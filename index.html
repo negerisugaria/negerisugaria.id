@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Negeri Sugaria — Where Every Flavor Belongs</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --strawberry: #E8385A;
+    --strawberry-light: #FF7295;
+    --chocolate: #5C3317;
+    --chocolate-mid: #8B5E3C;
+    --kiwi: #5BAD5A;
+    --blueberry: #5B4BB5;
+    --banana: #F5C242;
+    --orange: #F07B2E;
+    --grape: #7B3FA0;
+    --cream: #FFF8F0;
+    --warm-white: #FFFDF7;
+    --gold: #D4A017;
+    --gold-light: #F5D46A;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--warm-white);
+    color: #2A1A0E;
+    font-family: 'Nunito', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ---- NAV ---- */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(255,248,240,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 2px solid var(--gold-light);
+    padding: 0.75rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-logo {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1rem;
+    color: var(--strawberry);
+    letter-spacing: 0.05em;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--chocolate);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--strawberry); }
+
+  .nav-cta {
+    background: var(--strawberry);
+    color: #fff !important;
+    padding: 0.5rem 1.25rem;
+    border-radius: 999px;
+    transition: background 0.2s !important;
+  }
+
+  .nav-cta:hover { background: #c0284a !important; color: #fff !important; }
+
+  /* ---- HERO ---- */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(160deg, #FFF0E8 0%, #FFEAF4 40%, #EEF0FF 70%, #F0FFFE 100%);
+  }
+
+  .hero-bg-circles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .hero-bg-circles span {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.12;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 8rem 2rem 4rem;
+    max-width: 900px;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.8rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--strawberry);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  .eyebrow-line {
+    display: inline-block;
+    width: 40px;
+    height: 2px;
+    background: var(--strawberry);
+    border-radius: 2px;
+  }
+
+  .hero-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 900;
+    line-height: 1.05;
+    color: var(--strawberry);
+    text-shadow: 3px 3px 0 rgba(92,51,23,0.15);
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-subtitle-tag {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    color: var(--chocolate-mid);
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+    color: var(--chocolate);
+    margin-bottom: 2.5rem;
+    line-height: 1.4;
+  }
+
+  .hero-desc {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #5C3A1E;
+    max-width: 640px;
+    margin: 0 auto 3rem;
+  }
+
+  .hero-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--strawberry);
+    color: #fff;
+    padding: 0.875rem 2.5rem;
+    border-radius: 999px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.2s;
+    box-shadow: 0 4px 20px rgba(232,56,90,0.35);
+  }
+
+  .btn-primary:hover { background: #c0284a; transform: translateY(-2px); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--chocolate);
+    padding: 0.875rem 2.5rem;
+    border-radius: 999px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    border: 2px solid var(--chocolate-mid);
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.2s, color 0.2s;
+  }
+
+  .btn-secondary:hover { border-color: var(--strawberry); color: var(--strawberry); transform: translateY(-2px); }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--chocolate-mid);
+    font-weight: 700;
+    animation: bounce 2s infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-6px); }
+  }
+
+  .scroll-arrow {
+    width: 20px;
+    height: 20px;
+    border-right: 2px solid var(--chocolate-mid);
+    border-bottom: 2px solid var(--chocolate-mid);
+    transform: rotate(45deg);
+  }
+
+  /* ---- FLAVOR BAR ---- */
+  .flavor-bar {
+    background: var(--chocolate);
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+    overflow: hidden;
+  }
+
+  .flavor-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.9);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .flavor-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  /* ---- LORE SECTION ---- */
+  .section {
+    padding: 5rem 2rem;
+  }
+
+  .section-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--strawberry);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .section-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    font-weight: 700;
+    color: var(--chocolate);
+    margin-bottom: 1.25rem;
+    line-height: 1.2;
+  }
+
+  .section-body {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    line-height: 1.85;
+    color: #4A2C10;
+    max-width: 680px;
+  }
+
+  /* ---- WORLD INTRO ---- */
+  .world-intro {
+    background: linear-gradient(135deg, #FFF0E8, #FFF8F0);
+    border-top: 3px solid var(--gold-light);
+    border-bottom: 3px solid var(--gold-light);
+  }
+
+  .world-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    margin-top: 3rem;
+  }
+
+  @media (max-width: 768px) {
+    .world-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .nav-links { display: none; }
+  }
+
+  .world-concept-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .concept-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 1.25rem;
+    border: 1.5px solid var(--gold-light);
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .concept-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--gold);
+  }
+
+  .concept-icon {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .concept-name {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: var(--chocolate);
+    margin-bottom: 0.25rem;
+  }
+
+  .concept-desc {
+    font-size: 0.8rem;
+    color: #7A5235;
+    line-height: 1.5;
+  }
+
+  /* ---- CHARACTERS ---- */
+  .characters-section {
+    background: #1A0A04;
+    color: #FFF8F0;
+    overflow: hidden;
+  }
+
+  .characters-section .section-title { color: var(--gold-light); }
+  .characters-section .section-label { color: var(--strawberry-light); }
+  .characters-section .section-body { color: rgba(255,248,240,0.75); }
+
+  .characters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .char-card {
+    border-radius: 20px;
+    padding: 1.5rem 1rem 1.25rem;
+    text-align: center;
+    border: 1.5px solid rgba(255,255,255,0.1);
+    transition: transform 0.25s, border-color 0.2s;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .char-card:hover { transform: translateY(-5px); }
+
+  .char-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.08;
+    transition: opacity 0.2s;
+  }
+
+  .char-card:hover::before { opacity: 0.15; }
+
+  .char-emoji {
+    font-size: 2.75rem;
+    display: block;
+    margin-bottom: 0.75rem;
+    line-height: 1;
+  }
+
+  .char-name {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.05em;
+  }
+
+  .char-role {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+  }
+
+  .char-theme {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    opacity: 0.75;
+    line-height: 1.4;
+  }
+
+  .char-tier {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    margin-top: 0.75rem;
+  }
+
+  /* ---- LANDMARKS ---- */
+  .landmarks-section {
+    background: linear-gradient(180deg, #FFF8F0, #FFF0E0);
+  }
+
+  .landmarks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .landmark-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 2rem;
+    border: 1.5px solid var(--gold-light);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .landmark-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(92,51,23,0.12);
+  }
+
+  .landmark-accent {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .landmark-num {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    opacity: 0.07;
+    position: absolute;
+    top: 1rem;
+    right: 1.25rem;
+    line-height: 1;
+    color: var(--chocolate);
+  }
+
+  .landmark-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .landmark-name {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--chocolate);
+    margin-bottom: 0.3rem;
+  }
+
+  .landmark-guardian {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.75rem;
+  }
+
+  .landmark-emotion {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 0.2rem 0.75rem;
+    border-radius: 999px;
+    margin-bottom: 0.75rem;
+  }
+
+  .landmark-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: #5C3A1E;
+  }
+
+  /* ---- STORY ---- */
+  .story-section {
+    background: #2A1209;
+    position: relative;
+    overflow: hidden;
+    color: #FFF8F0;
+  }
+
+  .story-ornament {
+    position: absolute;
+    font-size: 20rem;
+    opacity: 0.025;
+    color: var(--gold);
+    font-family: 'Cinzel Decorative', serif;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .story-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+    margin-top: 3rem;
+  }
+
+  @media (max-width: 768px) { .story-grid { grid-template-columns: 1fr; } }
+
+  .story-section .section-title { color: var(--gold-light); }
+  .story-section .section-label { color: var(--strawberry-light); }
+
+  .story-section .section-body {
+    color: rgba(255,248,240,0.8);
+    position: relative;
+    z-index: 1;
+  }
+
+  .themes-list {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .theme-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    border-left: 3px solid var(--strawberry);
+  }
+
+  .theme-bullet {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--strawberry);
+    flex-shrink: 0;
+    margin-top: 0.4rem;
+  }
+
+  .theme-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: rgba(255,248,240,0.85);
+  }
+
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 1.25rem;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .timeline-item:last-child { border-bottom: none; }
+
+  .timeline-era {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    line-height: 1.4;
+    padding-top: 0.1rem;
+  }
+
+  .timeline-event {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: rgba(255,248,240,0.8);
+  }
+
+  .timeline-event strong {
+    color: var(--gold-light);
+    font-weight: 600;
+    font-style: italic;
+  }
+
+  /* ---- WARMTH VS CORRUPTION ---- */
+  .wvc-section {
+    background: linear-gradient(135deg, #FFF5E8 50%, #F0E8FF 100%);
+    padding: 5rem 2rem;
+  }
+
+  .wvc-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 2rem;
+    align-items: center;
+    margin-top: 3rem;
+  }
+
+  @media (max-width: 768px) {
+    .wvc-grid { grid-template-columns: 1fr; }
+    .wvc-vs { display: none; }
+  }
+
+  .wvc-side {
+    padding: 2.5rem;
+    border-radius: 24px;
+  }
+
+  .wvc-warmth {
+    background: linear-gradient(135deg, #FFF0E0, #FFDEC8);
+    border: 2px solid var(--orange);
+  }
+
+  .wvc-corruption {
+    background: linear-gradient(135deg, #EEE0FF, #DCC8F0);
+    border: 2px solid var(--grape);
+  }
+
+  .wvc-vs {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--chocolate-mid);
+    text-align: center;
+  }
+
+  .wvc-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+  }
+
+  .wvc-warmth .wvc-title { color: #C05010; }
+  .wvc-corruption .wvc-title { color: #5B2880; }
+
+  .wvc-types {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .wvc-type {
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  .wvc-warmth .wvc-type {
+    background: rgba(255,255,255,0.6);
+    color: #7A3010;
+  }
+
+  .wvc-corruption .wvc-type {
+    background: rgba(255,255,255,0.5);
+    color: #4A1A6A;
+  }
+
+  .wvc-type small {
+    display: block;
+    font-weight: 400;
+    font-size: 0.75rem;
+    margin-top: 0.15rem;
+    opacity: 0.75;
+  }
+
+  /* ---- FRANCHISE ---- */
+  .franchise-section {
+    background: var(--chocolate);
+    color: #FFF8F0;
+    text-align: center;
+    padding: 6rem 2rem;
+  }
+
+  .franchise-section .section-title { color: var(--gold-light); margin-bottom: 1rem; }
+  .franchise-section .section-label { color: var(--strawberry-light); justify-content: center; }
+
+  .franchise-pills {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 2.5rem 0;
+  }
+
+  .franchise-pill {
+    background: rgba(255,255,255,0.1);
+    border: 1.5px solid rgba(255,255,255,0.2);
+    color: rgba(255,248,240,0.9);
+    padding: 0.75rem 1.75rem;
+    border-radius: 999px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .franchise-pill:hover {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.35);
+  }
+
+  .franchise-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: rgba(255,248,240,0.75);
+    max-width: 600px;
+    margin: 0 auto 2.5rem;
+  }
+
+  /* ---- CTA ---- */
+  .cta-section {
+    background: var(--strawberry);
+    padding: 6rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-section::before {
+    content: '✦ Where Every Flavor Belongs ✦';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 8rem;
+    white-space: nowrap;
+    color: rgba(255,255,255,0.04);
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  .cta-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+  }
+
+  .cta-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.3rem;
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 3rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    background: #fff;
+    color: var(--strawberry);
+    padding: 1rem 3rem;
+    border-radius: 999px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.15s;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.15);
+  }
+
+  .cta-btn:hover { transform: translateY(-3px) scale(1.02); }
+
+  /* ---- FOOTER ---- */
+  footer {
+    background: #0F0502;
+    color: rgba(255,248,240,0.5);
+    padding: 2.5rem;
+    text-align: center;
+    font-size: 0.85rem;
+    line-height: 1.8;
+  }
+
+  footer strong {
+    color: var(--gold-light);
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.8rem;
+  }
+
+  /* ---- DECORATIVE DIVIDERS ---- */
+  .divider {
+    text-align: center;
+    font-size: 1.5rem;
+    color: var(--gold);
+    opacity: 0.5;
+    padding: 0.5rem 0;
+    letter-spacing: 0.5rem;
+  }
+
+  /* ---- ANIMATIONS ---- */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  .float { animation: float 4s ease-in-out infinite; }
+  .float-delay { animation: float 4s ease-in-out 1s infinite; }
+  .float-delay2 { animation: float 4s ease-in-out 2s infinite; }
+
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .spin-slow { animation: spin-slow 30s linear infinite; }
+
+  /* ---- QUOTE BLOCK ---- */
+  .quote-block {
+    background: linear-gradient(135deg, rgba(232,56,90,0.06), rgba(91,75,181,0.06));
+    border-left: 4px solid var(--strawberry);
+    padding: 1.5rem 2rem;
+    border-radius: 0 16px 16px 0;
+    margin: 2rem 0;
+  }
+
+  .quote-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: #4A2C10;
+    line-height: 1.75;
+  }
+
+  .quote-attr {
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--strawberry);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Negeri Sugaria</div>
+  <ul class="nav-links">
+    <li><a href="#world">Dunia</a></li>
+    <li><a href="#characters">Karakter</a></li>
+    <li><a href="#landmarks">Landmark</a></li>
+    <li><a href="#story">Cerita</a></li>
+    <li><a href="#franchise">Franchise</a></li>
+    <li><a href="#cta" class="nav-cta">Bergabung</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-circles">
+    <span class="float" style="width:400px;height:400px;background:var(--strawberry);top:-100px;right:-80px;"></span>
+    <span class="float-delay" style="width:300px;height:300px;background:var(--blueberry);bottom:-80px;left:-60px;"></span>
+    <span class="float-delay2" style="width:200px;height:200px;background:var(--banana);top:40%;left:5%;"></span>
+    <span class="float" style="width:150px;height:150px;background:var(--kiwi);bottom:20%;right:8%;"></span>
+    <span class="float-delay" style="width:100px;height:100px;background:var(--grape);top:20%;left:15%;"></span>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span class="eyebrow-line"></span>
+      The Sweet Kingdom
+      <span class="eyebrow-line"></span>
+    </div>
+
+    <h1 class="hero-title">Negeri<br>Sugaria</h1>
+    <p class="hero-subtitle-tag">Floating Dessert Fantasy World</p>
+
+    <p class="hero-tagline">"Where Every Flavor Belongs."</p>
+
+    <p class="hero-desc">
+      Sebuah dunia fantasy manis yang dibangun dari Sweetness Energy, Flavor Harmony, dan luka sejarah purba. Terlihat cozy — namun menyimpan pengorbanan yang tidak pernah meminta untuk diingat.
+    </p>
+
+    <div class="hero-buttons">
+      <a href="#world" class="btn-primary">Jelajahi Dunia</a>
+      <a href="#characters" class="btn-secondary">Temui Karakter</a>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    <span>Scroll</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- FLAVOR BAR -->
+<div class="flavor-bar">
+  <div class="flavor-pill"><span class="flavor-dot" style="background:#E8385A;"></span>Strawberry</div>
+  <div class="flavor-pill"><span class="flavor-dot" style="background:#5BAD5A;"></span>Kiwi</div>
+  <div class="flavor-pill"><span class="flavor-dot" style="background:#5B4BB5;"></span>Blueberry</div>
+  <div class="flavor-pill"><span class="flavor-dot" style="background:#F5C242;"></span>Banana</div>
+  <div class="flavor-pill"><span class="flavor-dot" style="background:#F07B2E;"></span>Orange</div>
+  <div class="flavor-pill"><span class="flavor-dot" style="background:#7B3FA0;"></span>Grape</div>
+  <div class="flavor-pill"><span class="flavor-dot" style="background:#8B5E3C;"></span>Chocolate</div>
+</div>
+
+<!-- WORLD SECTION -->
+<section class="section world-intro" id="world">
+  <div class="section-inner">
+    <div class="section-label"><span class="eyebrow-line"></span>Core World Philosophy</div>
+    <h2 class="section-title">Sebuah Dunia yang<br>Dibangun dari Rasa</h2>
+
+    <div class="world-grid">
+      <div>
+        <p class="section-body">
+          Negeri Sugaria adalah <em>floating dessert fantasy world</em> yang dibangun dari Sweetness Energy, Flavor Harmony, dan luka sejarah Oven of Origin. Di balik penampilannya yang manis dan cozy, tersimpan tragedi eksperimen purba, corruption, dan pencarian belonging yang tak pernah usai.
+        </p>
+
+        <div class="quote-block" style="margin-top:2rem;">
+          <p class="quote-text">
+            "Setiap flavor yang ada di dunia ini adalah warisan dari tiga lapis pengorbanan yang tidak pernah meminta untuk diingat: Vanilla yang melebur menjadi fondasi, Muscat yang menyerahkan warna pertama, dan Grape yang mengunci kehancuran dengan tongkatnya sendiri."
+          </p>
+          <p class="quote-attr">— Lore Resmi Negeri Sugaria</p>
+        </div>
+
+        <div class="world-concept-cards" style="margin-top:2rem;">
+          <div class="concept-card">
+            <span class="concept-icon">✨</span>
+            <div class="concept-name">Flavor</div>
+            <div class="concept-desc">Identitas, elemen sihir, dan ekspresi emosi setiap karakter.</div>
+          </div>
+          <div class="concept-card">
+            <span class="concept-icon">💛</span>
+            <div class="concept-name">Sweetness</div>
+            <div class="concept-desc">Energi kehidupan. Ketika hilang, warna dan memori dunia memudar.</div>
+          </div>
+          <div class="concept-card">
+            <span class="concept-icon">📜</span>
+            <div class="concept-name">Recipe</div>
+            <div class="concept-desc">Teknologi magis kuno untuk ritual, upgrade, dan flavor fusion.</div>
+          </div>
+          <div class="concept-card">
+            <span class="concept-icon">🕯️</span>
+            <div class="concept-name">Beacon</div>
+            <div class="concept-desc">Penyeimbang dunia yang menghubungkan Sugar Core ke seluruh wilayah.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="background:linear-gradient(135deg,#FFF0E8,#FFF8F0);border-radius:24px;padding:2rem;border:2px solid var(--gold-light);">
+          <div class="section-label" style="margin-bottom:1rem;"><span class="eyebrow-line"></span>Lapisan Dunia</div>
+          <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            <div style="background:#fff;border-radius:12px;padding:1rem 1.25rem;border-left:4px solid var(--banana);">
+              <div style="font-weight:800;font-size:0.85rem;color:var(--chocolate);margin-bottom:0.2rem;">☁️ Sky Layer</div>
+              <div style="font-size:0.8rem;color:#7A5235;">Floating islands, mini villages, flying platforms</div>
+            </div>
+            <div style="background:#fff;border-radius:12px;padding:1rem 1.25rem;border-left:4px solid var(--strawberry);">
+              <div style="font-weight:800;font-size:0.85rem;color:var(--chocolate);margin-bottom:0.2rem;">🏰 Central Layer</div>
+              <div style="font-size:0.8rem;color:#7A5235;">Main kingdoms, landmarks, trade routes, beacon network</div>
+            </div>
+            <div style="background:#fff;border-radius:12px;padding:1rem 1.25rem;border-left:4px solid var(--chocolate-mid);">
+              <div style="font-weight:800;font-size:0.85rem;color:var(--chocolate);margin-bottom:0.2rem;">🌑 Underground Layer</div>
+              <div style="font-size:0.8rem;color:#7A5235;">Ancient ruins, Undercrumb Labyrinth, Oven descent</div>
+            </div>
+            <div style="background:#fff;border-radius:12px;padding:1rem 1.25rem;border-left:4px solid var(--grape);">
+              <div style="font-weight:800;font-size:0.85rem;color:var(--chocolate);margin-bottom:0.2rem;">🌀 Corrupted Layer</div>
+              <div style="font-size:0.8rem;color:#7A5235;">Chocolate Abyss Gate, abyss mist, cold mint zones</div>
+            </div>
+          </div>
+
+          <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1.5px solid var(--gold-light);">
+            <div class="section-label" style="margin-bottom:1rem;font-size:0.7rem;"><span class="eyebrow-line" style="width:24px;"></span>Alur Energi Dunia</div>
+            <div style="font-size:0.8rem;color:#5C3A1E;line-height:2;">
+              <span style="background:rgba(92,51,23,0.08);padding:0.2rem 0.6rem;border-radius:6px;font-weight:700;">Oven of Origin</span>
+              <span style="margin:0 0.4rem;color:var(--gold);">→</span>
+              <span style="background:rgba(232,56,90,0.1);padding:0.2rem 0.6rem;border-radius:6px;font-weight:700;">Sugar Core</span>
+              <span style="margin:0 0.4rem;color:var(--gold);">→</span>
+              <span style="background:rgba(240,123,46,0.12);padding:0.2rem 0.6rem;border-radius:6px;font-weight:700;">Citrus Lighthouse</span>
+              <span style="margin:0 0.4rem;color:var(--gold);">→</span>
+              <span style="background:rgba(240,123,46,0.08);padding:0.2rem 0.6rem;border-radius:6px;font-weight:700;">Orange Cupcake</span>
+              <span style="margin:0 0.4rem;color:var(--gold);">→</span>
+              <span style="background:rgba(91,75,181,0.1);padding:0.2rem 0.6rem;border-radius:6px;font-weight:700;">Beacon Network</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHARACTERS -->
+<section class="section characters-section" id="characters">
+  <div class="section-inner">
+    <div class="section-label"><span class="eyebrow-line" style="background:var(--strawberry-light);"></span>The Guardians</div>
+    <h2 class="section-title">Tujuh Penjaga Sugaria</h2>
+    <p class="section-body">Para guardian adalah pemimpin landmark sekaligus penerus dari 7 pemimpin cupcake purba. Tanpa mereka ketahui, mereka mewarisi bukan hanya kepribadian leluhur — tetapi juga beban dosa mereka.</p>
+
+    <div class="characters-grid">
+
+      <!-- Strawberry -->
+      <div class="char-card" style="background:linear-gradient(160deg,#3A0A14,#1F0009);border-color:rgba(232,56,90,0.3);">
+        <span class="char-emoji">🍓</span>
+        <div class="char-name" style="color:#FF9EAF;">Strawberry</div>
+        <div class="char-role" style="color:rgba(255,158,175,0.6);">Knight · The Heart</div>
+        <div class="char-theme" style="color:rgba(255,248,240,0.7);">Hope / Courage / Warmth</div>
+        <span class="char-tier" style="background:rgba(232,56,90,0.25);color:#FF9EAF;">Tier S · Main Mascot</span>
+      </div>
+
+      <!-- Kiwi -->
+      <div class="char-card" style="background:linear-gradient(160deg,#0A2A14,#041509);border-color:rgba(91,173,90,0.3);">
+        <span class="char-emoji">🥝</span>
+        <div class="char-name" style="color:#8FD98E;">Kiwi</div>
+        <div class="char-role" style="color:rgba(143,217,142,0.6);">Alchemist · The Brain</div>
+        <div class="char-theme" style="color:rgba(255,248,240,0.7);">Healing / Nature / Intelligence</div>
+        <span class="char-tier" style="background:rgba(91,173,90,0.2);color:#8FD98E;">Tier A · Strong Support</span>
+      </div>
+
+      <!-- Blueberry -->
+      <div class="char-card" style="background:linear-gradient(160deg,#0D0A2A,#060416);border-color:rgba(91,75,181,0.3);">
+        <span class="char-emoji">🫐</span>
+        <div class="char-name" style="color:#A89EEA;">Blueberry</div>
+        <div class="char-role" style="color:rgba(168,158,234,0.6);">Tycoon · The Social Glue</div>
+        <div class="char-theme" style="color:rgba(255,248,240,0.7);">Trade / Community / Fortune</div>
+        <span class="char-tier" style="background:rgba(91,75,181,0.2);color:#A89EEA;">Tier B · Lore Expansion</span>
+      </div>
+
+      <!-- Banana -->
+      <div class="char-card" style="background:linear-gradient(160deg,#2A1F00,#16100A);border-color:rgba(245,194,66,0.3);">
+        <span class="char-emoji">🍌</span>
+        <div class="char-name" style="color:#F5D46A;">Banana</div>
+        <div class="char-role" style="color:rgba(245,212,106,0.6);">Mage · The Wise One</div>
+        <div class="char-theme" style="color:rgba(255,248,240,0.7);">Knowledge / Ancient Magic / Guilt</div>
+        <span class="char-tier" style="background:rgba(245,194,66,0.2);color:#F5D46A;">Tier B · Ancient Survivor</span>
+      </div>
+
+      <!-- Orange -->
+      <div class="char-card" style="background:linear-gradient(160deg,#2A0F00,#160900);border-color:rgba(240,123,46,0.3);">
+        <span class="char-emoji">🍊</span>
+        <div class="char-name" style="color:#F5A060;">Orange</div>
+        <div class="char-role" style="color:rgba(245,160,96,0.6);">Conduit · The Power</div>
+        <div class="char-theme" style="color:rgba(255,248,240,0.7);">Truth / Energy / Control</div>
+        <span class="char-tier" style="background:rgba(240,123,46,0.2);color:#F5A060;">Tier A · Living Conduit</span>
+      </div>
+
+      <!-- Grape -->
+      <div class="char-card" style="background:linear-gradient(160deg,#1A0A2A,#0D0415);border-color:rgba(123,63,160,0.3);">
+        <span class="char-emoji">🍇</span>
+        <div class="char-name" style="color:#C090E0;">Grape</div>
+        <div class="char-role" style="color:rgba(192,144,224,0.6);">Spirit Guardian · The Spirit</div>
+        <div class="char-theme" style="color:rgba(255,248,240,0.7);">Dream / Melancholy / Guardian</div>
+        <span class="char-tier" style="background:rgba(123,63,160,0.2);color:#C090E0;">Original Guardian · Spirit</span>
+      </div>
+
+      <!-- Chocolate -->
+      <div class="char-card" style="background:linear-gradient(160deg,#1A0A04,#0D0502);border-color:rgba(139,94,60,0.3);">
+        <span class="char-emoji">🍫</span>
+        <div class="char-name" style="color:#C09060;">Chocolate</div>
+        <div class="char-role" style="color:rgba(192,144,96,0.6);">Shadow · The Shadow</div>
+        <div class="char-theme" style="color:rgba(255,248,240,0.7);">Loneliness / Exile / Belonging</div>
+        <span class="char-tier" style="background:rgba(139,94,60,0.2);color:#C09060;">Tier S · Last Success</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- LANDMARKS -->
+<section class="section landmarks-section" id="landmarks">
+  <div class="section-inner">
+    <div class="section-label"><span class="eyebrow-line"></span>Main Regions</div>
+    <h2 class="section-title">Tujuh Landmark Sugaria</h2>
+    <p class="section-body" style="max-width:100%;">Setiap landmark adalah pusat emosi, wilayah kekuasaan guardian, dan simpul dari Sugar Beacon Network yang menjaga keseimbangan dunia.</p>
+
+    <div class="landmarks-grid">
+
+      <div class="landmark-card">
+        <div class="landmark-accent" style="background:linear-gradient(90deg,var(--strawberry),#FF9EAF);"></div>
+        <span class="landmark-num">01</span>
+        <span class="landmark-icon">🏰</span>
+        <div class="landmark-name">Gigantic Strawberry Castle</div>
+        <div class="landmark-guardian" style="color:var(--strawberry);">Guardian: Strawberry Cupcake</div>
+        <span class="landmark-emotion" style="background:rgba(232,56,90,0.1);color:#C0284A;">Warmth & Hope</span>
+        <p class="landmark-desc">Pusat pemerintahan, spiritual balance, dan guardian academy. Starting hub Season 1. Di bawahnya tersimpan Sugar Core — bukan karena Strawberry adalah hero, tapi karena lokasi geografis adalah satu-satunya titik yang terhubung langsung ke Oven of Origin.</p>
+      </div>
+
+      <div class="landmark-card">
+        <div class="landmark-accent" style="background:linear-gradient(90deg,var(--blueberry),#A89EEA);"></div>
+        <span class="landmark-num">02</span>
+        <span class="landmark-icon">🛒</span>
+        <div class="landmark-name">Blueberry Marketplace</div>
+        <div class="landmark-guardian" style="color:var(--blueberry);">Guardian: Blueberry Cupcake</div>
+        <span class="landmark-emotion" style="background:rgba(91,75,181,0.1);color:#3B2D8A;">Community & Trust</span>
+        <p class="landmark-desc">The Juicy Heart of Sugaria. Pusat ekonomi dan informasi Negeri Sugaria yang hidup dan penuh transaksi. Informasi yang dibeli di sini selalu punya harga tersembunyi.</p>
+      </div>
+
+      <div class="landmark-card">
+        <div class="landmark-accent" style="background:linear-gradient(90deg,var(--kiwi),#8FD98E);"></div>
+        <span class="landmark-num">03</span>
+        <span class="landmark-icon">🌿</span>
+        <div class="landmark-name">Kiwi Greenhouse</div>
+        <div class="landmark-guardian" style="color:var(--kiwi);">Guardian: Kiwi Cupcake</div>
+        <span class="landmark-emotion" style="background:rgba(91,173,90,0.1);color:#2A6A2A;">Healing & Patience</span>
+        <p class="landmark-desc">Botanical Conservatory & Healing Herbary. Wilayah pertama yang tercontaminasi corruption. Tidak semua potion bisa menyembuhkan luka yang tepat.</p>
+      </div>
+
+      <div class="landmark-card">
+        <div class="landmark-accent" style="background:linear-gradient(90deg,var(--orange),#F5A060);"></div>
+        <span class="landmark-num">04</span>
+        <span class="landmark-icon">🏮</span>
+        <div class="landmark-name">Citrus Lighthouse</div>
+        <div class="landmark-guardian" style="color:var(--orange);">Guardian: Orange Cupcake</div>
+        <span class="landmark-emotion" style="background:rgba(240,123,46,0.1);color:#A04A10;">Truth & Control</span>
+        <p class="landmark-desc">The Principal Beacon. Distribution hub utama yang menyebarkan energi Sugar Core ke seluruh wilayah. Festival Sweetlight merayakan nyalanya Lighthouse — ironinya, Sugar Core dicuri tepat di hari itu.</p>
+      </div>
+
+      <div class="landmark-card">
+        <div class="landmark-accent" style="background:linear-gradient(90deg,var(--banana),#F5D46A);"></div>
+        <span class="landmark-num">05</span>
+        <span class="landmark-icon">🗼</span>
+        <div class="landmark-name">Banana Tower</div>
+        <div class="landmark-guardian" style="color:#B08010;">Guardian: Banana Cupcake</div>
+        <span class="landmark-emotion" style="background:rgba(245,194,66,0.15);color:#7A5C00;">Memory & Wisdom</span>
+        <p class="landmark-desc">Faksi Pengetahuan. Arsip yang menyimpan bukti dosa pemimpin paling bijak Sugaria. Seseorang yang tahu terlalu banyak berdiri di sini — karena dia adalah pemimpin purba yang bereinkarnasi langsung.</p>
+      </div>
+
+      <div class="landmark-card">
+        <div class="landmark-accent" style="background:linear-gradient(90deg,var(--grape),#C090E0);"></div>
+        <span class="landmark-num">06</span>
+        <span class="landmark-icon">🌊</span>
+        <div class="landmark-name">Grape Chalice Swamp</div>
+        <div class="landmark-guardian" style="color:var(--grape);">Guardian: Grape Cupcake</div>
+        <span class="landmark-emotion" style="background:rgba(123,63,160,0.1);color:#5B1F88;">Melancholy & Dream</span>
+        <p class="landmark-desc">Mystic emotional zone. Bukan sekadar landmark dark — ini adalah bentuk fisik dari tongkat Grape yang digunakan mengunci Oven of Origin. Grape tersegel di dalamnya selama ratusan tahun, menyerap setiap duka Sugaria.</p>
+      </div>
+
+      <div class="landmark-card" style="grid-column: 1 / -1; max-width: 600px; margin: 0 auto; width: 100%;">
+        <div class="landmark-accent" style="background:linear-gradient(90deg,var(--chocolate),var(--chocolate-mid));"></div>
+        <span class="landmark-num">07</span>
+        <span class="landmark-icon">🌑</span>
+        <div class="landmark-name">Chocolate Abyss Gate</div>
+        <div class="landmark-guardian" style="color:var(--chocolate-mid);">Guardian: Chocolate Cupcake — No Second in Command</div>
+        <span class="landmark-emotion" style="background:rgba(92,51,23,0.12);color:#3A1A08;">Loneliness & Exile</span>
+        <p class="landmark-desc">Where Sweet Memories Melt into Silence. Dulunya bernama Sweet Vanilla — penghormatan diam kepada Vanilla Cupcake yang melebur menjadi fondasi semua rasa. Kini menjadi gerbang abyss dan final emotional zone Season 1. Ironi terdalam franchise: tempat yang dinamai untuk pemimpin paling selfless kini menjadi wilayah paling dark di Sugaria.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- STORY -->
+<section class="section story-section" id="story">
+  <div class="story-ornament" style="top:-2rem;right:-4rem;">✦</div>
+
+  <div class="section-inner" style="position:relative;z-index:1;">
+    <div class="section-label"><span class="eyebrow-line" style="background:var(--strawberry-light);"></span>Season 1</div>
+    <h2 class="section-title">The Fading Sweetness</h2>
+
+    <div class="story-grid">
+      <div>
+        <p class="section-body" style="position:relative;z-index:1;">
+          Sugar Core dicuri saat Festival Sweetlight. Warna Negeri Sugaria mulai memudar, Sungai Lactacea tercemar, corruption menyebar. Di permukaan: petualangan mengaktifkan Sugar Beacon. Di lapisan terdalam: luka masa lalu yang berusaha menjadi kebencian.
+        </p>
+
+        <div class="themes-list">
+          <div class="theme-item">
+            <div class="theme-bullet"></div>
+            <div class="theme-text">Penerimaan terhadap perbedaan rasa dan identitas</div>
+          </div>
+          <div class="theme-item" style="border-left-color:var(--banana);">
+            <div class="theme-bullet" style="background:var(--banana);"></div>
+            <div class="theme-text">Pengorbanan masa lalu dan rasa bersalah generasi baru</div>
+          </div>
+          <div class="theme-item" style="border-left-color:var(--grape);">
+            <div class="theme-bullet" style="background:var(--grape);"></div>
+            <div class="theme-text">Duka yang terkunci tetap ingin didengar</div>
+          </div>
+          <div class="theme-item" style="border-left-color:var(--chocolate-mid);">
+            <div class="theme-bullet" style="background:var(--chocolate-mid);"></div>
+            <div class="theme-text">Tidak semua luka bisa dikalahkan — beberapa harus diakui dan ditemani</div>
+          </div>
+          <div class="theme-item" style="border-left-color:var(--kiwi);">
+            <div class="theme-bullet" style="background:var(--kiwi);"></div>
+            <div class="theme-text">Persahabatan, trust, dan keluarga yang dipilih</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem;">Timeline Mitologi</div>
+
+        <div class="timeline-item">
+          <div class="timeline-era">Pure Origin</div>
+          <div class="timeline-event">Tujuh pemimpin cupcake purba diciptakan dari Oven of Origin — semua putih gula murni, belum punya flavor.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-era">Vanilla Foundation</div>
+          <div class="timeline-event"><strong>Vanilla Cupcake</strong> melebur sepenuhnya menjadi base semua flavor. Pengorbanan yang paling mudah dilupakan.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-era">Muscat Covenant</div>
+          <div class="timeline-event"><strong>Muscat</strong> menyerahkan inti tongkatnya sebagai bahan eksperimen flavor pertama. Seluruh dunia berwarna lahir dari satu pengorbanan.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-era">First Success</div>
+          <div class="timeline-event"><strong>Strawberry</strong> berhasil diciptakan sebagai penerus pertama yang stabil — membawa survivor's guilt seumur hidup.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-era">Great Oven Rupture</div>
+          <div class="timeline-event">Oven meledak akibat overcapacity. Enam pemimpin purba menjadi abu. Hollow Crumb mulai terbentuk dari collective wound.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-era">The Sealing</div>
+          <div class="timeline-event"><strong>Grape</strong> mengunci Oven dengan tongkatnya — tersegel di dalam Chalice Swamp selama ratusan tahun.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-era">Season 1 Begins</div>
+          <div class="timeline-event">Sugar Core dicuri di Festival Sweetlight. Chocolate Abyss Gate terbuka dari dalam. <strong>The Fading Sweetness dimulai.</strong></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WARMTH VS CORRUPTION -->
+<section class="wvc-section">
+  <div class="section-inner">
+    <div class="section-label"><span class="eyebrow-line"></span>Magic System</div>
+    <h2 class="section-title" style="color:var(--chocolate);">Warmth vs Corruption</h2>
+    <p class="section-body">Dua kekuatan yang mendefinisikan keseimbangan Negeri Sugaria. Semakin dekat ke Chocolate Abyss Gate, semakin dominan sisi Corruption — dan semakin gelap warna dunia.</p>
+
+    <div class="wvc-grid">
+      <div class="wvc-side wvc-warmth">
+        <div class="wvc-title">✨ Warmth</div>
+        <p style="font-size:0.85rem;color:#7A4020;margin-bottom:1.25rem;font-family:'Cormorant Garamond',serif;font-size:1rem;line-height:1.6;">Rasa Manis & Kehidupan. Energi yang mengalir dari Sugar Core ke seluruh beacon network — menjaga warna, rasa, dan memori dunia tetap hidup.</p>
+        <div class="wvc-types">
+          <div class="wvc-type">Sugar Core Energy<small>Inti kehidupan dunia — pure warmth</small></div>
+          <div class="wvc-type">Flavor Harmony<small>Keseimbangan rasa yang menghasilkan kekuatan</small></div>
+          <div class="wvc-type">Recipe Magic<small>Teknologi kuno untuk ritual dan upgrade</small></div>
+          <div class="wvc-type">Beacon Network<small>Penyeimbang dunia yang terhubung ke semua wilayah</small></div>
+        </div>
+      </div>
+
+      <div class="wvc-vs">VS</div>
+
+      <div class="wvc-side wvc-corruption">
+        <div class="wvc-title">🌑 Corruption</div>
+        <p style="font-size:0.85rem;color:#4A1A6A;margin-bottom:1.25rem;font-family:'Cormorant Garamond',serif;font-size:1rem;line-height:1.6;">Kekuatan Pahit & Kegelapan. Ketidakseimbangan rasa dan emosi yang menyerang identitas, memori, dan kehangatan dunia dari dalam.</p>
+        <div class="wvc-types">
+          <div class="wvc-type">Dark Mist<small>Kabut mengaburkan harapan dan arah</small></div>
+          <div class="wvc-type">Purple Poison<small>Merusak flora, air, mimpi, dan memori</small></div>
+          <div class="wvc-type">Hollow Slime<small>Manifestasi recipe failure yang kehilangan bentuk</small></div>
+          <div class="wvc-type">Cold Mint Decay<small>Dunia menjadi dingin, kehilangan warmth dan jiwa</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FRANCHISE -->
+<section class="franchise-section" id="franchise">
+  <div class="section-inner">
+    <div class="section-label" style="justify-content:center;"><span class="eyebrow-line" style="background:var(--strawberry-light);"></span>Franchise Vision</div>
+    <h2 class="section-title">Dikembangkan sebagai Franchise Multimedia</h2>
+
+    <div class="franchise-pills">
+      <div class="franchise-pill">🎮 Video Game</div>
+      <div class="franchise-pill">📺 Anime / Webtoon</div>
+      <div class="franchise-pill">🎬 Film</div>
+      <div class="franchise-pill">📱 Content Creator</div>
+      <div class="franchise-pill">🛍️ Merchandise</div>
+    </div>
+
+    <p class="franchise-desc">
+      Negeri Sugaria dirancang dari ground-up sebagai franchise multi-platform — dengan world-building yang kaya, karakter yang emosional, dan magic system yang konsisten di setiap medium.
+    </p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:1rem;text-align:left;">
+      <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:1.5rem;">
+        <div style="font-size:1.5rem;margin-bottom:0.75rem;">🎮</div>
+        <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;color:var(--gold-light);margin-bottom:0.5rem;">Game RPG</div>
+        <div style="font-size:0.8rem;color:rgba(255,248,240,0.6);line-height:1.6;">Jelajahi 7 landmark, aktifkan Sugar Beacon, dan ungkap kebenaran Oven of Origin dalam game RPG yang kaya lore.</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:1.5rem;">
+        <div style="font-size:1.5rem;margin-bottom:0.75rem;">📺</div>
+        <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;color:var(--gold-light);margin-bottom:0.5rem;">Anime / Webtoon</div>
+        <div style="font-size:0.8rem;color:rgba(255,248,240,0.6);line-height:1.6;">Visual style felt plush texture dengan aesthetic cozy + cinematic. Rounded silhouette dan toy-like proportions yang distinctive.</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:1.5rem;">
+        <div style="font-size:1.5rem;margin-bottom:0.75rem;">✨</div>
+        <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;color:var(--gold-light);margin-bottom:0.5rem;">Cute × Emotional</div>
+        <div style="font-size:0.8rem;color:rgba(255,248,240,0.6);line-height:1.6;">Core formula: cute characters dengan emotional fantasy bonds yang beresonansi secara universal.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <h2 class="cta-title">Setiap Rasa Punya<br>Tempatnya di Sini</h2>
+  <p class="cta-sub">"Where Every Flavor Belongs."</p>
+  <a href="#world" class="cta-btn">✦ Mulai Petualangan</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <strong>Negeri Sugaria</strong><br>
+  The Sweet Kingdom · Franchise Foundation v1.3<br>
+  <span style="font-size:0.75rem;opacity:0.5;margin-top:0.5rem;display:block;">Game · Anime · Webtoon · Film · Content — Where Every Flavor Belongs</span>
+</footer>
+
+</body>
+</html>
