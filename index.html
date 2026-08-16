@@ -1,398 +1,538 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Negeri Sugaria — The Seven Landmark Adventure</title>
-  <meta name="description" content="Mini Game Negeri Sugaria — jelajahi tujuh landmark dan selesaikan setiap mini game." />
-  
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Negeri Sugaria — Maze Adventure</title>
 <style>
-:root{
-  --bg:#07191f;
-  --bg2:#0d2d2c;
-  --panel:#0a2026;
-  --gold:#e9b94b;
-  --gold2:#ffd968;
-  --cream:#fff0bf;
-  --muted:#c9bd98;
-  --line:rgba(233,185,75,.34);
-  --shadow:0 14px 38px rgba(0,0,0,.38);
-}
+:root{--brown:#713d24;--gold:#f4bd54;--cream:#fff8e8;--dark:#3c2418;--wall:#7d4528;--path:#ffe8b3;--accent:#e8753d;--green:#6da34d}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0;
-  min-height:100vh;
-  font-family:Georgia,"Times New Roman",serif;
-  color:var(--cream);
-  background:
-    radial-gradient(circle at 50% 0%,rgba(75,125,83,.28),transparent 34%),
-    linear-gradient(145deg,#06171d 0%,#0b292b 48%,#171520 100%);
-}
-body:before{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  opacity:.5;
-  background:
-    radial-gradient(circle at 18% 22%,rgba(255,215,100,.08) 0 1px,transparent 2px),
-    radial-gradient(circle at 78% 68%,rgba(255,215,100,.07) 0 1px,transparent 2px);
-  background-size:90px 90px,130px 130px;
-}
-button,a{font:inherit}
-.shell{width:min(1600px,100%);margin:0 auto;padding:14px 18px 28px;position:relative}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(135deg,#fff8e8,#f6cf83);color:var(--dark)}
+.app{max-width:1180px;margin:auto;padding:18px}
+header{background:linear-gradient(135deg,#713d24,#b8642d 55%,#efb64e);border-radius:28px;padding:18px 22px;color:#fff;display:flex;align-items:center;gap:18px;box-shadow:0 12px 35px #6a3a2430}
+.logo{width:74px;height:74px;object-fit:contain}.head h1{margin:0;font-size:clamp(25px,4vw,42px)}.head p{margin:4px 0 0;font-weight:700;color:#ffeec7}
+.panel{margin-top:14px;background:#fffaf0e8;border:2px solid #7d452822;border-radius:24px;padding:14px;box-shadow:0 10px 28px #5c331522}
+.character-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.char{border:2px solid #e7c674;background:linear-gradient(#fffdf6,#ffe8b1);border-radius:18px;padding:6px;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;transition:.18s;min-width:0}
+.char:hover{transform:translateY(-2px)}.char.active{border-color:#e8753d;box-shadow:0 0 0 3px #e8753d30;background:#fff0d3}
+.char img{width:78px;height:78px;object-fit:contain}.char b{font-size:12px}.char span{font-weight:1000;color:#a75a2b}
+.layout{display:grid;grid-template-columns:300px 1fr;gap:14px;margin-top:14px}
+.side h2{margin:2px 0 8px;font-size:20px}.mission{background:#fff1cf;border-radius:16px;padding:10px;margin-bottom:10px;font-weight:700;line-height:1.45}
+.difficulty{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}.difficulty button{padding:8px 5px;background:#e7d3a6;color:var(--dark);font-size:12px}.difficulty button.active{background:var(--brown);color:#fff}.difficulty button.locked{display:none!important;opacity:.48;cursor:not-allowed;position:relative}.difficulty button.locked::after{content:" 🔒"}.difficulty button.hidden-level{display:none!important}.score-hint{font-size:12px;background:#fff1cf;border-radius:12px;padding:8px;margin:8px 0;line-height:1.4}
+.level-info{font-size:12px;color:#76503a;margin:5px 0 10px}
+.progress{display:flex;gap:5px;margin:10px 0;flex-wrap:wrap}.dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#e8d6ae;font-weight:1000;border:2px solid transparent}.dot.done{background:#6da34d;color:#fff}.dot.now{background:#e8753d;color:#fff;border-color:#fff;box-shadow:0 0 0 2px #e8753d55}.dot img{width:25px;height:25px;object-fit:contain}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:7px}.stat{background:#fff;border-radius:13px;padding:9px;text-align:center}.stat strong{display:block;font-size:20px}
+button{border:0;border-radius:13px;padding:10px 14px;font-weight:900;cursor:pointer;background:var(--brown);color:#fff}button:hover{filter:brightness(1.08)}
+#reset{width:100%;margin-top:10px;background:#e8753d}
+#exitGame{width:100%;margin-top:8px;background:#5b3323}
+.maze-wrap{display:flex;flex-direction:column;align-items:center}.maze{display:grid;width:min(78vw,680px);aspect-ratio:1;border:9px solid #713d24;border-radius:20px;background:#713d24;overflow:hidden;box-shadow:0 14px 35px #5c331530}
+.cell{position:relative;background:var(--path);border:1px solid #d8ae63;min-width:0}.cell.wall{background:var(--wall);border-color:#713d24}.cell.goal{background:#ffe49a;box-shadow:inset 0 0 0 2px #f4bd5470}.cell img{position:absolute;left:-27.5%;top:-27.5%;width:155%;height:155%;object-fit:contain;z-index:2;filter:drop-shadow(0 3px 3px #3a211755);pointer-events:none}
+.player{position:absolute;left:0;top:0;width:100%;height:100%;z-index:5;display:grid;place-items:center;pointer-events:none;overflow:visible}
+.player img{width:195%;height:195%;object-fit:contain;object-position:center;filter:drop-shadow(0 3px 2px #4d291555);display:block}
 
-/* HEADER */
-header{
-  position:sticky;
-  top:10px;
-  z-index:50;
-  display:grid;
-  grid-template-columns:auto 1fr auto;
-  align-items:center;
-  gap:18px;
-  min-height:78px;
-  padding:8px 14px;
-  border:1px solid var(--line);
-  border-radius:18px;
-  background:rgba(6,25,32,.94);
-  backdrop-filter:blur(12px);
-  box-shadow:var(--shadow),inset 0 0 0 1px rgba(255,217,104,.06);
-}
-.brand{display:flex;align-items:center;gap:10px;min-width:0}
-.logo{
-  width:190px;height:64px;display:block;object-fit:contain;
-  filter:drop-shadow(0 5px 8px rgba(0,0,0,.55));
-}
-.brand-name{
-  color:var(--gold2);font-weight:800;font-size:clamp(18px,1.5vw,25px);
-  white-space:nowrap;text-shadow:0 2px 5px #000;
-}
-nav{
-  display:flex;justify-content:center;align-items:center;gap:4px;
-  min-width:0;overflow-x:auto;scrollbar-width:none;
-}
-nav::-webkit-scrollbar{display:none}
-nav a{
-  color:#ffeab0;text-decoration:none;font-weight:800;font-size:14px;
-  padding:10px 13px;border-radius:10px;white-space:nowrap;
-}
-nav a:hover{background:rgba(233,185,75,.12);color:#fff}
-.side-stats{
-  position:sticky;top:104px;
-  border:1px solid var(--line);border-radius:16px;padding:12px;
-  background:rgba(7,27,32,.9);box-shadow:var(--shadow);
-}
-.side-stats-title{
-  color:var(--gold2);font-size:12px;font-weight:800;letter-spacing:1px;
-  text-align:center;padding:6px 2px 10px;border-bottom:1px solid var(--line);
-}
-.side-stat{
-  display:flex;align-items:center;gap:9px;padding:13px 5px;
-  border-bottom:1px solid rgba(233,185,75,.15);
-}
-.side-stat:last-child{border-bottom:0}
-.side-icon{
-  width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
-  background:#301c43;border:1px solid #d69b35;font-size:17px;flex:0 0 auto;
-}
-.side-stat strong{display:block;color:var(--gold2);font-size:19px}
-.side-stat span{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.key{margin-top:10px;font-weight:800;text-align:center}.controls{display:grid;grid-template-columns:repeat(3,55px);gap:6px;justify-content:center;margin-top:10px}.controls button{width:55px;height:45px;padding:0;font-size:20px}.up{grid-column:2}.left{grid-column:1}.down{grid-column:2}.right{grid-column:3}
+.start-overlay{position:fixed;inset:0;background:#2c1a12cc;display:grid;place-items:center;padding:18px;z-index:40}.start-card{max-width:760px;width:100%;background:#fff9eb;border-radius:28px;padding:24px;box-shadow:0 20px 70px #0006;text-align:center}.start-card h2{margin:0 0 6px;font-size:30px}.start-card p{margin:0 0 16px;color:#76503a;font-weight:700}.character-picker{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.pick{border:3px solid #e7c674;background:#fffdf6;border-radius:18px;padding:10px 6px;cursor:pointer;transition:.18s}.pick:hover{transform:translateY(-3px)}.pick.selected{border-color:#e8753d;background:#fff0d3;box-shadow:0 0 0 4px #e8753d30}.pick img{width:90px;height:90px;object-fit:contain}.pick b{display:block;font-size:13px;margin-top:7px;color:var(--brown);font-weight:900}.start-actions{display:flex;justify-content:center;gap:10px;margin-top:18px}.start-actions button{min-width:190px}.start-actions .secondary{background:#e7d3a6;color:var(--dark)}
 
-/* MAP AREA */
-.hero{min-width:0}
-.map-hero{position:relative;overflow:hidden;border-radius:20px}
-
-.eyebrow{color:var(--gold);font-size:12px;font-weight:800;letter-spacing:1.5px}
-.hero h1{margin:7px 0 8px;color:var(--gold2);font-size:clamp(30px,3.5vw,52px);line-height:1.05}
-.hero p{margin:0;color:#f4e8c1;font-size:17px;line-height:1.5}
-
-
-.map-hotspot{
-  position:absolute;left:25.8%;top:78.5%;transform:translate(-50%,-50%);
-  width:58px;height:58px;border-radius:50%;border:3px solid var(--gold2);
-  background:rgba(57,16,17,.94);box-shadow:0 0 0 5px rgba(255,211,92,.18),0 8px 22px rgba(0,0,0,.55);
-  font-size:27px;cursor:pointer;transition:.2s;z-index:5;
-}
-.map-hotspot:hover{transform:translate(-50%,-50%) scale(1.1)}
-
-/* CONTENT BELOW MAP */
-.progress-wrap{margin-top:16px}
-.panel{
-  border:1px solid var(--line);border-radius:16px;
-  background:rgba(5,20,25,.86);padding:20px;box-shadow:var(--shadow);
-}
-.panel h2{margin:0 0 12px;color:var(--gold2);font-size:22px}
-.progress-info{display:flex;justify-content:space-between;gap:12px;margin-bottom:8px;color:#e8ddba}
-.progress{height:12px;background:#172b2e;border-radius:99px;overflow:hidden;border:1px solid #765526}
-.progress>div{width:0;height:100%;background:linear-gradient(90deg,#7ed957,#ffd24a);transition:width .35s}
-.landmark-section{margin-top:16px}
-.landmarks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-.landmark{
-  position:relative;min-height:150px;padding:17px;border:1px solid #8f672a;border-radius:14px;
-  background:linear-gradient(145deg,rgba(28,43,40,.98),rgba(13,27,31,.98));
-  cursor:pointer;transition:.2s;
-}
-.landmark:hover{transform:translateY(-3px);border-color:#e6b43e}
-.num{
-  display:inline-flex;width:34px;height:34px;align-items:center;justify-content:center;
-  border-radius:50%;background:#321c45;border:2px solid #d69b35;color:#ffd25a;font-weight:800
-}
-.landmark h3{margin:11px 0 7px;color:#ffe4a0;font-size:18px;line-height:1.2}
-.landmark p{margin:0;color:#cdbf96;font-size:14px;line-height:1.45}
-.badge{position:absolute;right:14px;top:15px;color:#ffd34d}
-.locked{opacity:.58;cursor:not-allowed}
-
-footer{text-align:center;padding:28px 10px 4px;color:#a99b77;font-size:13px}
-
-/* TABLET */
-@media(max-width:1120px){
-  header{grid-template-columns:1fr;gap:6px;padding:9px 12px}
-  .brand{justify-content:center}
-  nav{justify-content:center}
-  .side-stats-title{border:0;border-right:1px solid var(--line);padding:6px}
-  .side-stat{justify-content:center;border:0}
-  .landmarks{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
-
-/* MOBILE */
-@media(max-width:700px){
-  .shell{padding:8px 8px 22px}
-  header{position:static;border-radius:14px}
-  .logo{width:145px;height:52px}
-  .brand-name{font-size:18px}
-  nav{width:100%;justify-content:flex-start;gap:2px}
-  nav a{font-size:12px;padding:8px 10px}
-
-/* V5: status panel beside the map */
-
-
-.map-stage .map-frame{
-  min-width:0;
-}
-@media (max-width: 900px){
-  
-  
-}
-
-
-/* V6 responsive landing map */
-.map-stage{
-  width:100%;
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  box-sizing:border-box;
-  margin:0 auto;
-}
-.map-stage .map-frame{
-  width:100%;
-  max-width:1500px;
-  min-width:0;
-  overflow:hidden;
-  box-sizing:border-box;
-}
-.map-stage .map-frame img{
-  display:block;
-  width:100%;
-  height:auto;
-  max-width:100%;
-  object-fit:contain;
-}
-@media (max-width: 900px){
-  .map-stage{
-    padding:0 10px;
-  }
-  .map-stage .map-frame{
-    width:100%;
-    border-radius:14px;
-  }
-}
-@media (max-width: 600px){
-  .map-stage{
-    padding:0 6px;
-  }
-}
-
+.intro-card{max-width:720px;width:100%;background:#fff9eb;border-radius:30px;padding:24px;box-shadow:0 20px 70px #0006;text-align:center;border:3px solid #e7c674}.intro-card img{width:min(310px,72vw);height:min(310px,72vw);object-fit:contain;display:block;margin:0 auto -8px}.intro-card h2{margin:0;color:var(--brown);font-size:clamp(25px,5vw,38px)}.intro-card p{margin:10px auto 18px;max-width:560px;color:#76503a;font-size:16px;line-height:1.6;font-weight:800}.intro-card button{min-width:210px;font-size:16px}.final-card{max-width:760px;width:100%;background:#fff9eb;border-radius:30px;padding:24px;box-shadow:0 20px 70px #0006;text-align:center;border:3px solid #f4bd54}.final-card h2{margin:0;color:var(--brown);font-size:clamp(25px,5vw,38px)}.final-scene{display:flex;align-items:flex-end;justify-content:center;gap:18px;margin:10px 0 2px;min-height:250px}.final-character{width:210px;height:210px;object-fit:contain}.cupcake-host{width:250px;height:250px;object-fit:contain}.trophy{font-size:82px;line-height:1;filter:drop-shadow(0 5px 4px #6a3a2440);animation:trophyBounce .7s ease-in-out infinite alternate}.final-card p{color:#76503a;font-weight:800;line-height:1.5}.final-card button{margin-top:8px}.hidden{display:none!important}@keyframes trophyBounce{from{transform:translateY(3px) rotate(-3deg)}to{transform:translateY(-8px) rotate(3deg)}}
+.modal{position:fixed;inset:0;background:#2c1a1290;display:none;place-items:center;padding:18px;z-index:20}.modal.show{display:grid}.card{max-width:420px;width:100%;background:#fff9eb;border-radius:25px;padding:22px;box-shadow:0 20px 60px #0005;text-align:center}.card img{width:120px;height:120px;object-fit:contain}.card h2{margin:5px 0}.answers{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.answers button{background:#a85d2e}.feedback{min-height:24px;font-weight:900;margin-top:8px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#3c2418;color:#fff;padding:11px 16px;border-radius:14px;font-weight:800;box-shadow:0 10px 30px #0004;z-index:30;transition:.2s;text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:800px){.character-picker{grid-template-columns:repeat(2,1fr)}.pick img{width:70px;height:70px}.start-card{padding:18px}.start-actions{flex-direction:column}.start-actions button{width:100%}.layout{grid-template-columns:1fr}.side{order:2}.character-strip{grid-template-columns:repeat(5,1fr)}.char{flex-direction:column;gap:0}.char img{width:64px;height:64px}.char b{font-size:9px}.char span{font-size:12px}.maze{width:min(92vw,680px)}}
 </style>
-
-
-<style id="v7-hide-status-stats">
-/* V7: landing page has no player status, score, badges, or keys */
-.player-status, #player-status, .status-petualang, #status-petualang,
-.player-stats, #player-stats, .stats, .score, #score, .badges, #badges,
-.keys, #keys, .status-panel, #status-panel {
-  display: none !important;
-}
-</style>
-
-
-<style id="v8-integrated-map">
-/* V8: map is integrated directly into the landing page */
-.adventure-layout{
-  display:block;
-  width:100%;
-  margin:0;
-  padding:0;
-}
-.map-hero{
-  position:relative;
-  width:100%;
-  margin:0;
-  padding:0;
-  overflow:hidden;
-  border:0;
-  border-radius:0;
-  background:transparent;
-  box-shadow:none;
-}
-.map-frame{
-  position:relative;
-  width:100%;
-  max-width:none !important;
-  margin:0;
-  padding:0;
-  overflow:hidden;
-  border:0;
-  border-radius:0;
-  background:transparent;
-  box-shadow:none;
-}
-.map-frame img.world-map{
-  display:block;
-  width:100%;
-  max-width:none;
-  height:auto;
-  margin:0;
-  border:0;
-  border-radius:0;
-  object-fit:cover;
-}
-@media (max-width:700px){
-  .map-frame img.world-map{
-    width:100%;
-    height:auto;
-    object-fit:cover;
-  }
-}
-</style>
-
 </head>
 <body>
-  <div class="shell">
-    <header>
-      <!-- Logo baru: menggantikan teks header lama -->
-      <div class="brand">
-        <img class="logo" src="assets/logo-negeri-sugaria.png" alt="Logo Negeri Sugaria" />
-        <div class="brand-name">Negeri Sugaria</div>
-      </div>
+<div class="app">
+<header>
+<img class="logo" src="sources/logo.png" alt="Negeri Sugaria">
+<div class="head"><h1>Negeri Sugaria Maze Adventure</h1><p>Jelajahi labirin, temui 4 karakter lain, dan selesaikan tantangan matematika!</p></div>
+</header>
 
-      <nav aria-label="Navigasi utama">
-        <a href="#beranda">⌂ BERANDA</a>
-        <a href="#landmarks">🗺 LANDMARKS</a>
-        <a href="#petualangan">⚔ ADVENTURE</a>
-      </nav>
-    </header>
+<section class="panel">
+<div class="character-strip">
+<div class="char active" data-player="0"><img src="sources/chocolate-bar.png"><div><b>Cokelat Batang</b></div></div>
+<div class="char" data-player="1"><img src="sources/kuki-cokelat.png"><div><b>Kuki Cokelat</b></div></div>
+<div class="char" data-player="2"><img src="sources/kopi.png"><div><b>Kopi</b></div></div>
+<div class="char" data-player="3"><img src="sources/pretzel.png"><div><b>Pretzel</b></div></div>
+<div class="char" data-player="4"><img src="sources/croissant.png"><div><b>Croissant</b></div></div>
+</div>
+</section>
 
-    <main id="beranda">
-      <div class="adventure-layout" id="petualangan">
-        <section class="hero map-hero" aria-label="Peta Negeri Sugaria">
-          <div class="map-frame">
-            <img
-              src="assets/negeri-sugaria-map.png"
-              alt="Peta tujuh landmark Negeri Sugaria"
-              class="world-map"
-            />
-            <button
-              class="map-hotspot chocolate-hotspot"
-              type="button"
-              aria-label="Buka Chocolate Abyss Gate"
-              title="Chocolate Abyss Gate"
-              onclick="openLandmark(0)"
-            >
-              🍫
-            </button>
-          </div>
-        </section>
-      </div>
+<div class="layout">
+<aside class="panel side">
+<h2>🗺️ Misi Labirin</h2>
+<div class="mission" id="mission">Acak misi sedang disiapkan...</div>
+<div class="difficulty" id="difficulty">
+<button data-level="easy" class="active">🟢 Mudah</button>
+<button data-level="medium">🟡 Sedang</button>
+<button data-level="hard">🔴 Sulit</button>
+</div>
+<div class="level-info" id="levelInfo"></div>
+<div style="font-size:11px;color:#76503a;background:#fff8e8;border-radius:10px;padding:7px 9px;font-weight:800">🔒 Sedang terbuka setelah Mudah selesai. 🔒 Sulit terbuka setelah Sedang selesai.</div>
+<div class="score-hint">🧠 <b>Soal mengikuti level:</b> Mudah → tambah/kurang, Sedang → tambah/kurang/perkalian, Sulit → operasi campuran dengan pembagian tepat.<br><br>🏃 <b>Kejar rute tercepat!</b><br>Setiap misi memberi skor dasar + bonus rute. Semakin sedikit langkah dari karakter sebelumnya, semakin besar bonusnya.</div>
+<div class="progress" id="progress"></div>
+<div class="stats">
+<div class="stat">Skor<strong id="score">0</strong></div>
+<div class="stat">Langkah<strong id="steps">0</strong></div>
+</div>
+<button id="reset">🔄 Labirin Baru & Acak Misi</button>
+<button id="exitGame" type="button">🚪 Keluar dari Game</button>
+<p style="font-size:13px;line-height:1.45;margin-bottom:0">Keyboard: <b>WASD</b> / <b>Arrow Keys</b>. Di HP gunakan tombol arah.</p>
+</aside>
 
-      <section class="progress-wrap" id="progress">
-        <div class="panel">
-          <h2>PROGRESS PETUALANGAN</h2>
-          <div class="progress-info">
-            <span id="progressText">0 / 7 Landmark Diselesaikan</span>
-            <b id="percent">0%</b>
-          </div>
-          <div class="progress"><div id="progressBar"></div></div>
-        </div>
-      </section>
+<main class="panel maze-wrap">
+<div class="maze" id="maze" aria-label="Labirin Negeri Sugaria"></div>
+<div class="key">🎯 Ikuti urutan misi yang muncul di kiri. Setiap karakter yang ditemukan membuka soal matematika.</div>
+<div class="controls">
+<button class="up" data-move="0,-1">▲</button>
+<button class="left" data-move="-1,0">◀</button>
+<button class="down" data-move="0,1">▼</button>
+<button class="right" data-move="1,0">▶</button>
+</div>
+</main>
+</div>
+</div>
 
-      <section class="panel" id="landmarks" style="margin-top:24px">
-        <h2>7 LANDMARK NEGERI SUGARIA</h2>
-        <div class="landmarks" id="landmarkGrid"></div>
-      </section>
-    </main>
-
-    <footer>
-      © Negeri Sugaria — The Seven Landmark Adventure · Where Every Flavor Belongs
-    </footer>
+<div class="start-overlay" id="startOverlay">
+  <div class="intro-card" id="introCard">
+    <img src="sources/chocolate-cupcake.png" alt="Chocolate Cupcake">
+    <h2>Welcome to Chocolate Abyss Gate</h2>
+    <p>Pilih karakter lalu selesaikan misi di setiap labirin, Good luck!</p>
+    <button id="enterCharacterSelect" type="button">🍫 Pilih Karakter</button>
   </div>
+  <div class="start-card hidden" id="characterSelectCard">
+    <h2>🎮 Pilih Karaktermu!</h2>
+    <p>Pilih satu karakter untuk menjadi pemain sebelum labirin dimulai.</p>
+    <div class="character-picker" id="characterPicker">
+      <button class="pick selected" type="button" data-player="0"><img src="sources/chocolate-bar.png" alt="Cokelat Batang"><b>Cokelat Batang</b></button>
+      <button class="pick" type="button" data-player="1"><img src="sources/kuki-cokelat.png" alt="Kuki Cokelat"><b>Kuki Cokelat</b></button>
+      <button class="pick" type="button" data-player="2"><img src="sources/kopi.png" alt="Kopi"><b>Kopi</b></button>
+      <button class="pick" type="button" data-player="3"><img src="sources/pretzel.png" alt="Pretzel"><b>Pretzel</b></button>
+      <button class="pick" type="button" data-player="4"><img src="sources/croissant.png" alt="Croissant"><b>Croissant</b></button>
+    </div>
+    <div class="start-actions">
+      <button id="backToIntro" class="secondary" type="button">← Kembali</button>
+      <button id="startGame" type="button">🚀 Mulai Labirin</button>
+    </div>
+  </div>
+</div>
 
-  <script>
-    // Urutan progres baru sesuai permintaan:
-    const landmarks = [
-      { name: "Chocolate Abyss Gate", desc: "Maze · Temukan jalan menuju gerbang cokelat.", icon: "🍫" },
-      { name: "Blueberry Marketplace", desc: "Transaksi jual-beli · Hitung uang dengan tepat.", icon: "🫐" },
-      { name: "Kiwi Greenhouse", desc: "Timbangan & pecahan · Pecahkan tantangan berat.", icon: "🥝" },
-      { name: "Grape Chalice Swamp", desc: "Waktu · Tantangan membaca dan menghitung waktu.", icon: "🍇" },
-      { name: "Banana Tower", desc: "Pola · Temukan pola dan lanjutkan urutannya.", icon: "🍌" },
-      { name: "Citrus Lighthouse", desc: "Bangun 2D → 3D · Susun bentuk menjadi objek.", icon: "🍊" },
-      { name: "Gigantic Strawberry Castle", desc: "Harta karun · Gunakan kunci untuk membuka puzzle.", icon: "🍓" }
-    ];
+<div class="modal" id="modal">
+<div class="card">
+<img id="modalImg" alt="">
+<h2 id="modalTitle"></h2>
+<p id="question"></p>
+<div class="answers" id="answers"></div>
+<div class="feedback" id="feedback"></div>
+</div>
+</div>
+<div class="start-overlay hidden" id="finalOverlay">
+  <div class="final-card">
+    <h2 id="finalTitle">🏆 Selamat!</h2>
+    <div class="final-scene">
+      <img id="finalPlayerImg" class="final-character" alt="Karakter pemain">
+      <div class="trophy" aria-label="Piala">🏆</div>
+      <img src="sources/chocolate-cupcake.png" class="cupcake-host" alt="Chocolate Cupcake">
+    </div>
+    <p id="finalMessage"></p>
+    <button id="finalContinue" type="button">🚀 Lanjut</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
 
-    // Nilai awal dapat diganti dengan data game/LocalStorage nantinya.
-    const completed = Number(localStorage.getItem("sugariaCompleted") || 0);
-    const score = Number(localStorage.getItem("sugariaScore") || 0);
-    const badges = Number(localStorage.getItem("sugariaBadges") || 0);
-    const keys = Number(localStorage.getItem("sugariaKeys") || 0);
-function openLandmark(index) {
-      const routes = [
-        "games/chocolate-abyss-gate/",
-        "games/blueberry-marketplace/",
-        "games/kiwi-greenhouse/",
-        "games/grape-chalice-swamp/",
-        "games/banana-tower/",
-        "games/citrus-lighthouse/",
-        "games/gigantic-strawberry-castle/"
-      ];
-      const unlocked = index === 0 || index <= completed;
-      if (unlocked) window.location.href = routes[index];
-    }
+<script>
+const chars=[
+ {name:"Cokelat Batang",value:1,img:"sources/chocolate-bar.png"},
+ {name:"Kuki Cokelat",value:2,img:"sources/kuki-cokelat.png"},
+ {name:"Kopi",value:3,img:"sources/kopi.png"},
+ {name:"Pretzel",value:4,img:"sources/pretzel.png"},
+ {name:"Croissant",value:5,img:"sources/croissant.png"}
+];
 
-    const grid = document.getElementById("landmarkGrid");
-    landmarks.forEach((item, i) => {
-      const unlocked = i === 0 || i <= completed;
-      const card = document.createElement("article");
-      card.className = "landmark" + (unlocked ? "" : " locked");
-      card.innerHTML = `
-        <span class="num">${i + 1}</span>
-        <span class="badge">${unlocked ? "✓" : "🔒"}</span>
-        <h3>${item.icon} ${item.name}</h3>
-        <p>${item.desc}</p>
-      `;
-      if (unlocked) {
-        card.addEventListener("click", () => {
-          openLandmark(i);
-        });
-      }
-      grid.appendChild(card);
-    });
+const levels={
+ easy:{name:"Mudah",size:15,desc:"Labirin ringkas • cocok untuk pemanasan",seed:13579,loops:3},
+ medium:{name:"Sedang",size:21,desc:"Banyak percabangan • pilih rute tercepat",seed:24680,loops:16},
+ hard:{name:"Sulit",size:27,desc:"Banyak percabangan & banyak pilihan rute • kejar skor tertinggi",seed:97531,loops:32}
+};
+// Maze Sedang terinspirasi langsung dari pola worksheet Chocolate yang diberikan.
+// Jalur dibuat sebagai grid 21×21 agar dapat dimainkan dengan keyboard/tombol arah.
+const worksheetMediumMap=[
+"#####################",
+"#.....#.......#.....#",
+"#.###.#.#####.#.###.#",
+"#...#.#.....#.#...#.#",
+"###.#.#####.#.###.#.#",
+"#...#.....#.#.....#.#",
+"#.#######.#.#######.#",
+"#.......#.#.#.......#",
+"#######.#.#.#.#######",
+"#.....#.#...#.#.....#",
+"#.###.#.#####.#.###.#",
+"#.#...#...#...#...#.#",
+"#.#.#####.#.#####.#.#",
+"#...#.....#.....#...#",
+"###.#.###.###.###.#.#",
+"#...#.#.......#.#...#",
+"#.###.#.#####.#.###.#",
+"#.....#...#...#.....#",
+"#.#########.#########",
+"#...................#",
+"#####################"
+];
 
-    const pct = Math.round((completed / 7) * 100);
-    document.getElementById("progressText").textContent = `${completed} / 7 Landmark Diselesaikan`;
-    document.getElementById("percent").textContent = `${pct}%`;
-    document.getElementById("progressBar").style.width = `${pct}%`;
-  </script>
+// Progres level tersimpan di browser: Mudah → Sedang → Sulit.
+const PROGRESS_KEY="negeriSugariaMazeProgress_v12";
+let unlockedLevel=Number(localStorage.getItem(PROGRESS_KEY)||1);
+if(!Number.isFinite(unlockedLevel)||unlockedLevel<1) unlockedLevel=1;
+if(unlockedLevel>3) unlockedLevel=3;
+
+let levelKey="easy", map=[], player={x:1,y:1}, selected=0, missionOrder=[], targetPos=[], nextTarget=0, score=0, steps=0, locked=true, gameStarted=false, toastTimer=null, missionStart={x:1,y:1}, missionStartSteps=0;
+const maze=document.getElementById("maze"), modal=document.getElementById("modal"), toast=document.getElementById("toast");
+
+function seededRandom(seed){
+ let t=seed>>>0;
+ return ()=>{t+=0x6D2B79F5;let r=Math.imul(t^(t>>>15),1|t);r^=r+Math.imul(r^(r>>>7),61|r);return ((r^(r>>>14))>>>0)/4294967296};
+}
+function shuffle(arr,rng=Math.random){
+ const a=[...arr];
+ for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+ return a;
+}
+
+// Recursive-backtracking generator: setiap level selalu memiliki jalur yang valid.
+function generateMaze(size,seed,extraLoops=0){
+ const rng=seededRandom(seed+Math.floor(Math.random()*100000));
+ const grid=Array.from({length:size},()=>Array(size).fill("#"));
+ const dirs=[[0,-2],[2,0],[0,2],[-2,0]];
+ function carve(x,y){
+   grid[y][x]=".";
+   for(const [dx,dy] of shuffle(dirs,rng)){
+     const nx=x+dx,ny=y+dy;
+     if(nx>0&&nx<size-1&&ny>0&&ny<size-1&&grid[ny][nx]==="#"){
+       grid[y+dy/2][x+dx/2]=".";
+       carve(nx,ny);
+     }
+   }
+ }
+ carve(1,1);
+
+ // Buka sebagian dinding untuk membuat loop/cabang alternatif.
+ // Level Sedang dan Sulit sengaja memiliki lebih banyak pilihan jalan.
+ const candidates=[];
+ for(let y=1;y<size-1;y+=1){
+   for(let x=1;x<size-1;x+=1){
+     if(grid[y][x]==="#"){
+       const horizontal=grid[y][x-1]==="."&&grid[y][x+1]===".";
+       const vertical=grid[y-1][x]==="."&&grid[y+1][x]===".";
+       if(horizontal||vertical) candidates.push([x,y]);
+     }
+   }
+ }
+ for(const [x,y] of shuffle(candidates,rng).slice(0,extraLoops)) grid[y][x]=".";
+
+ return grid.map(row=>row.join(""));
+}
+function neighbors(x,y){
+ return [[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>({x:x+dx,y:y+dy})).filter(p=>p.x>=0&&p.y>=0&&p.x<map[0].length&&p.y<map.length&&map[p.y][p.x]!=="#");
+}
+function distanceMap(start){
+ const d=new Map([[start.x+","+start.y,0]]),q=[start];
+ for(let i=0;i<q.length;i++){
+   const p=q[i],base=d.get(p.x+","+p.y);
+   for(const n of neighbors(p.x,p.y)){
+     const k=n.x+","+n.y;if(!d.has(k)){d.set(k,base+1);q.push(n)}
+   }
+ }
+ return d;
+}
+function chooseTargets(count=4){
+ const start={x:1,y:1};
+ const d=distanceMap(start);
+ const cells=[...d.keys()].map(k=>{const [x,y]=k.split(",").map(Number);return{x,y,dist:d.get(k)}}).filter(p=>!(p.x===start.x&&p.y===start.y));
+ let chosen=[];
+ // Ambil titik yang saling berjauhan supaya misi terasa berbeda-beda.
+ chosen.push(cells.sort((a,b)=>b.dist-a.dist)[0]);
+ while(chosen.length<count){
+   let best=null,bestScore=-1;
+   for(const c of cells){
+     if(chosen.some(p=>p.x===c.x&&p.y===c.y))continue;
+     const s=chosen.reduce((sum,p)=>sum+Math.abs(p.x-c.x)+Math.abs(p.y-c.y),0);
+     if(s>bestScore){bestScore=s;best=c}
+   }
+   chosen.push(best);
+ }
+ return shuffle(chosen);
+}
+
+function levelIndex(key){return key==="easy"?1:key==="medium"?2:3;}
+function levelKeyFromIndex(i){return i===1?"easy":i===2?"medium":"hard";}
+function updateDifficultyUI(){
+ document.querySelectorAll("#difficulty button").forEach(btn=>{
+   const idx=levelIndex(btn.dataset.level);
+   const unlocked=idx<=unlockedLevel;
+   const hideDuringPlay=gameStarted && btn.dataset.level!==levelKey;
+   btn.disabled=!unlocked || hideDuringPlay;
+   btn.classList.toggle("locked",!unlocked);
+   btn.classList.toggle("hidden-level",hideDuringPlay);
+   btn.setAttribute("aria-disabled",String(!unlocked || hideDuringPlay));
+   btn.title=!unlocked?`🔒 Selesaikan level ${idx===2?"Mudah":"Sedang"} sampai semua misinya selesai.`:hideDuringPlay?"Selesaikan level yang sedang dimainkan terlebih dahulu.":`Level ${levels[btn.dataset.level].name} tersedia`;
+   btn.classList.toggle("active",btn.dataset.level===levelKey);
+ });
+}
+function unlockNextLevel(){
+ const current=levelIndex(levelKey);
+ if(current<3 && unlockedLevel===current){
+   unlockedLevel=current+1;
+   localStorage.setItem(PROGRESS_KEY,String(unlockedLevel));
+   updateDifficultyUI();
+   return true;
+ }
+ return false;
+}
+
+function newGame(){
+ if(levelIndex(levelKey)>unlockedLevel){
+   levelKey=levelKeyFromIndex(unlockedLevel);
+ }
+ const cfg=levels[levelKey];
+ map=levelKey==="medium"
+   ? worksheetMediumMap.map(row=>row)
+   : generateMaze(cfg.size,cfg.seed+Date.now(),cfg.loops);
+ player={x:1,y:1};
+ missionOrder=shuffle([0,1,2,3,4].filter(i=>i!==selected));
+ targetPos=chooseTargets(missionOrder.length);
+ nextTarget=0;score=0;steps=0;locked=true;gameStarted=false;
+ missionStart={x:1,y:1};missionStartSteps=0;
+ modal.classList.remove("show");
+ const questionHint=levelKey==="easy"?"Soal: tambah & kurang sampai 10."
+   :levelKey==="medium"?"Soal: tambah, kurang, & perkalian dasar."
+   :"Soal: perkalian, pembagian tepat, tambah & kurang lebih besar.";
+ document.getElementById("levelInfo").textContent=`${cfg.desc} • ${cfg.size}×${cfg.size} kotak • ${questionHint}`;
+ updateDifficultyUI();
+ updateMission();
+ render();
+ showStartScreen();
+}
+function showStartScreen(){
+ const overlay=document.getElementById("startOverlay");
+ overlay.classList.remove("hidden");
+ overlay.style.display="grid";
+ document.getElementById("introCard").classList.remove("hidden");
+ document.getElementById("characterSelectCard").classList.add("hidden");
+ document.querySelectorAll("#characterPicker .pick").forEach(el=>el.classList.toggle("selected",+el.dataset.player===selected));
+ document.querySelectorAll(".char").forEach(el=>el.classList.toggle("active",+el.dataset.player===selected));
+}
+function showCharacterSelect(){
+ document.getElementById("introCard").classList.add("hidden");
+ document.getElementById("characterSelectCard").classList.remove("hidden");
+}
+function hideStartOverlay(){
+ const overlay=document.getElementById("startOverlay");
+ overlay.classList.add("hidden");
+ overlay.style.display="none";
+}
+function startGame(){
+ // Karakter dipilih terlebih dahulu; baru setelah itu misi diacak ulang
+ // agar karakter pemain PASTI tidak pernah masuk daftar misi.
+ missionOrder=shuffle([0,1,2,3,4].filter(i=>i!==selected));
+ targetPos=chooseTargets(missionOrder.length);
+ nextTarget=0;score=0;steps=0;
+ player={x:1,y:1};
+ missionStart={x:1,y:1};missionStartSteps=0;
+ gameStarted=true;locked=false;
+ updateDifficultyUI();
+ updateMission();
+ hideStartOverlay();
+ render();
+}
+
+function updateMission(){
+ const sequence=missionOrder.map(i=>chars[i].name);
+ document.getElementById("mission").innerHTML=`Temukan karakter secara <b>acak</b>:<br><span style="display:block;margin-top:5px">${sequence.map((n,i)=>`${i+1}. ${n}`).join(" → ")}</span>`;
+}
+function render(){
+ maze.innerHTML="";
+ maze.style.gridTemplateColumns=`repeat(${map[0].length},1fr)`;
+ const targetByPos=new Map(targetPos.map((p,i)=>[p.x+","+p.y,i]));
+ for(let y=0;y<map.length;y++) for(let x=0;x<map[y].length;x++){
+   const c=document.createElement("div"); c.className="cell"+(map[y][x]==="#"?" wall":"");
+   const ti=targetByPos.get(x+","+y);
+   if(ti!==undefined && ti>=nextTarget){
+     c.classList.add("goal");
+     const charId=missionOrder[ti];
+     const im=document.createElement("img");im.src=chars[charId].img;im.alt=chars[charId].name;im.onerror=()=>im.remove();c.appendChild(im);
+   }
+   if(x===player.x&&y===player.y){
+     const p=document.createElement("div");p.className="player";
+     const im=document.createElement("img");im.src=chars[selected].img;im.alt="Karakter pemain";im.onerror=()=>{im.style.display="none"};p.appendChild(im);c.appendChild(p);
+   }
+   maze.appendChild(c);
+ }
+ document.getElementById("score").textContent=score;
+ document.getElementById("steps").textContent=steps;
+ document.getElementById("progress").innerHTML=missionOrder.map((charId,i)=>{
+   const ch=chars[charId];
+   return `<div class="dot ${i<nextTarget?"done":i===nextTarget?"now":""}" title="${i+1}. ${ch.name}">${i<nextTarget?"✓":`<img src="${ch.img}" alt="${ch.name}">`}</div>`;
+ }).join("");
+}
+function showToast(message){
+ clearTimeout(toastTimer);toast.textContent=message;toast.classList.add("show");
+ toastTimer=setTimeout(()=>toast.classList.remove("show"),1800);
+}
+function move(dx,dy){
+ if(locked||!gameStarted)return;
+ const nx=player.x+dx,ny=player.y+dy;
+ if(nx<0||ny<0||ny>=map.length||nx>=map[0].length||map[ny][nx]==="#")return;
+ player={x:nx,y:ny};steps++;render();
+ const ti=targetPos.findIndex(p=>p.x===nx&&p.y===ny);
+ if(ti===nextTarget) openQuestion(ti);
+ else if(ti>nextTarget) showToast(`🔎 ${chars[missionOrder[nextTarget]].name} dulu, ya!`);
+}
+function buildQuestion(levelKey, missionIndex){
+ const randInt=(min,max)=>Math.floor(Math.random()*(max-min+1))+min;
+ let a,b,ans,op;
+ if(levelKey==="easy"){
+   op=missionIndex%2===0?"+":"−";
+   if(op==="+"){ a=randInt(1,5); b=randInt(1,5); ans=a+b; }
+   else { a=randInt(2,10); b=randInt(1,a); ans=a-b; }
+ }else if(levelKey==="medium"){
+   const type=missionIndex%3;
+   if(type===0){ op="+"; a=randInt(4,12); b=randInt(3,12); ans=a+b; }
+   else if(type===1){ op="−"; a=randInt(6,20); b=randInt(1,a); ans=a-b; }
+   else { op="×"; a=randInt(2,8); b=randInt(2,8); ans=a*b; }
+ }else{
+   const type=missionIndex%4;
+   if(type===0){ op="×"; a=randInt(4,12); b=randInt(3,12); ans=a*b; }
+   else if(type===1){ op="÷"; b=randInt(2,10); ans=randInt(2,10); a=b*ans; }
+   else if(type===2){ op="+"; a=randInt(10,30); b=randInt(10,30); ans=a+b; }
+   else { op="−"; a=randInt(15,40); b=randInt(5,a); ans=a-b; }
+ }
+ return {a,b,ans,op};
+}
+
+function makeAnswerOptions(ans,op,levelKey){
+ const values=new Set([ans]);
+ const spread=levelKey==="easy"?5:levelKey==="medium"?10:15;
+ const candidates=[];
+ for(let d=1;d<=spread;d++){ candidates.push(ans+d,ans-d); }
+ if(op==="×"||op==="÷") candidates.push(ans+2,ans+3,ans+5,Math.max(0,ans-2),Math.max(0,ans-3));
+ for(const value of shuffle(candidates)){ if(value>=0&&value!==ans) values.add(value); if(values.size===4) break; }
+ return shuffle([...values]);
+}
+
+function openQuestion(ti){
+ locked=true;
+ const ch=chars[missionOrder[ti]];
+ const q=buildQuestion(levelKey,ti);
+ const optionValues=makeAnswerOptions(q.ans,q.op,levelKey);
+ document.getElementById("modalImg").src=ch.img;
+ document.getElementById("modalTitle").textContent=`Misi ${ti+1}: ${ch.name} • ${levels[levelKey].name}`;
+ document.getElementById("question").textContent=`Berapa hasil ${q.a} ${q.op} ${q.b}?`;
+ const answers=document.getElementById("answers"); answers.innerHTML="";
+ optionValues.forEach(v=>{ const btn=document.createElement("button"); btn.textContent=v; btn.onclick=()=>answer(v,q.ans,ti); answers.appendChild(btn); });
+ document.getElementById("feedback").textContent="";
+ modal.classList.add("show");
+}
+function answer(v,ans,ti){
+ const f=document.getElementById("feedback");
+ if(v!==ans){f.textContent="❌ Belum tepat. Coba lagi!";return}
+ const actualSteps=steps-missionStartSteps;
+ const optimalSteps=distanceMap(missionStart).get(player.x+","+player.y) ?? actualSteps;
+ const extraSteps=Math.max(0,actualSteps-optimalSteps);
+ const routeBonus=Math.max(20,100-extraSteps*5);
+ const earned=100+routeBonus;
+ f.innerHTML=`🎉 Benar! <b>+${earned} poin</b><br><small>Rute: ${actualSteps} langkah • tercepat: ${optimalSteps}</small>`;
+ score+=earned;
+ nextTarget++;
+ missionStart={...player};
+ missionStartSteps=steps;
+ setTimeout(()=>{
+   modal.classList.remove("show");locked=false;render();
+   if(nextTarget===missionOrder.length)finish();
+ },850);
+}
+function finish(){
+ locked=true;
+ const currentIdx=levelIndex(levelKey);
+ const justUnlocked=unlockNextLevel();
+ updateDifficultyUI();
+ // Piala + Chocolate Cupcake hanya muncul saat seluruh permainan selesai (Hard).
+ if(currentIdx===3){
+   const finalOverlay=document.getElementById("finalOverlay");
+   document.getElementById("finalPlayerImg").src=chars[selected].img;
+   document.getElementById("finalTitle").textContent="👑 Semua Level Tuntas!";
+   document.getElementById("finalMessage").innerHTML=`Chocolate Cupcake memberikan piala kepada <b>${chars[selected].name}</b>!<br>Hebat! Kamu menaklukkan semua labirin dengan skor <b>${score}</b> dalam <b>${steps}</b> langkah.`;
+   const finalContinue=document.getElementById("finalContinue");
+   finalContinue.textContent="🎮 Main Lagi";
+   finalContinue.onclick=()=>{finalOverlay.classList.add("hidden");finalOverlay.style.display="none";newGame();};
+   finalOverlay.classList.remove("hidden");
+   finalOverlay.style.display="grid";
+   return;
+ }
+ const nextKey=levelKeyFromIndex(currentIdx+1);
+ const nextText=justUnlocked?`🔓 Level ${levels[nextKey].name} terbuka! Sekarang kamu bisa lanjut ke level berikutnya.`:"";
+ document.getElementById("modalImg").src=chars[selected].img;
+ document.getElementById("modalTitle").textContent="🏆 Level Selesai!";
+ document.getElementById("question").innerHTML=`Hebat! Kamu menyelesaikan ${missionOrder.length} misi tingkat <b>${levels[levelKey].name}</b>.<br><b>Skor: ${score}</b> • <b>${steps} langkah</b><br><span style="color:#6da34d;font-weight:900">${nextText}</span>`;
+ const buttons=[];
+ if(justUnlocked){
+   buttons.push(`<button onclick="startNextLevel('${nextKey}')" style="grid-column:1/-1">🚀 Lanjut ke ${levels[nextKey].name}</button>`);
+ }
+ buttons.push(`<button onclick="newGame()" style="grid-column:1/-1;background:#e7d3a6;color:#3c2418">🎮 Main Lagi di Level Ini</button>`);
+ document.getElementById("answers").innerHTML=buttons.join("");
+ document.getElementById("feedback").textContent="";
+ modal.classList.add("show");
+}
+
+function startNextLevel(nextKey){
+ if(levelIndex(nextKey)>unlockedLevel){
+   showToast("🔒 Selesaikan level sebelumnya terlebih dahulu.");
+   return;
+ }
+ levelKey=nextKey;
+ document.querySelectorAll("#difficulty button").forEach(x=>x.classList.toggle("active",x.dataset.level===levelKey));
+ newGame();
+}
+
+function exitGame(){
+  locked=true;
+  gameStarted=false;
+  modal.classList.remove("show");
+  const finalOverlay=document.getElementById("finalOverlay");
+  finalOverlay.classList.add("hidden");
+  finalOverlay.style.display="none";
+  levelKey=levelKeyFromIndex(unlockedLevel);
+  updateDifficultyUI();
+  showStartScreen();
+  showToast("🚪 Kamu keluar dari game.");
+}
+
+
+document.querySelectorAll("#characterPicker .pick").forEach(el=>el.onclick=()=>{
+ selected=+el.dataset.player;
+ document.querySelectorAll("#characterPicker .pick").forEach(x=>x.classList.remove("selected"));
+ el.classList.add("selected");
+ document.querySelectorAll(".char").forEach(x=>x.classList.toggle("active",+x.dataset.player===selected));
+});
+document.querySelectorAll(".char").forEach(el=>el.onclick=()=>{
+ if(gameStarted){showToast("🔒 Karakter sudah dipilih. Mulai ulang untuk menggantinya.");return;}
+ selected=+el.dataset.player;
+ showStartScreen();
+});
+document.getElementById("enterCharacterSelect").onclick=showCharacterSelect;
+document.getElementById("backToIntro").onclick=showStartScreen;
+document.getElementById("startGame").onclick=startGame;
+document.querySelectorAll("#difficulty button").forEach(btn=>btn.onclick=()=>{
+ const idx=levelIndex(btn.dataset.level);
+ if(idx>unlockedLevel){showToast(`🔒 Selesaikan level ${idx===2?"Mudah":"Sedang"} terlebih dahulu.`);return;}
+ levelKey=btn.dataset.level;
+ updateDifficultyUI();
+ newGame();
+});
+document.getElementById("reset").onclick=newGame;
+document.getElementById("exitGame").onclick=exitGame;
+document.querySelectorAll(".controls button").forEach(b=>b.onclick=()=>{const [x,y]=b.dataset.move.split(",").map(Number);move(x,y)});
+document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();const d={arrowup:[0,-1],w:[0,-1],arrowdown:[0,1],s:[0,1],arrowleft:[-1,0],a:[-1,0],arrowright:[1,0],d:[1,0]}[k];if(d){e.preventDefault();move(...d)}});
+
+newGame();
+</script>
 </body>
 </html>
