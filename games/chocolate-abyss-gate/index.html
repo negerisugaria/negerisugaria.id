@@ -1,0 +1,903 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Negeri Sugaria — Chocolate Abyss Gate</title>
+<style>
+:root{
+  --brown:#5b2d16; --brown2:#7b3e1f; --choco:#3b1d10; --gold:#f3c15b;
+  --cream:#fff8e8; --cream2:#ffe8b2; --orange:#e97936; --green:#63a44d;
+  --red:#c9523d; --ink:#2d1b12; --path:#fff0c8; --wall:#633218;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,sans-serif;
+  background:
+    radial-gradient(circle at 15% 5%,#fff5d9 0 8%,transparent 24%),
+    linear-gradient(145deg,#32180d,#6f351b 45%,#d48a43);
+  min-height:100vh;
+}
+button{font:inherit;border:0;cursor:pointer}
+.app{width:min(1240px,100%);margin:auto;padding:14px}
+header{
+  position:relative;overflow:hidden;display:flex;align-items:center;gap:14px;
+  padding:12px 16px;border-radius:24px;color:#fff;
+  background:linear-gradient(135deg,#2b140b,#6d3218 52%,#b7652a);
+  border:2px solid #e7b45d66;box-shadow:0 14px 40px #1e0e0860;
+}
+header:after{
+  content:"";position:absolute;inset:auto -20% -70% -20%;height:120px;
+  background:radial-gradient(ellipse,#f5c55d44,transparent 65%);pointer-events:none;
+}
+.logo{width:58px;height:58px;object-fit:contain;position:relative;z-index:1}
+.head{position:relative;z-index:1}
+.head h1{margin:0;font-size:clamp(22px,3.4vw,38px);letter-spacing:.2px}
+.head p{margin:3px 0 0;color:#ffecc6;font-weight:800;font-size:13px}
+
+.panel{
+  margin-top:12px;background:#fffaf0ed;border:2px solid #6b371d33;border-radius:22px;
+  padding:12px;box-shadow:0 10px 28px #28120833;backdrop-filter:blur(4px)
+}
+.character-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.char{
+  min-width:0;display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:5px;border:2px solid #e4c77d;background:linear-gradient(#fffdf8,#ffe9ba);
+  border-radius:16px;cursor:pointer
+}
+.char.active{border-color:var(--orange);box-shadow:0 0 0 3px #e9793630}
+.char img{width:55px;height:55px;object-fit:contain}
+.char b{font-size:11px}.char span{display:block;color:#a15b2d;font-weight:1000;font-size:10px}
+
+.layout{display:grid;grid-template-columns:285px 1fr;gap:12px;margin-top:12px}
+.side h2{margin:2px 0 8px;font-size:19px}
+.mission{background:#fff0cc;border:1px solid #e4bd6a;border-radius:15px;padding:10px;line-height:1.45;font-weight:800}
+.mission small{color:#795137}
+.difficulty{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:9px 0}
+.difficulty button{padding:8px 4px;border-radius:11px;background:#e8d6ac;color:var(--ink);font-weight:1000;font-size:12px}
+.difficulty button.active{background:var(--brown);color:#fff}
+.difficulty button:disabled{opacity:.45;cursor:not-allowed}
+.progress{display:flex;gap:5px;flex-wrap:wrap;margin:9px 0}
+.dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#ead8af;border:2px solid transparent}
+.dot.now{background:var(--orange);color:#fff;box-shadow:0 0 0 2px #e9793640}
+.dot.done{background:var(--green);color:#fff}
+.dot img{width:25px;height:25px;object-fit:contain}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.stat{background:#fff;border-radius:12px;padding:7px;text-align:center}
+.stat span{font-size:11px;font-weight:800;color:#76503a}.stat strong{display:block;font-size:20px}
+.hint{font-size:11px;line-height:1.4;background:#fff6df;border-radius:11px;padding:8px;margin:8px 0;color:#6e4b35}
+.action{width:100%;margin-top:7px;padding:10px;border-radius:12px;background:var(--brown);color:#fff;font-weight:1000}
+.action.new{background:var(--orange)}.action.new:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.25)}.action.exit{background:#452416}
+.lock-note{font-size:11px;color:#76503a;background:#fff8e8;border-radius:10px;padding:7px;margin-top:8px;font-weight:800}
+
+.maze-wrap{display:flex;flex-direction:column;align-items:center}
+.maze{
+  position:relative;display:grid;width:min(78vw,720px);aspect-ratio:1;
+  border:8px solid #4a2412;border-radius:18px;background:#4a2412;overflow:visible;
+  box-shadow:0 18px 42px #2a120a55;
+}
+.cell{position:relative;background:var(--path);border:1px solid #d8b76e;min-width:0}
+.cell.wall{background:var(--wall);border-color:#4a2412}
+.cell.goal{background:#ffe29a;box-shadow:inset 0 0 0 2px #f3c15b88}
+.target-img{
+  position:absolute;left:50%;top:50%;width:155%;height:155%;transform:translate(-50%,-50%);
+  object-fit:contain;z-index:3;pointer-events:none;filter:drop-shadow(0 3px 2px #2d160b55)
+}
+.home-img{
+  position:absolute;left:50%;top:50%;width:230%;height:230%;transform:translate(-50%,-50%);
+  object-fit:contain;z-index:6;pointer-events:none;filter:drop-shadow(0 5px 4px #2d160b66)
+}
+.player{
+  position:absolute;left:50%;top:50%;width:125%;height:125%;transform:translate3d(-50%,-50%,0);
+  z-index:8;display:flex;align-items:center;justify-content:center;pointer-events:none;overflow:visible;
+}
+.player img{
+  width:100%;height:100%;object-fit:contain;object-position:50% 50%;display:block;
+  filter:drop-shadow(0 4px 3px #2d160b55);
+  animation:none;
+  transform:none;
+  transform-origin:center center;
+}
+.cell.hit .target-img{animation:targetPop .5s ease}
+.maze-caption{margin-top:8px;text-align:center;font-size:12px;font-weight:900;color:#6f4a34}
+.controls{display:grid;grid-template-columns:56px 56px 56px;gap:6px;justify-content:center;margin-top:9px}
+.controls button{width:56px;height:44px;border-radius:12px;background:var(--brown);color:#fff;font-size:19px;font-weight:1000}
+.controls .up{grid-column:2}.controls .left{grid-column:1}.controls .down{grid-column:2}.controls .right{grid-column:3}
+
+.overlay{
+  position:fixed;inset:0;background:#1f0d08cc;display:grid;place-items:center;padding:16px;z-index:50
+}
+.card{
+  width:min(760px,100%);background:#fff9ec;border:3px solid #e5bc5e;border-radius:28px;
+  padding:22px;box-shadow:0 25px 80px #0008;text-align:center
+}
+.intro-cupcake{width:min(260px,65vw);height:min(260px,65vw);object-fit:contain;margin:-6px auto -10px;display:block}
+.card h2{margin:0;color:var(--brown);font-size:clamp(25px,5vw,38px)}
+.card p{color:#76503a;font-weight:800;line-height:1.55}
+.picker{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px}
+.pick{
+  background:#fffdf7;border:3px solid #e4c77d;border-radius:17px;padding:8px 5px;
+  min-width:0;transition:.15s
+}
+.pick:hover{transform:translateY(-2px)}.pick.selected{border-color:var(--orange);background:#fff0d3;box-shadow:0 0 0 4px #e9793630}
+.pick img{width:90px;height:90px;object-fit:contain;max-width:100%}
+.pick b{display:block;margin-top:4px;color:var(--brown);font-size:12px}
+.actions{display:flex;justify-content:center;gap:8px;margin-top:15px}
+.actions button{padding:11px 18px;border-radius:12px;background:var(--brown);color:#fff;font-weight:1000}
+.actions .secondary{background:#e7d4aa;color:var(--ink)}
+.hidden{display:none!important}
+
+.modal{position:fixed;inset:0;background:#24100899;display:none;place-items:center;padding:16px;z-index:60}
+.modal.show{display:grid}
+.question-card{width:min(430px,100%);background:#fff9ec;border:3px solid #e5bc5e;border-radius:24px;padding:20px;text-align:center;box-shadow:0 25px 70px #0007}
+.question-card img{width:110px;height:110px;object-fit:contain}
+.question-card h2{margin:3px 0;color:var(--brown)}
+.question{font-size:23px;font-weight:1000;margin:8px 0}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.answers button{background:#a65b2c;color:#fff;padding:11px;border-radius:12px;font-weight:1000}
+.feedback{min-height:27px;margin-top:8px;font-weight:1000}
+.toast{
+  position:fixed;left:50%;bottom:20px;transform:translate(-50%,20px);opacity:0;
+  background:#3c1d10;color:#fff;padding:10px 15px;border-radius:13px;font-weight:900;
+  z-index:100;transition:.2s;pointer-events:none;text-align:center
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:90;overflow:hidden}
+.confetti i{position:absolute;top:-20px;width:9px;height:14px;animation:fall linear forwards}
+
+.final-card{width:min(560px,100%);background:#fff9ec;border:3px solid #f3c15b;border-radius:28px;padding:26px;text-align:center;box-shadow:0 25px 80px #0008}
+.final-trophy{font-size:110px;line-height:1;filter:drop-shadow(0 7px 4px #6a3a2440);animation:bounce .8s ease-in-out infinite alternate}
+.final-card h2{margin:5px 0;color:var(--brown);font-size:34px}
+.final-card p{color:#76503a;font-weight:800;line-height:1.5}
+.final-card button{padding:11px 20px;border-radius:12px;background:var(--brown);color:#fff;font-weight:1000;margin:4px}
+
+@keyframes float{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+@keyframes targetPop{0%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.14)}100%{transform:translate(-50%,-50%) scale(1)}}
+@keyframes bounce{from{transform:translateY(2px) rotate(-3deg)}to{transform:translateY(-8px) rotate(3deg)}}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.95}}
+
+@media(max-width:820px){
+  .layout{grid-template-columns:1fr}.side{order:2}
+  .character-strip{grid-template-columns:repeat(5,1fr)}
+  .char{flex-direction:column;gap:0}.char img{width:48px;height:48px}.char b{font-size:9px}
+  .picker{grid-template-columns:repeat(2,1fr)}
+  .pick img{width:80px;height:80px}
+  .maze{width:min(92vw,720px)}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <img class="logo" src="sources/logo.png" alt="Negeri Sugaria">
+  <div class="head">
+    <h1>Chocolate Abyss Gate</h1>
+    <p>Maze Adventure • Matematika • Strategi • Kejar skor tertinggi</p>
+  </div>
+</header>
+
+<section class="panel">
+  <div class="character-strip" id="characterStrip"></div>
+</section>
+
+<div class="layout">
+  <aside class="panel side">
+    <h2>🗺️ Misi Chocolate Abyss</h2>
+    <div class="mission" id="mission"></div>
+    <div class="difficulty" id="difficulty">
+      <button data-level="easy">🟢 Mudah</button>
+      <button data-level="medium">🟡 Sedang</button>
+      <button data-level="hard">🔴 Sulit</button>
+    </div>
+    <div class="progress" id="progress"></div>
+    <div class="stats">
+      <div class="stat"><span>SKOR LEVEL</span><strong id="score">0</strong></div>
+      <div class="stat"><span>LANGKAH</span><strong id="steps">0</strong></div>
+    </div>
+    <div class="stat" style="margin-top:7px;background:#fff0cc;border:1px solid #e4bd6a">
+      <span>🏆 TOTAL SKOR</span><strong id="totalScore">0</strong>
+    </div>
+    <div class="hint" id="levelHint"></div>
+    <button class="action new" id="newMaze">🆕 Labirin Baru</button>
+    <button class="action exit" id="exitGame">🚪 Exit</button>
+    <div class="lock-note">🔒 Sedang terbuka setelah Mudah selesai. Sulit terbuka setelah Sedang selesai.</div>
+  </aside>
+
+  <main class="panel maze-wrap">
+    <div class="maze" id="maze"></div>
+    <div class="maze-caption" id="caption">Cari teman-temanmu, lalu temukan rumah Chocolate Abyss.</div>
+    <div class="controls">
+      <button class="up" data-move="0,-1">▲</button>
+      <button class="left" data-move="-1,0">◀</button>
+      <button class="down" data-move="0,1">▼</button>
+      <button class="right" data-move="1,0">▶</button>
+    </div>
+  </main>
+</div>
+</div>
+
+<!-- INTRO + CHARACTER SELECT -->
+<div class="overlay" id="startOverlay">
+  <div class="card" id="introCard">
+    <img class="intro-cupcake" src="sources/chocolate-cupcake.png" alt="Chocolate Cupcake">
+    <h2>Welcome to Chocolate Abyss Gate</h2>
+    <p>Pilih karakter lalu selesaikan misi di setiap labirin.<br>Temukan teman-temanmu, cari rumah, dan kumpulkan skor setinggi mungkin.<br><b>Good luck!</b></p>
+    <button class="actions" id="goPick">🍫 Pilih Karakter</button>
+  </div>
+
+  <div class="card hidden" id="pickerCard">
+    <h2>🎮 Pilih Karaktermu</h2>
+    <p>Karakter yang kamu pilih menjadi pemain dan tidak muncul sebagai target misi.</p>
+    <div class="picker" id="picker"></div>
+    <div class="actions">
+      <button class="secondary" id="backIntro">← Kembali</button>
+      <button id="startGame">🚀 Mulai Labirin</button>
+    </div>
+  </div>
+</div>
+
+<!-- MATH QUESTION -->
+<div class="modal" id="questionModal">
+  <div class="question-card">
+    <img id="questionImg" alt="">
+    <h2 id="questionTitle">Misi</h2>
+    <div class="question" id="questionText"></div>
+    <div class="answers" id="answers"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+</div>
+
+<!-- LEVEL COMPLETE -->
+<div class="modal" id="levelModal">
+  <div class="question-card">
+    <div style="font-size:72px">🎉</div>
+    <h2 id="levelTitle">Level selesai!</h2>
+    <p id="levelMessage"></p>
+    <div class="answers" id="levelButtons"></div>
+  </div>
+</div>
+
+<!-- FINAL -->
+<div class="overlay hidden" id="finalOverlay">
+  <div class="final-card">
+    <div class="final-trophy">🏆</div>
+    <h2>Chocolate Abyss Gate Tuntas!</h2>
+    <p id="finalMessage"></p>
+    <button id="playAgain">🎮 Main Lagi</button>
+    <button id="finalExit" style="background:#452416">🚪 Exit</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="confetti" id="confetti"></div>
+
+<script>
+const chars = [
+  {name:"Cokelat Batang", img:"sources/chocolate-bar.png"},
+  {name:"Kuki Cokelat", img:"sources/kuki-cokelat.png"},
+  {name:"Kopi", img:"sources/kopi.png"},
+  {name:"Pretzel", img:"sources/pretzel.png"},
+  {name:"Croissant", img:"sources/croissant.png"}
+];
+
+const levels = {
+  easy:   {name:"Mudah", size:15, loops:3, desc:"Tambah & kurang • maze sederhana"},
+  medium: {name:"Sedang", size:21, loops:15, desc:"Tambah, kurang & perkalian • banyak percabangan"},
+  hard:   {name:"Sulit", size:27, loops:32, desc:"Operasi campuran • banyak rute & kejar waktu"}
+};
+
+const STORAGE = "sugaria_chocolate_abyss_progress_v16";
+let unlocked = Number(localStorage.getItem(STORAGE) || 1);
+if (!Number.isFinite(unlocked) || unlocked < 1 || unlocked > 3) unlocked = 1;
+
+let selected = 0;
+let levelKey = "easy";
+let map = [];
+let player = {x:1,y:1};
+let targets = [];
+let targetSlots = [];
+let targetOrder = [];
+let nextTarget = 0;
+let home = null;
+let score = 0;
+let totalScore = 0;
+let steps = 0;
+let locked = true;
+let gameStarted = false;
+let missionStart = {x:1,y:1};
+let missionStartSteps = 0;
+let currentQuestion = null;
+let toastTimer = null;
+
+const maze = document.getElementById("maze");
+const missionEl = document.getElementById("mission");
+const progressEl = document.getElementById("progress");
+const scoreEl = document.getElementById("score");
+const stepsEl = document.getElementById("steps");
+const totalScoreEl = document.getElementById("totalScore");
+const levelHint = document.getElementById("levelHint");
+const startOverlay = document.getElementById("startOverlay");
+const introCard = document.getElementById("introCard");
+const pickerCard = document.getElementById("pickerCard");
+const questionModal = document.getElementById("questionModal");
+const levelModal = document.getElementById("levelModal");
+const finalOverlay = document.getElementById("finalOverlay");
+
+function seededRandom(seed){
+  let t = seed >>> 0;
+  return () => {
+    t += 0x6D2B79F5;
+    let r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function shuffle(arr, rng=Math.random){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(rng()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+/* Worksheet-inspired 21x21 maze for Medium. */
+const mediumMap = [
+"#####################",
+"#.....#.......#.....#",
+"#.###.#.#####.#.###.#",
+"#...#.#.....#.#...#.#",
+"###.#.#####.#.###.#.#",
+"#...#.....#.#.....#.#",
+"#.#######.#.#######.#",
+"#.......#.#.#.......#",
+"#######.#.#.#.#######",
+"#.....#.#...#.#.....#",
+"#.###.#.#####.#.###.#",
+"#.#...#...#...#...#.#",
+"#.#.#####.#.#####.#.#",
+"#...#.....#.....#...#",
+"###.#.###.###.###.#.#",
+"#...#.#.......#.#...#",
+"#.###.#.#####.#.###.#",
+"#.....#...#...#.....#",
+"#.#########.#########",
+"#...................#",
+"#####################"
+];
+
+function generateMaze(size, seed, extraLoops){
+  const rng = seededRandom(seed);
+  const grid = Array.from({length:size},()=>Array(size).fill("#"));
+  const dirs = [[0,-2],[2,0],[0,2],[-2,0]];
+  function carve(x,y){
+    grid[y][x]=".";
+    for(const [dx,dy] of shuffle(dirs,rng)){
+      const nx=x+dx, ny=y+dy;
+      if(nx>0&&nx<size-1&&ny>0&&ny<size-1&&grid[ny][nx]==="#"){
+        grid[y+dy/2][x+dx/2]=".";
+        carve(nx,ny);
+      }
+    }
+  }
+  carve(1,1);
+
+  const candidates=[];
+  for(let y=1;y<size-1;y++){
+    for(let x=1;x<size-1;x++){
+      if(grid[y][x]!=="#") continue;
+      const h=grid[y][x-1]==="."&&grid[y][x+1]===".";
+      const v=grid[y-1][x]==="."&&grid[y+1][x]===".";
+      if(h||v) candidates.push([x,y]);
+    }
+  }
+  for(const [x,y] of shuffle(candidates,rng).slice(0,extraLoops)) grid[y][x]=".";
+  return grid.map(row=>row.join(""));
+}
+
+function neighbors(x,y){
+  return [[1,0],[-1,0],[0,1],[0,-1]]
+    .map(([dx,dy])=>({x:x+dx,y:y+dy}))
+    .filter(p=>p.x>=0&&p.y>=0&&p.y<map.length&&p.x<map[0].length&&map[p.y][p.x]!== "#");
+}
+function findNearestWalkable(sx,sy){
+  if(map[sy]?.[sx] !== "#") return {x:sx,y:sy};
+  const q=[{x:sx,y:sy}], seen=new Set([sx+","+sy]);
+  for(let i=0;i<q.length;i++){
+    const p=q[i];
+    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+      const x=p.x+dx,y=p.y+dy,k=x+","+y;
+      if(x<0||y<0||y>=map.length||x>=map[0].length||seen.has(k)) continue;
+      if(map[y][x] !== "#") return {x,y};
+      seen.add(k); q.push({x,y});
+    }
+  }
+  return {x:1,y:1};
+}
+function distanceMap(start){
+  const d=new Map([[start.x+","+start.y,0]]);
+  const q=[start];
+  for(let i=0;i<q.length;i++){
+    const p=q[i], base=d.get(p.x+","+p.y);
+    for(const n of neighbors(p.x,p.y)){
+      const k=n.x+","+n.y;
+      if(!d.has(k)){d.set(k,base+1);q.push(n);}
+    }
+  }
+  return d;
+}
+function farthestReachable(){
+  const d=distanceMap({x:1,y:1});
+  return [...d.entries()]
+    .map(([k,dist])=>{const [x,y]=k.split(",").map(Number);return{x,y,dist};})
+    .sort((a,b)=>b.dist-a.dist);
+}
+function chooseTargets(count, rng=Math.random){
+  // Pilih posisi target yang benar-benar acak, tetapi tetap tersebar
+  // agar misi tidak berkumpul di satu area. Khusus Medium, setiap
+  // klik "Labirin Baru" akan menghasilkan penempatan target baru.
+  const cells=shuffle(farthestReachable().filter(p=>!(p.x===1&&p.y===1)), rng);
+  const chosen=[];
+  const minGap = levelKey === "medium" ? 4 : 3;
+
+  for(const c of cells){
+    if(chosen.some(p=>Math.abs(p.x-c.x)+Math.abs(p.y-c.y)<minGap)) continue;
+    chosen.push(c);
+    if(chosen.length===count) break;
+  }
+
+  // Fallback jika maze terlalu padat.
+  if(chosen.length<count){
+    for(const c of cells){
+      if(chosen.some(p=>p.x===c.x&&p.y===c.y)) continue;
+      chosen.push(c);
+      if(chosen.length===count) break;
+    }
+  }
+  return chosen;
+}
+
+function chooseHome(){
+  const cells=farthestReachable();
+  const candidates=cells.filter(p=>p.dist>Math.max(10, Math.floor(map.length*0.8)));
+  return candidates[Math.floor(Math.random()*Math.max(1,candidates.length))] || cells[0];
+}
+
+function levelIndex(k){return k==="easy"?1:k==="medium"?2:3;}
+function keyFromIndex(i){return i===1?"easy":i===2?"medium":"hard";}
+
+function updateDifficulty(){
+  document.querySelectorAll("#difficulty button").forEach(btn=>{
+    const idx=levelIndex(btn.dataset.level);
+    btn.disabled = idx>unlocked || (gameStarted && btn.dataset.level!==levelKey);
+    btn.classList.toggle("active",btn.dataset.level===levelKey);
+  });
+}
+function updateHeaderCharacters(){
+  const strip=document.getElementById("characterStrip");
+  strip.innerHTML=chars.map((c,i)=>`
+    <button class="char ${i===selected?"active":""}" data-player="${i}" type="button">
+      <img src="${c.img}" alt="${c.name}">
+      <div><b>${c.name}</b><span>${i===selected?"PEMAIN":"TARGET"}</span></div>
+    </button>`).join("");
+  strip.querySelectorAll(".char").forEach(el=>{
+    el.onclick=()=>{
+      if(gameStarted){showToast("🔒 Karakter sudah dipilih. Gunakan Main Lagi untuk memilih karakter baru.");return;}
+      selected=Number(el.dataset.player);
+      updateHeaderCharacters();
+      renderPicker();
+    };
+  });
+}
+function renderPicker(){
+  document.getElementById("picker").innerHTML=chars.map((c,i)=>`
+    <button class="pick ${i===selected?"selected":""}" data-player="${i}" type="button">
+      <img src="${c.img}" alt="${c.name}">
+      <b>${c.name}</b>
+    </button>`).join("");
+  document.querySelectorAll("#picker .pick").forEach(el=>{
+    el.onclick=()=>{selected=Number(el.dataset.player);renderPicker();updateHeaderCharacters();};
+  });
+}
+
+function showIntro(){
+  startOverlay.classList.remove("hidden");
+  introCard.classList.remove("hidden");
+  pickerCard.classList.add("hidden");
+}
+function showPicker(){
+  introCard.classList.add("hidden");
+  pickerCard.classList.remove("hidden");
+  renderPicker();
+}
+function hideStart(){startOverlay.classList.add("hidden");}
+
+function prepareTargets(rng=Math.random){
+  // Target misi selalu mengecualikan karakter yang sedang dipakai pemain.
+  // Penempatan target dibuat SEKALI saat level dimulai dan tidak dihitung ulang
+  // ketika target sebelumnya berhasil, sehingga target yang tersisa tidak berpindah.
+  targetOrder = shuffle(chars.map((_,i)=>i).filter(i=>i!==selected), rng);
+  targetSlots = chooseTargets(targetOrder.length, rng).map(p=>({x:p.x,y:p.y}));
+  targets = targetSlots.map(p=>({x:p.x,y:p.y}));
+  nextTarget = 0;
+  home = null;
+}
+
+function updateNewMazeButton(){
+  const btn=document.getElementById("newMaze");
+  // During active play, a new maze is locked until the current maze
+  // has been completed by finding the Chocolate Abyss Gate home.
+  btn.disabled = gameStarted && !home;
+  btn.title = btn.disabled ? "Temukan rumah Chocolate Abyss terlebih dahulu." : "Buat labirin baru";
+}
+
+function setupLevel(){
+  const cfg=levels[levelKey];
+  const seed=Date.now()+Math.floor(Math.random()*1000000);
+  const rng=seededRandom(seed);
+  map = levelKey==="medium" ? mediumMap.map(r=>r) : generateMaze(cfg.size,seed,cfg.loops);
+
+  player={x:1,y:1};
+  // Always start on a walkable cell. This prevents a newly generated maze from spawning inside a wall.
+  if(map[player.y]?.[player.x]==="#") player=findNearestWalkable(player.x,player.y);
+  prepareTargets(rng);
+  score=0;
+  steps=0;
+  missionStart={...player};
+  missionStartSteps=0;
+  locked=true;
+  gameStarted=false;
+  updateNewMazeButton();
+
+  levelHint.innerHTML = `<b>${cfg.name}</b> — ${cfg.desc}<br>
+    Jawaban benar <b>+100</b> + bonus rute. Jawaban salah <b>-25</b>.`;
+  updateDifficulty();
+  updateMission();
+  render();
+  showIntro();
+}
+function startLevelWithoutIntro(){
+  /* Used for the automatic Easy → Medium → Hard transition. */
+  gameStarted=true;
+  locked=false;
+  hideStart();
+  updateDifficulty();
+  updateNewMazeButton();
+  render();
+}
+function startNewSession(){
+  totalScore=0;
+  levelKey="easy";
+  selected=0;
+  unlocked=1;
+  localStorage.setItem(STORAGE,"1");
+  gameStarted=false;
+  locked=true;
+  setupLevel();
+  showIntro();
+}
+function updateMission(){
+  const names=targetOrder.map(i=>chars[i].name);
+  let text=`Temukan <b>${names.length}</b> karakter secara acak:<br>`;
+  text += `<span style="display:block;margin-top:5px">${names.map((n,i)=>`${i+1}. ${n}`).join(" → ")}</span>`;
+  if(home) text += `<br>🏠 Setelah semuanya ditemukan, cari <b>rumah Chocolate Abyss</b>.`;
+  missionEl.innerHTML=text;
+}
+function render(){
+  maze.innerHTML="";
+  maze.style.gridTemplateColumns=`repeat(${map[0].length},1fr)`;
+  const targetMap=new Map(targets.map((p,i)=>[p.x+","+p.y,i]));
+
+  for(let y=0;y<map.length;y++){
+    for(let x=0;x<map[y].length;x++){
+      const cell=document.createElement("div");
+      cell.className="cell"+(map[y][x]==="#"?" wall":"");
+
+      const ti=targetMap.get(x+","+y);
+      if(ti!==undefined && ti>=nextTarget){
+        cell.classList.add("goal");
+        const img=document.createElement("img");
+        img.className="target-img";
+        img.src=chars[targetOrder[ti]].img;
+        img.alt=chars[targetOrder[ti]].name;
+        cell.appendChild(img);
+      }
+
+      if(home && x===home.x && y===home.y){
+        cell.classList.add("goal");
+        const img=document.createElement("img");
+        img.className="home-img";
+        img.src="sources/chocolate-open-gate.png";
+        img.alt="Rumah Chocolate Abyss Gate";
+        cell.appendChild(img);
+      }
+
+      if(x===player.x&&y===player.y){
+        const p=document.createElement("div"); p.className="player";
+        const img=document.createElement("img");
+        img.src=chars[selected].img; img.alt=chars[selected].name;
+        p.appendChild(img); cell.appendChild(p);
+      }
+      maze.appendChild(cell);
+    }
+  }
+
+  scoreEl.textContent=score;
+  stepsEl.textContent=steps;
+  totalScoreEl.textContent=totalScore;
+  progressEl.innerHTML=targetOrder.map((id,i)=>{
+    const c=chars[id];
+    return `<div class="dot ${i<nextTarget?"done":i===nextTarget?"now":""}" title="${i+1}. ${c.name}">
+      ${i<nextTarget?"✓":`<img src="${c.img}" alt="${c.name}">`}
+    </div>`;
+  }).join("");
+
+  if(home){
+    const dot=document.createElement("div");
+    dot.className="dot now";dot.textContent="🏠";dot.title="Cari rumah";
+    progressEl.appendChild(dot);
+    document.getElementById("caption").textContent="Semua teman ditemukan! Sekarang cari rumah Chocolate Abyss.";
+  }else{
+    document.getElementById("caption").textContent="Cari teman-temanmu, jawab soal, lalu temukan rumah Chocolate Abyss.";
+  }
+}
+
+function showToast(msg){
+  const t=document.getElementById("toast");
+  clearTimeout(toastTimer);t.textContent=msg;t.classList.add("show");
+  toastTimer=setTimeout(()=>t.classList.remove("show"),1800);
+}
+
+function buildQuestion(){
+  const r=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+  let a,b,ans,op;
+  const i=nextTarget;
+  if(levelKey==="easy"){
+    if(i%2===0){a=r(1,9);b=r(1,9);op="+";ans=a+b;}
+    else {a=r(3,15);b=r(1,a);op="−";ans=a-b;}
+  }else if(levelKey==="medium"){
+    const t=i%3;
+    if(t===0){a=r(5,18);b=r(2,15);op="+";ans=a+b;}
+    else if(t===1){a=r(8,25);b=r(1,a);op="−";ans=a-b;}
+    else {a=r(2,9);b=r(2,9);op="×";ans=a*b;}
+  }else{
+    const t=i%4;
+    if(t===0){a=r(3,12);b=r(2,10);op="×";ans=a*b;}
+    else if(t===1){b=r(2,10);ans=r(2,10);a=b*ans;op="÷";}
+    else if(t===2){a=r(15,35);b=r(10,30);op="+";ans=a+b;}
+    else {a=r(20,50);b=r(5,a);op="−";ans=a-b;}
+  }
+  return {a,b,ans,op};
+}
+function optionsFor(ans){
+  const values=new Set([ans]);
+  const spread=levelKey==="easy"?5:levelKey==="medium"?10:15;
+  const candidates=[];
+  for(let d=1;d<=spread;d++){candidates.push(ans+d,ans-d);}
+  for(const v of shuffle(candidates)){
+    if(v>=0) values.add(v);
+    if(values.size===4) break;
+  }
+  return shuffle([...values]).slice(0,4);
+}
+
+function openQuestion(){
+  locked=true;
+  currentQuestion=buildQuestion();
+  const targetName=chars[targetOrder[nextTarget]].name;
+  document.getElementById("questionImg").src=chars[targetOrder[nextTarget]].img;
+  document.getElementById("questionTitle").textContent=`Misi ${nextTarget+1} • ${targetName}`;
+  document.getElementById("questionText").textContent=`${currentQuestion.a} ${currentQuestion.op} ${currentQuestion.b} = ?`;
+  document.getElementById("feedback").textContent="";
+  const answers=document.getElementById("answers");
+  answers.innerHTML="";
+  optionsFor(currentQuestion.ans).forEach(v=>{
+    const b=document.createElement("button");
+    b.textContent=v;
+    b.onclick=()=>answerQuestion(v);
+    answers.appendChild(b);
+  });
+  questionModal.classList.add("show");
+}
+
+function answerQuestion(value){
+  const f=document.getElementById("feedback");
+  if(value!==currentQuestion.ans){
+    score=Math.max(0,score-25);
+    totalScore=Math.max(0,totalScore-25);
+    f.textContent="❌ Salah. -25 poin. Coba lagi!";
+    render();
+    return;
+  }
+  const actual=steps-missionStartSteps;
+  const optimal=distanceMap(missionStart).get(player.x+","+player.y) ?? actual;
+  const extra=Math.max(0,actual-optimal);
+  const bonus=Math.max(20,100-extra*5);
+  const earned=100+bonus;
+  score+=earned;
+  totalScore+=earned;
+  f.innerHTML=`🎉 Benar! <b>+${earned} poin</b><br><small>Rute ${actual} langkah • rute tercepat ${optimal}</small>`;
+  nextTarget++;
+  missionStart={...player}; missionStartSteps=steps;
+  render();
+
+  setTimeout(()=>{
+    questionModal.classList.remove("show");
+    if(nextTarget===targetOrder.length){
+      home=chooseHome();
+      updateMission();
+      locked=false;
+      updateNewMazeButton();
+      render();
+      showToast("🏠 Semua teman ditemukan! Cari rumah Chocolate Abyss.");
+    }else{
+      locked=false;
+    }
+  },750);
+}
+
+function move(dx,dy){
+  // Movement is allowed only after the player has started the current level.
+  // Keep this independent from overlay animations/classes so keyboard and touch controls behave identically.
+  if(!gameStarted || locked || !startOverlay.classList.contains("hidden") || questionModal.classList.contains("show") || levelModal.classList.contains("show") || !finalOverlay.classList.contains("hidden")) return;
+  const nx=player.x+dx, ny=player.y+dy;
+  if(!Number.isInteger(nx)||!Number.isInteger(ny)) return;
+  if(nx<0||ny<0||ny>=map.length||nx>=map[0].length||map[ny][nx]==="#") return;
+  player={x:nx,y:ny};
+  steps++;
+  render();
+
+  const ti=targets.findIndex(p=>p.x===nx&&p.y===ny);
+  if(!home && ti===nextTarget) openQuestion();
+  else if(!home && ti>nextTarget) showToast(`🔎 Temukan ${chars[targetOrder[nextTarget]].name} lebih dulu.`);
+  else if(home && nx===home.x && ny===home.y) completeLevel();
+}
+
+function completeLevel(){
+  locked=true;
+  const idx=levelIndex(levelKey);
+  if(idx<3){
+    unlocked=idx+1;
+    localStorage.setItem(STORAGE,String(unlocked));
+    document.getElementById("levelTitle").textContent=`🎉 ${levels[levelKey].name} selesai!`;
+    document.getElementById("levelMessage").innerHTML=
+      `Skor level <b>${score}</b> • <b>${steps}</b> langkah<br>🏆 Total skor <b>${totalScore}</b><br><br>
+       🔓 <b>${levels[keyFromIndex(idx+1)].name}</b> terbuka.<br>
+       Petualangan langsung berlanjut tanpa intro dan tanpa memilih karakter lagi.`;
+    const buttons=document.getElementById("levelButtons");
+    const nextKey=keyFromIndex(idx+1);
+    buttons.innerHTML=`
+      <button id="replayMazeBtn">🔄 Labirin Baru</button>
+      <button id="nextLevelBtn">🚀 Lanjut ke ${levels[nextKey].name}</button>
+    `;
+
+    // Setelah satu tingkat selesai, pemain boleh mengulang tingkat yang sama
+    // dengan labirin baru ATAU langsung melanjutkan ke tingkat berikutnya.
+    document.getElementById("replayMazeBtn").onclick=()=>{
+      levelModal.classList.remove("show");
+      setupLevel();
+      startLevelWithoutIntro();
+      updateNewMazeButton();
+      showToast(`🔄 Labirin ${levels[levelKey].name} baru dimulai!`);
+    };
+
+    document.getElementById("nextLevelBtn").onclick=()=>{
+      levelKey=nextKey;
+      levelModal.classList.remove("show");
+      setupLevel();
+      startLevelWithoutIntro();
+      updateNewMazeButton();
+    };
+
+    // Tombol Labirin Baru di header juga sudah aktif setelah rumah ditemukan.
+    // Pastikan statusnya diperbarui saat dialog selesai ditampilkan.
+    updateNewMazeButton();
+    levelModal.classList.add("show");
+  }else{
+    launchConfetti();
+    document.getElementById("finalMessage").innerHTML=
+      `Semua tingkat Chocolate Abyss Gate berhasil ditaklukkan!<br>
+       Skor akumulasi Easy + Medium + Hard: <b>${totalScore}</b><br>Skor Hard: <b>${score}</b> dengan <b>${steps}</b> langkah.<br><br>
+       🏆 Piala menunggu sang petualang hebat!`;
+    finalOverlay.classList.remove("hidden");
+  }
+}
+
+function launchConfetti(){
+  const c=document.getElementById("confetti");c.innerHTML="";
+  for(let i=0;i<90;i++){
+    const p=document.createElement("i");
+    p.style.left=Math.random()*100+"%";
+    p.style.animationDuration=(2+Math.random()*2.5)+"s";
+    p.style.animationDelay=(Math.random()*0.8)+"s";
+    p.style.background=["#f3c15b","#e97936","#6da34d","#c9523d","#7b4bd8"][Math.floor(Math.random()*5)];
+    p.style.transform=`rotate(${Math.random()*360}deg)`;
+    c.appendChild(p);
+  }
+  setTimeout(()=>c.innerHTML="",5000);
+}
+
+function exitGame(){
+  // Exit selalu menghapus progres sesi dan mengembalikan permainan
+  // ke awal: Easy + intro + pilih karakter.
+  locked=true;
+  gameStarted=false;
+  questionModal.classList.remove("show");
+  levelModal.classList.remove("show");
+  finalOverlay.classList.add("hidden");
+
+  levelKey="easy";
+  unlocked=1;
+  selected=0;
+  localStorage.setItem(STORAGE,"1");
+
+  setupLevel();
+  showIntro();
+  updateDifficulty();
+  updateNewMazeButton();
+  showToast("🚪 Game di-reset. Mulai lagi dari level Mudah.");
+}
+
+document.getElementById("goPick").onclick=showPicker;
+document.getElementById("backIntro").onclick=showIntro;
+document.getElementById("startGame").onclick=()=>{
+  // Karakter baru dipilih setelah setup awal. Siapkan ulang misi SEKALI
+  // agar karakter pemain tidak pernah muncul sebagai target.
+  const seed=Date.now()+Math.floor(Math.random()*1000000);
+  prepareTargets(seededRandom(seed));
+  score=0;
+  steps=0;
+  missionStart={...player};
+  missionStartSteps=0;
+  locked=false;
+  gameStarted=true;
+  hideStart();
+  updateMission();
+  updateDifficulty();
+  updateNewMazeButton();
+  render();
+};
+document.getElementById("newMaze").onclick=()=>{
+  /* During active play, the button is locked until the home is found.
+     Once unlocked, keep the selected player and current difficulty,
+     and randomize the target character placement for the new maze. */
+  if(gameStarted && !home){
+    showToast("🔒 Temukan rumah Chocolate Abyss terlebih dahulu.");
+    return;
+  }
+  setupLevel();
+  startLevelWithoutIntro();
+};
+document.getElementById("exitGame").onclick=exitGame;
+document.getElementById("playAgain").onclick=()=>{
+  finalOverlay.classList.add("hidden");
+  startNewSession();
+};
+document.getElementById("finalExit").onclick=exitGame;
+
+document.querySelectorAll("#difficulty button").forEach(btn=>{
+  btn.onclick=()=>{
+    const idx=levelIndex(btn.dataset.level);
+    if(idx>unlocked){showToast("🔒 Selesaikan tingkat sebelumnya terlebih dahulu.");return;}
+    if(gameStarted && btn.dataset.level!==levelKey){showToast("Selesaikan level yang sedang dimainkan terlebih dahulu.");return;}
+    levelKey=btn.dataset.level;
+    setupLevel();
+    startLevelWithoutIntro();
+  };
+});
+document.querySelectorAll(".controls button").forEach(btn=>{
+  const handler=(e)=>{ e.preventDefault(); const [x,y]=btn.dataset.move.split(",").map(Number); move(x,y); };
+  btn.addEventListener("click",handler);
+  btn.addEventListener("pointerdown",e=>e.preventDefault());
+});
+document.addEventListener("keydown",e=>{
+  const key=e.key.toLowerCase();
+  const d={arrowup:[0,-1],w:[0,-1],arrowdown:[0,1],s:[0,1],arrowleft:[-1,0],a:[-1,0],arrowright:[1,0],d:[1,0]}[key];
+  if(d){e.preventDefault();move(...d);}
+});
+
+updateHeaderCharacters();
+setupLevel();
+</script>
+</body>
+</html>
