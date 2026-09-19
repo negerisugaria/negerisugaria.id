@@ -1,0 +1,10 @@
+{
+  "name": "chocolate-cupcake-agent",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chocolate Cupcake AI Learning Companion for Negeri Sugaria",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  }
+}
