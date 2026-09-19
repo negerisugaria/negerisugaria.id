@@ -152,76 +152,159 @@
    * ============================================================
    */
 
-  function showCupcakeResponse(data){
+ function showCupcakeResponse(data){
 
-    if(!data || !data.success || !data.response){
-      return;
-    }
+  if(!data || !data.success || !data.response){
+    return;
+  }
 
-    const ai = data.response;
+  const ai = data.response;
 
-    const note =
-      document.getElementById("aiNote");
+  const note = document.getElementById("aiNote");
 
-    if(!note){
-      return;
-    }
+  if(!note){
+    console.warn("[Chocolate Cupcake] #aiNote tidak ditemukan.");
+    return;
+  }
 
-    let message = ai.message || "";
+  /*
+   * ============================================================
+   * CUPCAKE STATE → IMAGE
+   * ============================================================
+   */
 
-    if(ai.hint){
-      message += " " + ai.hint;
-    }
+  const stateImages = {
+    welcome: "sources/welcome.png",
+    encouraging: "sources/encouraging.png",
+    thinking: "sources/thinking.png",
+    oops: "sources/oops.png",
+    teaching: "sources/theaching.png",
+    celebrating: "sources/celebrating.png",
+    victory: "sources/victory.png"
+  };
 
-    if(ai.visual && ai.visual.enabled && ai.visual.content){
+  const state =
+    String(ai.state || ai.emotion || "encouraging")
+      .toLowerCase()
+      .trim();
 
-      message +=
-        "\n\n" + ai.visual.content;
-    }
+  const imageSrc =
+    stateImages[state] || stateImages.encouraging;
 
-    note.textContent =
-      "🍫 Chocolate Cupcake: " + message;
+  /*
+   * ============================================================
+   * BUILD MESSAGE
+   * ============================================================
+   */
 
-    note.classList.remove("hidden");
+  let message = ai.message || "";
 
-    /*
-     * TTS
-     */
-    if(
-      ai.speak === true &&
-      "speechSynthesis" in window &&
-      ai.message
-    ){
+  if(ai.hint){
+    message += " " + ai.hint;
+  }
 
-      try{
+  /*
+   * ============================================================
+   * BUILD CUPCAKE UI
+   * ============================================================
+   */
 
-        window.speechSynthesis.cancel();
+  note.innerHTML = "";
 
-        const utterance =
-          new SpeechSynthesisUtterance(ai.message);
+  const wrapper = document.createElement("div");
+  wrapper.className = "cupcake-ai-response";
 
-        utterance.lang = "id-ID";
-        utterance.rate = 0.95;
-        utterance.pitch = 1.05;
+  const image = document.createElement("img");
+  image.className = "cupcake-ai-image";
+  image.src = imageSrc;
+  image.alt = "Chocolate Cupcake";
+  image.loading = "eager";
 
-        window.speechSynthesis.speak(
-          utterance
-        );
+  image.onerror = function(){
+    console.warn(
+      "[Chocolate Cupcake] Asset tidak ditemukan:",
+      imageSrc
+    );
+  };
 
-      }catch(error){
+  const content = document.createElement("div");
+  content.className = "cupcake-ai-content";
 
-        console.warn(
-          "[Chocolate Cupcake] TTS error:",
-          error
-        );
+  const title = document.createElement("strong");
+  title.textContent = "🍫 Chocolate Cupcake";
 
-      }
+  const text = document.createElement("div");
+  text.className = "cupcake-ai-message";
+  text.textContent = message;
+
+  content.appendChild(title);
+  content.appendChild(text);
+
+  /*
+   * ============================================================
+   * VISUAL MATH
+   * ============================================================
+   */
+
+  if(
+    ai.visual &&
+    ai.visual.enabled &&
+    ai.visual.content
+  ){
+
+    const visual = document.createElement("div");
+    visual.className = "cupcake-ai-visual";
+    visual.textContent = ai.visual.content;
+
+    content.appendChild(visual);
+  }
+
+  wrapper.appendChild(image);
+  wrapper.appendChild(content);
+
+  note.appendChild(wrapper);
+
+  note.classList.remove("hidden");
+
+  /*
+   * ============================================================
+   * TTS
+   * ============================================================
+   */
+
+  if(
+    ai.speak === true &&
+    "speechSynthesis" in window &&
+    ai.message
+  ){
+
+    try{
+
+      window.speechSynthesis.cancel();
+
+      const utterance =
+        new SpeechSynthesisUtterance(ai.message);
+
+      utterance.lang = "id-ID";
+      utterance.rate = 0.95;
+      utterance.pitch = 1.05;
+
+      window.speechSynthesis.speak(
+        utterance
+      );
+
+    }catch(error){
+
+      console.warn(
+        "[Chocolate Cupcake] TTS error:",
+        error
+      );
 
     }
 
   }
 
-
+}
   /*
    * ============================================================
    * SEND GAME EVENT TO CUPCAKE AI
