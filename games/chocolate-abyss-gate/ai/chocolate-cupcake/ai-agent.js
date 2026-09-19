@@ -265,6 +265,18 @@
   note.appendChild(wrapper);
 
   note.classList.remove("hidden");
+   // Celebration harus tetap terlihat agar anak sempat melihatnya
+if(ai.state === "celebrating"){
+  note.classList.remove("hidden");
+
+  if(window.cupcakeCelebrationTimer){
+    clearTimeout(window.cupcakeCelebrationTimer);
+  }
+
+  window.cupcakeCelebrationTimer = setTimeout(() => {
+    note.classList.remove("hidden");
+  }, 5000);
+}
 
   /*
    * ============================================================
