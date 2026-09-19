@@ -28,12 +28,15 @@
     return profile;
   }
   window.PlayerLearningProfile={calculate};
-  window.getPlayerLearningProfile=function(){
-    const tracker=window.playerEventTracker;
-    const player=tracker?.getPlayerInfo ? tracker.getPlayerInfo() : {};
-    const p=calculate(tracker?tracker.getEvents():[],player);
-    p.currentSkill=window.getCurrentSkill?window.getCurrentSkill():null;
-    p.currentDifficulty=window.getCurrentGameLevel?window.getCurrentGameLevel():null;
-    return p;
-  };
+ window.getLearningProfileSnapshot = function () {
+  if (window.getPlayerLearningProfile) {
+    const profile = window.getPlayerLearningProfile();
+
+    window.currentPlayerLearningProfile = profile;
+
+    return profile;
+  }
+
+  return null;
+};
 })();
