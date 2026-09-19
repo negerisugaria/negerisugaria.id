@@ -853,7 +853,20 @@ function answerQuestion(value){
     hintUsed:currentHintUsed
   };
   playerEventTracker.track("ANSWER_SUBMITTED", answerEvent);
-  updateDebugPanel();
+
+askCupcakeAfterAnswer({
+  question: currentQuestion,
+  playerAnswer: value,
+  correctAnswer: currentQuestion.ans,
+  isCorrect: value === currentQuestion.ans,
+  attemptNumber: currentAttemptNumber,
+  responseTime: responseTime,
+  skill: currentQuestion.skill,
+  difficulty: levelKey,
+  playerId: playerEventTracker.getPlayerInfo().playerId
+});
+
+updateDebugPanel();
   if(value!==currentQuestion.ans){
     score=Math.max(0,score-25);
     totalScore=Math.max(0,totalScore-25);
