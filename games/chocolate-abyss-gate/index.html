@@ -361,56 +361,70 @@ header:after{
 <div class="confetti" id="confetti"></div>
 <div id="debugPanel" class="hidden" aria-live="polite">
   <h3>PLAYER EVENT TRACKER</h3>
+
   <div class="debug-grid">
-    <span>Player</span><b id="debugPlayerName">-</b>
-    <span>Usia</span><b id="debugPlayerAge">-</b>
-    <span>Player ID</span><b id="debugPlayerId">-</b>
-    <span>Session ID</span><b id="debugSessionId">-</b>
-    <span>Current Level</span><b id="debugLevel">-</b>
-    <span>Current Difficulty</span><b id="debugDifficulty">-</b>
-    <span>Questions</span><b id="debugQuestions">0</b>
-    <span>Correct</span><b id="debugCorrect">0</b>
-    <span>Incorrect</span><b id="debugIncorrect">0</b>
-    <span>Accuracy</span><b id="debugAccuracy">0%</b>
-    <span>Average Response Time</span><b id="debugAvgTime">0 ms</b>
-    <span>Hints Used</span><b id="debugHints">0</b>
-    <div id="debugPanel">
-  <h3>PLAYER EVENT TRACKER</h3>
+    <span>Player</span>
+    <b id="debugPlayerName">-</b>
 
-  <div>Player: <span id="debugPlayerName">-</span></div>
-  <div>Usia: <span id="debugPlayerAge">-</span></div>
-  <div>Player ID: <span id="debugPlayerId">-</span></div>
-  <div>Session ID: <span id="debugSessionId">-</span></div>
+    <span>Usia</span>
+    <b id="debugPlayerAge">-</b>
 
-  <div>Current Level: <span id="debugLevel">-</span></div>
-  <div>Current Difficulty: <span id="debugDifficulty">-</span></div>
+    <span>Player ID</span>
+    <b id="debugPlayerId">-</b>
 
-  <div>Questions: <span id="debugQuestions">0</span></div>
-  <div>Correct: <span id="debugCorrect">0</span></div>
-  <div>Incorrect: <span id="debugIncorrect">0</span></div>
-  <div>Accuracy: <span id="debugAccuracy">0%</span></div>
-  <div>Average Response Time: <span id="debugResponseTime">0 ms</span></div>
-  <div>Hints Used: <span id="debugHints">0</span></div>
+    <span>Session ID</span>
+    <b id="debugSessionId">-</b>
 
-  <!-- TAMBAHKAN DI SINI -->
-  <div id="debugProfileStatus">
+    <span>Current Level</span>
+    <b id="debugLevel">-</b>
+
+    <span>Current Difficulty</span>
+    <b id="debugDifficulty">-</b>
+
+    <span>Questions</span>
+    <b id="debugQuestions">0</b>
+
+    <span>Correct</span>
+    <b id="debugCorrect">0</b>
+
+    <span>Incorrect</span>
+    <b id="debugIncorrect">0</b>
+
+    <span>Accuracy</span>
+    <b id="debugAccuracy">0%</b>
+
+    <span>Average Response Time</span>
+    <b id="debugAvgTime">0 ms</b>
+
+    <span>Hints Used</span>
+    <b id="debugHints">0</b>
+  </div>
+
+  <div id="debugProfileStatus"
+       style="margin-top:8px;padding:8px;background:#f5e3bd;border-radius:9px;font-weight:900">
     Learning Profile: -
   </div>
 
-  <div>Current Skill: <span id="debugSkill">-</span></div>
-  <div>AI Decision: <span id="debugAIDecision">-</span></div>
-</div>
+  <div id="debugSkill"
+       style="margin-top:8px;padding:8px;background:#f5e3bd;border-radius:9px;font-weight:900">
+    Current Skill: -
   </div>
-  <div id="debugSkill">Current Skill: -</div>
-  <div id="debugAI" style="margin-top:8px;padding:8px;background:#e8f0d8;border-radius:9px;font-weight:900">AI Decision: -</div>
+
+  <div id="debugAI"
+       style="margin-top:8px;padding:8px;background:#e8f0d8;border-radius:9px;font-weight:900">
+    AI Decision: -
+  </div>
+
   <div class="debug-actions">
-    <button id="exportPlayerData">Export Player Data</button>
-    <button id="clearPlayerData" class="secondary">Clear Player Data</button>
+    <button id="exportPlayerData">
+      Export Player Data
+    </button>
+
+    <button id="clearPlayerData" class="secondary">
+      Clear Player Data
+    </button>
   </div>
 </div>
-
-
-
 <script src="ai/chocolate-cupcake/player-event-tracker.js"></script>
 <script src="ai/chocolate-cupcake/player-learning-profile.js"></script>
 <script src="ai/chocolate-cupcake/ai-agent.js"></script>
@@ -472,25 +486,103 @@ function getCurrentSkill(){
 }
 function updateDebugPanel(){
   if(typeof DEBUG_MODE === "undefined" || !DEBUG_MODE) return;
-  const p=getPlayerLearningProfile();
-  const el=id=>document.getElementById(id);
-  const info=playerEventTracker.getPlayerInfo();
-  el("debugPlayerName").textContent=info.name||"-";
-  el("debugPlayerAge").textContent=info.age||"-";
-  el("debugPlayerId").textContent=playerEventTracker.playerId;
-  el("debugSessionId").textContent=playerEventTracker.sessionId;
-  el("debugLevel").textContent=levelKey;
-  el("debugDifficulty").textContent=levelKey;
-  el("debugQuestions").textContent=p.totalQuestions;
-  el("debugCorrect").textContent=p.correctAnswers;
-  el("debugIncorrect").textContent=p.incorrectAnswers;
-  el("debugAccuracy").textContent=(p.accuracy*100).toFixed(1)+"%";
-  el("debugAvgTime").textContent=Math.round(p.averageResponseTime)+" ms";
-  el("debugHints").textContent=p.hintsUsed;
-  el("debugSkill").textContent="Current Skill: "+(getCurrentSkill() || "-");
-  el("debugAI").textContent="AI Decision: "+(lastAIDecision ? `${lastAIDecision.action} • ${lastAIDecision.skill} • ${lastAIDecision.difficulty}${lastAIDecision.useHint?" • hint":""}` : "-");
-}
 
+  try{
+    const el=id=>document.getElementById(id);
+
+    if(!window.playerEventTracker){
+      console.warn("[Player Tracker] Tracker belum tersedia.");
+      return;
+    }
+
+    const info=playerEventTracker.getPlayerInfo
+      ? playerEventTracker.getPlayerInfo()
+      : {};
+
+    const p=window.getPlayerLearningProfile
+      ? window.getPlayerLearningProfile()
+      : {
+          totalQuestions:0,
+          correctAnswers:0,
+          incorrectAnswers:0,
+          accuracy:0,
+          averageResponseTime:0,
+          hintsUsed:0
+        };
+
+    if(el("debugPlayerName"))
+      el("debugPlayerName").textContent=info.name||"-";
+
+    if(el("debugPlayerAge"))
+      el("debugPlayerAge").textContent=info.age||"-";
+
+    if(el("debugPlayerId"))
+      el("debugPlayerId").textContent=
+        playerEventTracker.playerId||"-";
+
+    if(el("debugSessionId"))
+      el("debugSessionId").textContent=
+        playerEventTracker.sessionId||"-";
+
+    if(el("debugLevel"))
+      el("debugLevel").textContent=levelKey;
+
+    if(el("debugDifficulty"))
+      el("debugDifficulty").textContent=levelKey;
+
+    if(el("debugQuestions"))
+      el("debugQuestions").textContent=
+        p.totalQuestions||0;
+
+    if(el("debugCorrect"))
+      el("debugCorrect").textContent=
+        p.correctAnswers||0;
+
+    if(el("debugIncorrect"))
+      el("debugIncorrect").textContent=
+        p.incorrectAnswers||0;
+
+    if(el("debugAccuracy"))
+      el("debugAccuracy").textContent=
+        ((p.accuracy||0)*100).toFixed(1)+"%";
+
+    if(el("debugAvgTime"))
+      el("debugAvgTime").textContent=
+        Math.round(p.averageResponseTime||0)+" ms";
+
+    if(el("debugHints"))
+      el("debugHints").textContent=
+        p.hintsUsed||0;
+
+    if(el("debugProfileStatus")){
+      el("debugProfileStatus").textContent=
+        `Learning Profile: ${p.totalQuestions||0} questions • `+
+        `${((p.accuracy||0)*100).toFixed(1)}% accuracy • `+
+        `${p.hintsUsed||0} hints`;
+    }
+
+    if(el("debugSkill")){
+      el("debugSkill").textContent=
+        "Current Skill: "+(getCurrentSkill()||"-");
+    }
+
+    if(el("debugAI")){
+      el("debugAI").textContent=
+        "AI Decision: "+
+        (
+          lastAIDecision
+          ? `${lastAIDecision.action} • ${lastAIDecision.skill} • ${lastAIDecision.difficulty}${lastAIDecision.useHint?" • hint":""}`
+          : "-"
+        );
+    }
+
+  }catch(error){
+    console.error(
+      "[Player Tracker] Debug panel error:",
+      error
+    );
+  }
+}
 
 const maze = document.getElementById("maze");
 const missionEl = document.getElementById("mission");
