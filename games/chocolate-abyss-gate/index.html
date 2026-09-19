@@ -154,7 +154,8 @@ header:after{
 .final-trophy{font-size:110px;line-height:1;filter:drop-shadow(0 7px 4px #6a3a2440);animation:bounce .8s ease-in-out infinite alternate}
 .final-card h2{margin:5px 0;color:var(--brown);font-size:34px}
 .final-card p{color:#76503a;font-weight:800;line-height:1.5}
-.final-card button{padding:11px 20px;border-radius:12px;background:var(--brown);color:#fff;font-weight:1000;margin:4px}
+.final-card button{padding:11px 20px;border-radius:12px;background:var(--brown);color:#fff;font-weight:1000;margin:4px}\n.final-card .ai-note{margin:12px 0 10px;text-align:left}
+
 
 @keyframes float{from{transform:translateY(0)}to{transform:translateY(-3px)}}
 @keyframes targetPop{0%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.14)}100%{transform:translate(-50%,-50%) scale(1)}}
@@ -218,11 +219,17 @@ header:after{
 @media (max-width: 600px) {
   .cupcake-ai-response {
     gap: 8px;
+    align-items: flex-start;
   }
 
   .cupcake-ai-image {
     width: 70px;
     height: 70px;
+  }
+
+  #levelAiNote .cupcake-ai-image {
+    width: 82px;
+    height: 82px;
   }
 }
 </style>
@@ -876,7 +883,7 @@ function openQuestion(){
   document.getElementById("feedback").textContent="";
   const aiNote=document.getElementById("aiNote");
   aiNote.classList.add("hidden");
-  aiNote.textContent="";
+  aiNote.innerHTML="";
   const answers=document.getElementById("answers");
   answers.innerHTML="";
   optionsFor(currentQuestion.ans).forEach(v=>{
@@ -890,66 +897,117 @@ function openQuestion(){
 
 function answerQuestion(value){
   const f=document.getElementById("feedback");
+  const aiNote=document.getElementById("aiNote");
+
   currentAttemptNumber++;
-  const responseTime=Math.max(0,Date.now()-(questionShownAt || Date.now()));
+
+  const responseTime=Math.max(
+    0,
+    Date.now()-(questionShownAt || Date.now())
+  );
+
+  const isCorrect=value===currentQuestion.ans;
+
   const answerEvent={
     questionId:currentQuestionId,
+    level:levelKey,
+    difficulty:levelKey,
     playerAnswer:value,
     correctAnswer:currentQuestion.ans,
-    isCorrect:value===currentQuestion.ans,
+    isCorrect,
     responseTime,
     attemptNumber:currentAttemptNumber,
     hintUsed:currentHintUsed
   };
+
   playerEventTracker.track("ANSWER_SUBMITTED", answerEvent);
 
-askCupcakeAfterAnswer({
-  question: currentQuestion,
-  playerAnswer: value,
-  correctAnswer: currentQuestion.ans,
-  isCorrect: value === currentQuestion.ans,
-  attemptNumber: currentAttemptNumber,
-  responseTime: responseTime,
-  skill: currentQuestion.skill,
-  difficulty: levelKey,
-  playerId: playerEventTracker.getPlayerInfo().playerId
-});
+  // AI hanya menerima event. Game engine tetap menjadi sumber kebenaran.
+  if(typeof window.askCupcakeAfterAnswer==="function"){
+    window.askCupcakeAfterAnswer({
+      question:currentQuestion,
+      playerAnswer:value,
+      correctAnswer:currentQuestion.ans,
+      isCorrect,
+      attemptNumber:currentAttemptNumber,
+      responseTime,
+      skill:currentQuestion.skill,
+      difficulty:levelKey,
+      playerId:playerEventTracker.getPlayerInfo().playerId
+    });
+  }
 
-updateDebugPanel();
-  if(value!==currentQuestion.ans){
+  updateDebugPanel();
+
+  if(!isCorrect){
     score=Math.max(0,score-25);
     totalScore=Math.max(0,totalScore-25);
+
     const profile=getPlayerLearningProfile();
     profile.currentSkill=currentQuestion.skill;
     profile.currentDifficulty=levelKey;
+
     lastAIDecision=requestAIDecision(profile);
     currentHintUsed=!!lastAIDecision.useHint;
+
     if(lastAIDecision.useHint){
-      const hintMap={addition:"Coba hitung dari angka pertama, lalu tambahkan angka kedua secara bertahap.",subtraction:"Coba mulai dari angka pertama lalu kurangi perlahan.",multiplication:"Ingat bahwa perkalian bisa dihitung sebagai penjumlahan berulang.",division:"Coba cari angka yang jika dikalikan pembagi menghasilkan bilangan pertama."};
-      const hint=hintMap[currentQuestion.skill] || "Coba perhatikan kembali operasi matematikanya.";
+      const hintMap={
+        addition:"Coba hitung dari angka pertama, lalu tambahkan angka kedua secara bertahap.",
+        subtraction:"Coba mulai dari angka pertama lalu kurangi perlahan.",
+        multiplication:"Ingat bahwa perkalian bisa dihitung sebagai penjumlahan berulang.",
+        division:"Coba cari angka yang jika dikalikan pembagi menghasilkan bilangan pertama."
+      };
+
+      const hint=hintMap[currentQuestion.skill] ||
+        "Coba perhatikan kembali operasi matematikanya.";
+
       aiNote.textContent=`🤖 Chocolate Guide: ${hint}`;
       aiNote.classList.remove("hidden");
-      f.textContent=`❌ Belum tepat. -25 poin. ${lastAIDecision.action === "REMEDIATE" ? "Kita turunkan tingkat tantangannya." : "Aku bantu sedikit."}`;
-      playerEventTracker.track("HINT_USED",{questionId:currentQuestionId,hintLevel:lastAIDecision.action,skill:currentQuestion.skill});
+
+      f.textContent=
+        `❌ Belum tepat. -25 poin. ${
+          lastAIDecision.action==="REMEDIATE"
+            ? "Kita turunkan tingkat tantangannya."
+            : "Aku bantu sedikit."
+        }`;
+
+      playerEventTracker.track("HINT_USED",{
+        questionId:currentQuestionId,
+        hintLevel:lastAIDecision.action,
+        skill:currentQuestion.skill
+      });
     }else{
       f.textContent="❌ Salah. -25 poin. Coba lagi!";
     }
-    if(lastAIDecision.difficulty && lastAIDecision.difficulty!==levelKey){
+
+    if(
+      lastAIDecision.difficulty &&
+      lastAIDecision.difficulty!==levelKey
+    ){
       adaptiveDifficultyOverride=lastAIDecision.difficulty;
     }
+
     updateDebugPanel();
     render();
     return;
   }
+
+  // Jawaban benar: gameplay langsung memberi skor.
   const actual=steps-missionStartSteps;
-  const optimal=distanceMap(missionStart).get(player.x+","+player.y) ?? actual;
+  const optimal=
+    distanceMap(missionStart).get(player.x+","+player.y) ?? actual;
   const extra=Math.max(0,actual-optimal);
   const bonus=Math.max(20,100-extra*5);
   const earned=100+bonus;
+
   score+=earned;
   totalScore+=earned;
-  f.innerHTML=`🎉 Benar! <b>+${earned} poin</b><br><small>Rute ${actual} langkah • rute tercepat ${optimal}</small>`;
-  playerEventTracker.track("QUESTION_COMPLETED", {
+
+  f.innerHTML=
+    `🎉 Benar! <b>+${earned} poin</b><br>`+
+    `<small>Rute ${actual} langkah • rute tercepat ${optimal}</small>`;
+
+  playerEventTracker.track("QUESTION_COMPLETED",{
     questionId:currentQuestionId,
     question:`${currentQuestion.a} ${currentQuestion.op} ${currentQuestion.b} = ?`,
     skill:getCurrentSkill(),
@@ -957,12 +1015,15 @@ updateDebugPanel();
     attemptNumber:currentAttemptNumber,
     hintUsed:currentHintUsed
   });
+
   nextTarget++;
-  missionStart={...player}; missionStartSteps=steps;
+  missionStart={...player};
+  missionStartSteps=steps;
+
   render();
 
-    // Beri waktu Chocolate Cupcake menampilkan celebration
-  // sebelum pertanyaan ditutup.
+  // Beri waktu agar respons celebrating dari Chocolate Cupcake
+  // tetap terlihat sebelum modal pertanyaan ditutup.
   setTimeout(()=>{
     questionModal.classList.remove("show");
 
@@ -977,7 +1038,8 @@ updateDebugPanel();
       locked=false;
     }
   },3000);
-  
+}
+
 function move(dx,dy){
   // Movement is allowed only after the player has started the current level.
   // Keep this independent from overlay animations/classes so keyboard and touch controls behave identically.
@@ -996,7 +1058,6 @@ function move(dx,dy){
 }
 function showLevelCelebration(levelName){
   const note=document.getElementById("levelAiNote");
-
   if(!note) return;
 
   note.innerHTML=`
@@ -1006,41 +1067,81 @@ function showLevelCelebration(levelName){
         src="sources/celebrating.png"
         alt="Chocolate Cupcake celebrating"
       >
-
       <div class="cupcake-ai-content">
         <div class="cupcake-ai-message">
           🎉 Hebat! Kamu menyelesaikan level ${levelName}! 🍫
         </div>
-
-        <div class="cupcake-ai-visual">
-          🎉🏆🍫
-        </div>
+        <div class="cupcake-ai-visual">🎉🏆🍫</div>
       </div>
     </div>
   `;
 
   note.classList.remove("hidden");
 
-  // TTS
   if("speechSynthesis" in window){
     try{
       window.speechSynthesis.cancel();
-
       const utterance=new SpeechSynthesisUtterance(
         `Hebat! Kamu menyelesaikan level ${levelName}!`
       );
-
       utterance.lang="id-ID";
       utterance.rate=0.95;
       utterance.pitch=1.05;
-
       window.speechSynthesis.speak(utterance);
     }catch(error){
       console.warn("[Chocolate Cupcake] Level TTS error:",error);
     }
   }
 }
-  
+
+function showFinalVictory(){
+  const card=document.querySelector("#finalOverlay .final-card");
+  if(!card) return;
+
+  let note=document.getElementById("finalAiNote");
+
+  if(!note){
+    note=document.createElement("div");
+    note.id="finalAiNote";
+    note.className="ai-note";
+    const message=document.getElementById("finalMessage");
+    message.insertAdjacentElement("afterend",note);
+  }
+
+  note.innerHTML=`
+    <div class="cupcake-ai-response">
+      <img
+        class="cupcake-ai-image"
+        src="sources/victory.png"
+        alt="Chocolate Cupcake victory"
+      >
+      <div class="cupcake-ai-content">
+        <div class="cupcake-ai-message">
+          🏆 Luar biasa! Kamu menaklukkan Chocolate Abyss Gate! 🍫🎉
+        </div>
+        <div class="cupcake-ai-visual">🏆🎉🍫</div>
+      </div>
+    </div>
+  `;
+
+  note.classList.remove("hidden");
+
+  if("speechSynthesis" in window){
+    try{
+      window.speechSynthesis.cancel();
+      const utterance=new SpeechSynthesisUtterance(
+        "Luar biasa! Kamu menaklukkan Chocolate Abyss Gate!"
+      );
+      utterance.lang="id-ID";
+      utterance.rate=0.95;
+      utterance.pitch=1.05;
+      window.speechSynthesis.speak(utterance);
+    }catch(error){
+      console.warn("[Chocolate Cupcake] Victory TTS error:",error);
+    }
+  }
+}
+
 function completeLevel(){
   locked=true;
 
@@ -1112,6 +1213,7 @@ function completeLevel(){
     // dengan labirin baru ATAU langsung melanjutkan ke tingkat berikutnya.
     document.getElementById("replayMazeBtn").onclick=()=>{
       levelModal.classList.remove("show");
+      document.getElementById("levelAiNote").classList.add("hidden");
       setupLevel();
       startLevelWithoutIntro();
       updateNewMazeButton();
@@ -1121,6 +1223,7 @@ function completeLevel(){
     document.getElementById("nextLevelBtn").onclick=()=>{
       levelKey=nextKey;
       levelModal.classList.remove("show");
+      document.getElementById("levelAiNote").classList.add("hidden");
       setupLevel();
       startLevelWithoutIntro();
       updateNewMazeButton();
@@ -1129,7 +1232,17 @@ function completeLevel(){
     // Tombol Labirin Baru di header juga sudah aktif setelah rumah ditemukan.
     // Pastikan statusnya diperbarui saat dialog selesai ditampilkan.
     updateNewMazeButton();
+
+    // Tampilkan celebration di dalam modal level agar tidak tertutup
+    // oleh modal berikutnya dan tidak hilang saat #aiNote pertanyaan di-reset.
+    const levelAiNote=document.getElementById("levelAiNote");
+    if(levelAiNote){
+      levelAiNote.innerHTML="";
+      levelAiNote.classList.add("hidden");
+    }
+
     levelModal.classList.add("show");
+    showLevelCelebration(levels[levelKey].name);
   }else{
     playerEventTracker.track("GAME_COMPLETED", {level:levelKey, difficulty:levelKey, totalScore});
     updateDebugPanel();
@@ -1139,6 +1252,7 @@ function completeLevel(){
        Skor akumulasi Easy + Medium + Hard: <b>${totalScore}</b><br>Skor Hard: <b>${score}</b> dengan <b>${steps}</b> langkah.<br><br>
        🏆 Piala menunggu sang petualang hebat!`;
     finalOverlay.classList.remove("hidden");
+    showFinalVictory();
   }
 }
 
@@ -1163,6 +1277,7 @@ function exitGame(){
   gameStarted=false;
   questionModal.classList.remove("show");
   levelModal.classList.remove("show");
+  document.getElementById("levelAiNote").classList.add("hidden");
   finalOverlay.classList.add("hidden");
   adaptiveDifficultyOverride=null;
   lastAIDecision=null;
