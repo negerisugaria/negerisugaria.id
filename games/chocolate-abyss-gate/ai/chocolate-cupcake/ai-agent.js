@@ -17,409 +17,807 @@
    */
   window.requestAIDecision = function(playerProfile){
 
-    const skill =
-      playerProfile.currentSkill ||
-      Object.keys(playerProfile.skills || {})[0] ||
-      "addition";
-
-    const skillData =
-      (playerProfile.skills || {})[skill] || {};
-
-    const recent =
-      (playerProfile.recentPerformance || [])
-        .filter(e => e.skill === skill)
-        .slice(-3);
-
-    const recentMistakes =
-      recent.filter(e => !e.isCorrect).length;
+    const profile = playerProfile || {};
 
     const accuracy =
-      Number.isFinite(skillData.accuracy)
-        ? skillData.accuracy
-        : Number(playerProfile.accuracy || 0);
+      typeof profile.accuracy === "number"
+        ? profile.accuracy
+        : 1;
 
-    const slow =
-      Number(playerProfile.averageResponseTime || 0) > 7000;
+    const streak =
+      typeof profile.streak === "number"
+        ? profile.streak
+        : 0;
 
-    const totalAttempts =
-      Number(playerProfile.attempts || 0);
+    const attempts =
+      typeof profile.attempts === "number"
+        ? profile.attempts
+        : 0;
 
-    let decision;
+    let difficulty = "easy";
+    let reason = "starting";
 
-    if(totalAttempts === 0){
-
-      decision = {
-        action: "BASELINE",
-        difficulty:
-          playerProfile.currentDifficulty || "easy",
-        skill,
-        useHint: false,
-        reason: "no_history"
-      };
-
-    }else if(recentMistakes >= 2 || accuracy < 0.5){
-
-      decision = {
-        action: "REMEDIATE",
-        difficulty: "easy",
-        skill,
-        useHint: true,
-        reason: "repeated_mistakes"
-      };
-
-    }else if(recentMistakes >= 1 || accuracy < 0.7 || slow){
-
-      decision = {
-        action: "SUPPORT",
-        difficulty: "easy",
-        skill,
-        useHint: true,
-        reason: "needs_support"
-      };
-
-    }else{
-
-      decision = {
-        action: "PRACTICE",
-        difficulty:
-          playerProfile.currentDifficulty || "medium",
-        skill,
-        useHint: false,
-        reason: "continue_practice"
-      };
-
+    if(accuracy < 0.5){
+      difficulty = "easy";
+      reason = "low_accuracy";
+    }else if(accuracy < 0.75){
+      difficulty = "medium";
+      reason = "developing_skill";
+    }else if(accuracy >= 0.85 && streak >= 3){
+      difficulty = "hard";
+      reason = "strong_performance";
+    }else if(attempts >= 5 && accuracy >= 0.75){
+      difficulty = "medium";
+      reason = "stable_progress";
     }
 
-    return decision;
+    return {
+      difficulty,
+      reason,
+      confidence: Math.max(0.5, Math.min(1, accuracy))
+    };
   };
 
 
   /*
    * ============================================================
-   * CHOCOLATE CUPCAKE AI API
-   * ============================================================
-   */
-
-  window.requestCupcakeResponse = async function(eventData){
-
-    try{
-
-      const response = await fetch(CUPCAKE_API, {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify(eventData)
-      });
-
-      if(!response.ok){
-        throw new Error(
-          "Cupcake API HTTP " + response.status
-        );
-      }
-
-      const data = await response.json();
-
-      if(!data || !data.success){
-        throw new Error("Invalid Cupcake API response");
-      }
-
-      return data;
-
-    }catch(error){
-
-      console.warn(
-        "[Chocolate Cupcake] API unavailable:",
-        error
-      );
-
-      return {
-        success: false,
-        fallback: true,
-        response: null,
-        error: error.message
-      };
-    }
-
-  };
-
-
-  /*
-   * ============================================================
-   * DISPLAY CHOCOLATE CUPCAKE RESPONSE
-   * ============================================================
-   */
-
- function showCupcakeResponse(data){
-
-  if(!data || !data.success || !data.response){
-    return;
-  }
-
-  const ai = data.response;
-
-  const note = document.getElementById("aiNote");
-
-  if(!note){
-    console.warn("[Chocolate Cupcake] #aiNote tidak ditemukan.");
-    return;
-  }
-
-  /*
-   * ============================================================
-   * CUPCAKE STATE → IMAGE
+   * CUPCAKE STATE
    * ============================================================
    */
 
   const stateImages = {
-    welcome: "sources/welcome.png",
-    encouraging: "sources/encouraging.png",
-    thinking: "sources/thinking.png",
-    oops: "sources/oops.png",
-    teaching: "sources/theaching.png",
-    celebrating: "sources/celebrating.png",
-    victory: "sources/victory.png"
+    welcome:
+      "ai/chocolate-cupcake/assets/welcome.png",
+
+    encouraging:
+      "ai/chocolate-cupcake/assets/encouraging.png",
+
+    thinking:
+      "ai/chocolate-cupcake/assets/thinking.png",
+
+    oops:
+      "ai/chocolate-cupcake/assets/oops.png",
+
+    teaching:
+      "ai/chocolate-cupcake/assets/teaching.png",
+
+    celebrating:
+      "ai/chocolate-cupcake/assets/celebrating.png",
+
+    victory:
+      "ai/chocolate-cupcake/assets/victory.png"
   };
 
-  const state =
-    String(ai.state || ai.emotion || "encouraging")
-      .toLowerCase()
-      .trim();
 
-  const imageSrc =
-    stateImages[state] || stateImages.encouraging;
+  function normalizeCupcakeState(state){
 
-  /*
-   * ============================================================
-   * BUILD MESSAGE
-   * ============================================================
-   */
+    if(!state) return "encouraging";
 
-  let message = ai.message || "";
+    const value =
+      String(state)
+        .toLowerCase()
+        .trim();
 
-  if(ai.hint){
-    message += " " + ai.hint;
+    if(
+      value === "welcome" ||
+      value === "welcoming"
+    ){
+      return "welcome";
+    }
+
+    if(
+      value === "thinking" ||
+      value === "think"
+    ){
+      return "thinking";
+    }
+
+    if(
+      value === "oops" ||
+      value === "wrong"
+    ){
+      return "oops";
+    }
+
+    if(
+      value === "teaching" ||
+      value === "teaching"
+    ){
+      return "teaching";
+    }
+
+    if(
+      value === "celebrating" ||
+      value === "celebrate" ||
+      value === "celebration"
+    ){
+      return "celebrating";
+    }
+
+    if(
+      value === "victory" ||
+      value === "win" ||
+      value === "completed"
+    ){
+      return "victory";
+    }
+
+    return "encouraging";
   }
 
-  /*
-   * ============================================================
-   * BUILD CUPCAKE UI
-   * ============================================================
-   */
-
-  note.innerHTML = "";
-
-  const wrapper = document.createElement("div");
-  wrapper.className = "cupcake-ai-response";
-
-  const image = document.createElement("img");
-  image.className = "cupcake-ai-image";
-  image.src = imageSrc;
-  image.alt = "Chocolate Cupcake";
-  image.loading = "eager";
-
-  image.onerror = function(){
-    console.warn(
-      "[Chocolate Cupcake] Asset tidak ditemukan:",
-      imageSrc
-    );
-  };
-
-  const content = document.createElement("div");
-  content.className = "cupcake-ai-content";
-
-  const title = document.createElement("strong");
-  title.textContent = "🍫 Chocolate Cupcake";
-
-  const text = document.createElement("div");
-  text.className = "cupcake-ai-message";
-  text.textContent = message;
-
-  content.appendChild(title);
-  content.appendChild(text);
 
   /*
    * ============================================================
-   * VISUAL MATH
+   * TEXT TO SPEECH
    * ============================================================
    */
 
-  if(
-    ai.visual &&
-    ai.visual.enabled &&
-    ai.visual.content
-  ){
+  function speakCupcake(text){
 
-    const visual = document.createElement("div");
-    visual.className = "cupcake-ai-visual";
-    visual.textContent = ai.visual.content;
-
-    content.appendChild(visual);
-  }
-
-  wrapper.appendChild(image);
-  wrapper.appendChild(content);
-
-  note.appendChild(wrapper);
-
-  note.classList.remove("hidden");
-   // Celebration harus tetap terlihat agar anak sempat melihatnya
-if(ai.state === "celebrating"){
-  note.classList.remove("hidden");
-
-  if(window.cupcakeCelebrationTimer){
-    clearTimeout(window.cupcakeCelebrationTimer);
-  }
-
-  window.cupcakeCelebrationTimer = setTimeout(() => {
-    note.classList.remove("hidden");
-  }, 5000);
-}
-
-  /*
-   * ============================================================
-   * TTS
-   * ============================================================
-   */
-
-  if(
-    ai.speak === true &&
-    "speechSynthesis" in window &&
-    ai.message
-  ){
+    if(
+      !text ||
+      !("speechSynthesis" in window)
+    ){
+      return;
+    }
 
     try{
 
       window.speechSynthesis.cancel();
 
       const utterance =
-        new SpeechSynthesisUtterance(ai.message);
+        new SpeechSynthesisUtterance(text);
 
       utterance.lang = "id-ID";
       utterance.rate = 0.95;
-      utterance.pitch = 1.05;
+      utterance.pitch = 1.08;
+      utterance.volume = 1;
 
-      window.speechSynthesis.speak(
-        utterance
-      );
+      window.speechSynthesis.speak(utterance);
 
     }catch(error){
 
       console.warn(
-        "[Chocolate Cupcake] TTS error:",
+        "Chocolate Cupcake TTS error:",
         error
       );
 
     }
-
   }
 
-}
+
+  /*
+   * ============================================================
+   * CUPCAKE FLOATING RESPONSE
+   * ============================================================
+   *
+   * PENTING:
+   *
+   * Jangan memasukkan celebration ke #aiNote.
+   *
+   * #aiNote berada di dalam #questionModal.
+   * questionModal ditutup setelah menjawab soal.
+   *
+   * Karena itu celebration dibuat langsung sebagai child
+   * document.body agar tidak ikut tertutup.
+   */
+
+  window.showCupcakeResponse = function(result, options){
+
+    options = options || {};
+
+    if(!result){
+      return;
+    }
+
+    /*
+     * API dapat mengembalikan:
+     *
+     * {
+     *   success: true,
+     *   response: {...}
+     * }
+     *
+     * atau response langsung.
+     */
+
+    const success =
+      result.success !== false;
+
+    if(!success){
+      return;
+    }
+
+    const ai =
+      result.response ||
+      result.data ||
+      result;
+
+    if(!ai){
+      return;
+    }
+
+    const state =
+      normalizeCupcakeState(
+        ai.state ||
+        ai.emotion ||
+        options.state
+      );
+
+    const image =
+      stateImages[state] ||
+      stateImages.encouraging;
+
+    const message =
+      ai.message ||
+      ai.text ||
+      options.message ||
+      "";
+
+    const hint =
+      ai.hint ||
+      options.hint ||
+      "";
+
+    /*
+     * Hindari menampilkan hint dua kali jika API
+     * memasukkan hint ke dalam message.
+     */
+
+    let finalMessage = message;
+
+    if(
+      hint &&
+      hint.trim() &&
+      !message.includes(hint)
+    ){
+      finalMessage =
+        message
+          ? message + " " + hint
+          : hint;
+    }
+
+    /*
+     * Hapus popup Chocolate Cupcake sebelumnya.
+     */
+
+    const oldPopup =
+      document.getElementById(
+        "cupcakeFloatingResponse"
+      );
+
+    if(oldPopup){
+      oldPopup.remove();
+    }
+
+    /*
+     * Hentikan timer popup sebelumnya.
+     */
+
+    if(window.cupcakeCelebrationTimer){
+
+      clearTimeout(
+        window.cupcakeCelebrationTimer
+      );
+
+      window.cupcakeCelebrationTimer = null;
+    }
+
+    /*
+     * ========================================================
+     * CREATE FLOATING POPUP
+     * ========================================================
+     */
+
+    const popup =
+      document.createElement("div");
+
+    popup.id =
+      "cupcakeFloatingResponse";
+
+    popup.setAttribute(
+      "role",
+      "status"
+    );
+
+    popup.setAttribute(
+      "aria-live",
+      "polite"
+    );
+
+    const isCelebration =
+      state === "celebrating";
+
+    const isVictory =
+      state === "victory";
+
+    popup.style.position = "fixed";
+    popup.style.left = "50%";
+    popup.style.bottom = "24px";
+    popup.style.transform =
+      "translate(-50%, 30px)";
+    popup.style.width =
+      "min(560px, calc(100vw - 28px))";
+    popup.style.maxWidth = "560px";
+    popup.style.boxSizing = "border-box";
+    popup.style.background =
+      "#fff9ec";
+    popup.style.border =
+      "3px solid #e5bc5e";
+    popup.style.borderRadius =
+      "22px";
+    popup.style.boxShadow =
+      "0 12px 40px rgba(0,0,0,.28)";
+    popup.style.padding =
+      "16px 18px";
+    popup.style.zIndex =
+      "10000";
+    popup.style.display =
+      "flex";
+    popup.style.alignItems =
+      "center";
+    popup.style.gap =
+      "14px";
+    popup.style.opacity =
+      "0";
+    popup.style.transition =
+      "opacity .35s ease, transform .35s ease";
+    popup.style.fontFamily =
+      "inherit";
+
+    /*
+     * Saat victory / celebration, popup dibuat sedikit
+     * lebih menonjol.
+     */
+
+    if(isCelebration || isVictory){
+
+      popup.style.padding =
+        "18px 20px";
+
+      popup.style.borderWidth =
+        "4px";
+    }
+
+
+    /*
+     * ========================================================
+     * CUPCAKE IMAGE
+     * ========================================================
+     */
+
+    const img =
+      document.createElement("img");
+
+    img.src = image;
+
+    img.alt =
+      "Chocolate Cupcake";
+
+    img.style.width =
+      isVictory ? "105px" : "88px";
+
+    img.style.height =
+      isVictory ? "105px" : "88px";
+
+    img.style.objectFit =
+      "contain";
+
+    img.style.flex =
+      "0 0 auto";
+
+    img.style.display =
+      "block";
+
+
+    /*
+     * Jika asset tidak ditemukan, jangan membuat popup
+     * rusak. Sembunyikan gambar saja.
+     */
+
+    img.onerror = function(){
+
+      this.style.display =
+        "none";
+    };
+
+
+    /*
+     * ========================================================
+     * CONTENT
+     * ========================================================
+     */
+
+    const content =
+      document.createElement("div");
+
+    content.style.flex =
+      "1";
+
+    content.style.minWidth =
+      "0";
+
+
+    const title =
+      document.createElement("div");
+
+    title.style.fontWeight =
+      "800";
+
+    title.style.fontSize =
+      isVictory
+        ? "20px"
+        : "17px";
+
+    title.style.color =
+      "#5b2d16";
+
+    title.style.marginBottom =
+      "5px";
+
+    if(isVictory){
+
+      title.textContent =
+        "🏆 Chocolate Cupcake!";
+
+    }else if(isCelebration){
+
+      title.textContent =
+        "🎉 Hebat!";
+
+    }else{
+
+      title.textContent =
+        "🍫 Chocolate Cupcake";
+    }
+
+
+    const text =
+      document.createElement("div");
+
+    text.style.fontSize =
+      "15px";
+
+    text.style.lineHeight =
+      "1.5";
+
+    text.style.color =
+      "#3b1d10";
+
+    text.style.whiteSpace =
+      "pre-wrap";
+
+    text.textContent =
+      finalMessage ||
+      (
+        isVictory
+          ? "Kamu berhasil menyelesaikan tantangan!"
+          : isCelebration
+            ? "Hebat! Kamu berhasil!"
+            : "Ayo kita coba bersama!"
+      );
+
+
+    content.appendChild(
+      title
+    );
+
+    content.appendChild(
+      text
+    );
+
+
+    /*
+     * ========================================================
+     * VISUAL CONTENT
+     * ========================================================
+     */
+
+    if(
+      ai.visual &&
+      ai.visual.enabled &&
+      ai.visual.content
+    ){
+
+      const visual =
+        document.createElement("div");
+
+      visual.style.marginTop =
+        "8px";
+
+      visual.style.fontSize =
+        "22px";
+
+      visual.textContent =
+        ai.visual.content;
+
+      content.appendChild(
+        visual
+      );
+    }
+
+
+    popup.appendChild(
+      img
+    );
+
+    popup.appendChild(
+      content
+    );
+
+    document.body.appendChild(
+      popup
+    );
+
+
+    /*
+     * ========================================================
+     * FADE IN
+     * ========================================================
+     */
+
+    requestAnimationFrame(function(){
+
+      requestAnimationFrame(function(){
+
+        popup.style.opacity =
+          "1";
+
+        popup.style.transform =
+          "translate(-50%, 0)";
+
+      });
+
+    });
+
+
+    /*
+     * ========================================================
+     * DISPLAY DURATION
+     * ========================================================
+     *
+     * Normal       = 4.5 detik
+     * Celebrating  = 5 detik
+     * Victory      = 10 detik
+     */
+
+    const duration =
+      isVictory
+        ? 10000
+        : isCelebration
+          ? 5000
+          : 4500;
+
+
+    window.cupcakeCelebrationTimer =
+      setTimeout(function(){
+
+        if(!popup){
+          return;
+        }
+
+        popup.style.opacity =
+          "0";
+
+        popup.style.transform =
+          "translate(-50%, 30px)";
+
+        setTimeout(function(){
+
+          if(
+            popup &&
+            popup.parentNode
+          ){
+
+            popup.parentNode.removeChild(
+              popup
+            );
+          }
+
+        }, 400);
+
+      }, duration);
+
+
+    /*
+     * ========================================================
+     * TEXT TO SPEECH
+     * ========================================================
+     */
+
+    if(
+      options.speak === true &&
+      ai.speak === true &&
+      ai.message
+    ){
+
+      speakCupcake(
+        ai.message
+      );
+
+    }else if(
+      options.speak === true &&
+      ai.speak !== false &&
+      ai.message
+    ){
+
+      speakCupcake(
+        ai.message
+      );
+    }
+
+  };
+
+
+  /*
+   * ============================================================
+   * ASK CUPCAKE AFTER ANSWER
+   * ============================================================
+   */
+
+  window.askCupcakeAfterAnswer =
+    async function(payload){
+
+      payload =
+        payload || {};
+
+      try{
+
+        /*
+         * Tampilkan thinking sementara jika diperlukan.
+         */
+
+        /*
+        showCupcakeResponse({
+          success:true,
+          response:{
+            state:"thinking",
+            message:"Hmm... kita lihat jawabannya dulu ya! 🍫"
+          }
+        });
+        */
+
+        const response =
+          await fetch(
+            CUPCAKE_API,
+            {
+              method:"POST",
+
+              headers:{
+                "Content-Type":
+                  "application/json"
+              },
+
+              body:
+                JSON.stringify(payload)
+            }
+          );
+
+        if(!response.ok){
+
+          throw new Error(
+            "Cupcake API HTTP " +
+            response.status
+          );
+        }
+
+        const data =
+          await response.json();
+
+        /*
+         * Kirim response AI ke UI.
+         */
+
+        showCupcakeResponse(
+          data,
+          {
+            speak:true
+          }
+        );
+
+        return data;
+
+      }catch(error){
+
+        console.warn(
+          "Chocolate Cupcake API error:",
+          error
+        );
+
+        /*
+         * Jangan membuat game berhenti jika API gagal.
+         */
+
+        return {
+          success:false,
+          fallback:true,
+          error:
+            error.message
+        };
+      }
+
+    };
+
+
   /*
    * ============================================================
    * SEND GAME EVENT TO CUPCAKE AI
    * ============================================================
    */
 
-  window.sendCupcakeEvent = function(eventData){
+  window.sendCupcakeEvent =
+    async function(eventType, payload){
 
-    /*
-     * Jangan await.
-     *
-     * Game harus tetap berjalan walaupun AI membutuhkan waktu
-     * atau API sedang overload.
-     */
-    requestCupcakeResponse(eventData)
-      .then(showCupcakeResponse)
-      .catch(error => {
+      payload =
+        payload || {};
+
+      try{
+
+        const body = {
+          event:eventType,
+          ...payload
+        };
+
+        const response =
+          await fetch(
+            CUPCAKE_API,
+            {
+              method:"POST",
+
+              headers:{
+                "Content-Type":
+                  "application/json"
+              },
+
+              body:
+                JSON.stringify(body)
+            }
+          );
+
+        if(!response.ok){
+
+          throw new Error(
+            "Cupcake event HTTP " +
+            response.status
+          );
+        }
+
+        return await response.json();
+
+      }catch(error){
 
         console.warn(
-          "[Chocolate Cupcake] Event error:",
+          "Chocolate Cupcake event error:",
           error
         );
 
-      });
+        return {
+          success:false,
+          fallback:true
+        };
+      }
 
-  };
+    };
 
 
   /*
    * ============================================================
-   * HELPER: BUILD ANSWER EVENT
+   * SEND VICTORY EVENT
    * ============================================================
    */
 
-  window.askCupcakeAfterAnswer = function({
+  window.sendCupcakeVictory =
+    async function(payload){
 
-    question,
-    playerAnswer,
-    correctAnswer,
-    isCorrect,
-    attemptNumber,
-    responseTime,
-    skill,
-    difficulty,
-    playerId
+      payload =
+        payload || {};
 
-    }){
-    
-    // Tampilkan celebrating LANGSUNG jika jawaban benar.
-    // Tidak menunggu API agar UI game tidak kehilangan selebrasi.
-    if(isCorrect === true){
-      showCupcakeResponse({
-        success: true,
-        response: {
-          state: "celebrating",
-          message: "Benar! Hebat sekali! 🍫🎉",
-          hint: "",
-          visual: {
-            enabled: true,
-            content: "🎉🍫"
-          },
-          speak: true,
-          emotion: "excited"
-        }
-      });
-    }
+      return sendCupcakeEvent(
+        "VICTORY",
+        payload
+      );
 
-    sendCupcakeEvent({
-
-      event: "answer_submitted",
-
-      player: {
-        id: playerId || "player"
-      },
-
-      game: {
-        gameId: "chocolate-abyss-gate",
-        level: difficulty || "easy"
-      },
-
-      question: {
-        type: skill || "addition",
-        a: question?.a,
-        b: question?.b,
-        operation: question?.op,
-        correctAnswer
-      },
-
-      answer: {
-        value: playerAnswer,
-        correct: isCorrect
-      },
-
-      attempt: attemptNumber || 1,
-
-      context: {
-        responseTime: responseTime || 0,
-        skill: skill || "addition"
-      }
-
-    });
-
-  };
+    };
 
 
   /*
@@ -428,27 +826,182 @@ if(ai.state === "celebrating"){
    * ============================================================
    */
 
-  window.startCupcakeWelcome = function(playerId){
+  window.showCupcakeWelcome =
+    function(message){
 
-    sendCupcakeEvent({
+      showCupcakeResponse({
+        success:true,
 
-      event: "game_started",
+        response:{
+          state:"welcome",
 
-      player: {
-        id: playerId || "player"
-      },
+          message:
+            message ||
+            "Selamat datang di Chocolate Abyss Gate! 🍫",
 
-      game: {
-        gameId: "chocolate-abyss-gate",
-        level:
-          window.getCurrentGameLevel
-            ? window.getCurrentGameLevel()
-            : "easy"
-      }
+          hint:"Ayo kita mulai petualangan!",
 
-    });
+          speak:true
+        }
 
-  };
+      },{
+        speak:true
+      });
+
+    };
+
+
+  /*
+   * ============================================================
+   * ENCOURAGING
+   * ============================================================
+   */
+
+  window.showCupcakeEncouraging =
+    function(message){
+
+      showCupcakeResponse({
+        success:true,
+
+        response:{
+          state:"encouraging",
+
+          message:
+            message ||
+            "Kamu pasti bisa! Ayo coba lagi! 🍫",
+
+          speak:true
+        }
+
+      },{
+        speak:true
+      });
+
+    };
+
+
+  /*
+   * ============================================================
+   * THINKING
+   * ============================================================
+   */
+
+  window.showCupcakeThinking =
+    function(message){
+
+      showCupcakeResponse({
+        success:true,
+
+        response:{
+          state:"thinking",
+
+          message:
+            message ||
+            "Hmm... mari kita pikirkan bersama. 🤔🍫",
+
+          speak:true
+        }
+
+      },{
+        speak:true
+      });
+
+    };
+
+
+  /*
+   * ============================================================
+   * OOPS
+   * ============================================================
+   */
+
+  window.showCupcakeOops =
+    function(message){
+
+      showCupcakeResponse({
+        success:true,
+
+        response:{
+          state:"oops",
+
+          message:
+            message ||
+            "Oops! Tidak apa-apa. Kita coba lagi ya! 🍫",
+
+          speak:true
+        }
+
+      },{
+        speak:true
+      });
+
+    };
+
+
+  /*
+   * ============================================================
+   * TEACHING
+   * ============================================================
+   */
+
+  window.showCupcakeTeaching =
+    function(message){
+
+      showCupcakeResponse({
+        success:true,
+
+        response:{
+          state:"teaching",
+
+          message:
+            message ||
+            "Ayo kita pelajari caranya bersama! 🍫",
+
+          speak:true
+        }
+
+      },{
+        speak:true
+      });
+
+    };
+
+
+  /*
+   * ============================================================
+   * CELEBRATING
+   * ============================================================
+   */
+
+  window.showCupcakeCelebrating =
+    function(message){
+
+      showCupcakeResponse({
+        success:true,
+
+        response:{
+          state:"celebrating",
+
+          message:
+            message ||
+            "Hebat! Jawabanmu benar! 🎉🍫",
+
+          hint:
+            "Kamu semakin jago!",
+
+          visual:{
+            enabled:true,
+            content:"🎉🍫✨"
+          },
+
+          speak:true
+        }
+
+      },{
+        speak:true
+      });
+
+    };
 
 
   /*
@@ -457,37 +1010,35 @@ if(ai.state === "celebrating"){
    * ============================================================
    */
 
-  window.sendCupcakeVictory = function({
+  window.showCupcakeVictoryScreen =
+    function(message){
 
-    playerId,
-    level,
-    correct,
-    wrong
+      showCupcakeResponse({
+        success:true,
 
-  }){
+        response:{
+          state:"victory",
 
-    sendCupcakeEvent({
+          message:
+            message ||
+            "Luar biasa! Kamu berhasil menyelesaikan tantangan! 🏆🍫",
 
-      event: "level_completed",
+          hint:
+            "Petualanganmu berhasil diselesaikan!",
 
-      player: {
-        id: playerId || "player"
-      },
+          visual:{
+            enabled:true,
+            content:"🏆🎉🍫✨"
+          },
 
-      game: {
-        gameId: "chocolate-abyss-gate",
-        level: level || "easy"
-      },
+          speak:true
+        }
 
-      progress: {
-        correct: correct || 0,
-        wrong: wrong || 0,
-        completed: true
-      }
+      },{
+        speak:true
+      });
 
-    });
-
-  };
+    };
 
 
 })();
