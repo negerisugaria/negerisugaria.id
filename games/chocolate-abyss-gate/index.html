@@ -374,6 +374,32 @@ header:after{
     <span>Accuracy</span><b id="debugAccuracy">0%</b>
     <span>Average Response Time</span><b id="debugAvgTime">0 ms</b>
     <span>Hints Used</span><b id="debugHints">0</b>
+    <div id="debugPanel">
+  <h3>PLAYER EVENT TRACKER</h3>
+
+  <div>Player: <span id="debugPlayerName">-</span></div>
+  <div>Usia: <span id="debugPlayerAge">-</span></div>
+  <div>Player ID: <span id="debugPlayerId">-</span></div>
+  <div>Session ID: <span id="debugSessionId">-</span></div>
+
+  <div>Current Level: <span id="debugLevel">-</span></div>
+  <div>Current Difficulty: <span id="debugDifficulty">-</span></div>
+
+  <div>Questions: <span id="debugQuestions">0</span></div>
+  <div>Correct: <span id="debugCorrect">0</span></div>
+  <div>Incorrect: <span id="debugIncorrect">0</span></div>
+  <div>Accuracy: <span id="debugAccuracy">0%</span></div>
+  <div>Average Response Time: <span id="debugResponseTime">0 ms</span></div>
+  <div>Hints Used: <span id="debugHints">0</span></div>
+
+  <!-- TAMBAHKAN DI SINI -->
+  <div id="debugProfileStatus">
+    Learning Profile: -
+  </div>
+
+  <div>Current Skill: <span id="debugSkill">-</span></div>
+  <div>AI Decision: <span id="debugAIDecision">-</span></div>
+</div>
   </div>
   <div id="debugSkill">Current Skill: -</div>
   <div id="debugAI" style="margin-top:8px;padding:8px;background:#e8f0d8;border-radius:9px;font-weight:900">AI Decision: -</div>
@@ -863,10 +889,14 @@ function openQuestion(){
   currentAttemptNumber=0;
   currentHintUsed=false;
   questionShownAt=Date.now();
-  const profile=getPlayerLearningProfile();
-  profile.currentSkill=currentQuestion.skill;
-  profile.currentDifficulty=levelKey;
-  lastAIDecision=requestAIDecision(profile);
+  const profile = getPlayerLearningProfile();
+
+profile.currentSkill = currentQuestion.skill;
+profile.currentDifficulty = levelKey;
+
+window.currentPlayerLearningProfile = profile;
+
+lastAIDecision = requestAIDecision(profile);
   adaptiveDifficultyOverride=lastAIDecision.skill===currentQuestion.skill ? lastAIDecision.difficulty : null;
   playerEventTracker.track("QUESTION_SHOWN", {
     questionId:currentQuestionId,
@@ -943,11 +973,14 @@ function answerQuestion(value){
     score=Math.max(0,score-25);
     totalScore=Math.max(0,totalScore-25);
 
-    const profile=getPlayerLearningProfile();
-    profile.currentSkill=currentQuestion.skill;
-    profile.currentDifficulty=levelKey;
+    const profile = getPlayerLearningProfile();
 
-    lastAIDecision=requestAIDecision(profile);
+profile.currentSkill = currentQuestion.skill;
+profile.currentDifficulty = levelKey;
+
+window.currentPlayerLearningProfile = profile;
+
+lastAIDecision = requestAIDecision(profile);
     currentHintUsed=!!lastAIDecision.useHint;
 
     if(lastAIDecision.useHint){
