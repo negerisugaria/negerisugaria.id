@@ -351,7 +351,26 @@
     difficulty,
     playerId
 
-  }){
+    }){
+    
+    // Tampilkan celebrating LANGSUNG jika jawaban benar.
+    // Tidak menunggu API agar UI game tidak kehilangan selebrasi.
+    if(isCorrect === true){
+      showCupcakeResponse({
+        success: true,
+        response: {
+          state: "celebrating",
+          message: "Benar! Hebat sekali! 🍫🎉",
+          hint: "",
+          visual: {
+            enabled: true,
+            content: "🎉🍫"
+          },
+          speak: true,
+          emotion: "excited"
+        }
+      });
+    }
 
     sendCupcakeEvent({
 
