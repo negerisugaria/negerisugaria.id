@@ -21,10 +21,39 @@
     setPlayerInfo(name,age){this.playerInfo={playerId:this.playerId,name:String(name||"").trim(),age:Number(age)||null};this.data.playerInfo=this.playerInfo;this.save();}
     getPlayerInfo(){return {...this.playerInfo};}
     makeQuestionId(level,index,q){return `${level}_q${index+1}_${q.a}${q.op}${q.b}_${Date.now().toString(36)}`;}
-    track(type,payload={}){
-      const event={eventId:id("evt"),type,playerId:this.playerId,sessionId:this.sessionId,timestamp:payload.timestamp||new Date().toISOString(),level:payload.level || (window.getCurrentGameLevel ? window.getCurrentGameLevel() : null),difficulty:payload.difficulty || (window.getCurrentGameLevel ? window.getCurrentGameLevel() : null),...payload};
-      this.data.events.push(event);this.save();window.dispatchEvent(new CustomEvent("player-event",{detail:event}));return event;
-    }
+   track(type, payload = {}) {
+  const event = {
+    eventId: id("evt"),
+    type,
+    playerId: this.playerId,
+    sessionId: this.sessionId,
+    timestamp: payload.timestamp || new Date().toISOString(),
+    level:
+      payload.level ||
+      (window.getCurrentGameLevel ? window.getCurrentGameLevel() : null),
+    difficulty:
+      payload.difficulty ||
+      (window.getCurrentGameLevel ? window.getCurrentGameLevel() : null),
+    ...payload
+  };
+
+  this.data.events.push(event);
+  this.save();
+
+  console.log(
+    "[Player Event Tracker]",
+    type,
+    event
+  );
+
+  window.dispatchEvent(
+    new CustomEvent("player-event", {
+      detail: event
+    })
+  );
+
+  return event;
+}
     getEvents(){return [...this.data.events];}
     clearPlayerData(){this.data={version:EVENT_VERSION,playerId:this.playerId,sessionId:id("session"),playerInfo:{playerId:this.playerId,name:"",age:null},events:[]};this.sessionId=this.data.sessionId;this.playerInfo=this.data.playerInfo;this.save();}
     exportJSON(){
