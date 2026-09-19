@@ -1,0 +1,10 @@
+{
+  "event": "game_started",
+  "player": {
+    "id": "demo-player"
+  },
+  "game": {
+    "gameId": "chocolate-abyss-gate",
+    "level": "easy"
+  }
+}

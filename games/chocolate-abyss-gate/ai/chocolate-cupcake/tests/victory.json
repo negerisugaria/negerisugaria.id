@@ -1,0 +1,15 @@
+{
+  "event": "level_completed",
+  "player": {
+    "id": "demo-player"
+  },
+  "game": {
+    "gameId": "chocolate-abyss-gate",
+    "level": "easy"
+  },
+  "progress": {
+    "correct": 10,
+    "wrong": 2,
+    "completed": true
+  }
+}

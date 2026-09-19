@@ -1,0 +1,22 @@
+{
+  "event": "answer_submitted",
+  "player": {
+    "id": "demo-player"
+  },
+  "game": {
+    "gameId": "chocolate-abyss-gate",
+    "level": "easy"
+  },
+  "question": {
+    "type": "addition",
+    "a": 2,
+    "b": 3,
+    "operation": "+",
+    "correctAnswer": 5
+  },
+  "answer": {
+    "value": 7,
+    "correct": false
+  },
+  "attempt": 1
+}
