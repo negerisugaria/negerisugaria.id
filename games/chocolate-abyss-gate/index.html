@@ -4,243 +4,922 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Negeri Sugaria — Chocolate Abyss Gate</title>
+
 <style>
 :root{
-  --brown:#5b2d16; --brown2:#7b3e1f; --choco:#3b1d10; --gold:#f3c15b;
-  --cream:#fff8e8; --cream2:#ffe8b2; --orange:#e97936; --green:#63a44d;
-  --red:#c9523d; --ink:#2d1b12; --path:#fff0c8; --wall:#633218;
+  --brown:#5b2d16;
+  --brown2:#7b3e1f;
+  --choco:#3b1d10;
+  --gold:#f3c15b;
+  --cream:#fff8e8;
+  --cream2:#ffe8b2;
+  --orange:#e97936;
+  --green:#63a44d;
+  --red:#c9523d;
+  --ink:#2d1b12;
+  --path:#fff0c8;
+  --wall:#633218;
 }
+
 *{box-sizing:border-box}
+
 body{
-  margin:0;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,sans-serif;
+  margin:0;
+  color:var(--ink);
+  font-family:system-ui,-apple-system,Segoe UI,sans-serif;
   background:
     radial-gradient(circle at 15% 5%,#fff5d9 0 8%,transparent 24%),
     linear-gradient(145deg,#32180d,#6f351b 45%,#d48a43);
   min-height:100vh;
 }
-button{font:inherit;border:0;cursor:pointer}
-.app{width:min(1240px,100%);margin:auto;padding:14px}
+
+button{
+  font:inherit;
+  border:0;
+  cursor:pointer;
+}
+
+.app{
+  width:min(1240px,100%);
+  margin:auto;
+  padding:14px;
+}
+
 header{
-  position:relative;overflow:hidden;display:flex;align-items:center;gap:14px;
-  padding:12px 16px;border-radius:24px;color:#fff;
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:12px 16px;
+  border-radius:24px;
+  color:#fff;
   background:linear-gradient(135deg,#2b140b,#6d3218 52%,#b7652a);
-  border:2px solid #e7b45d66;box-shadow:0 14px 40px #1e0e0860;
+  border:2px solid #e7b45d66;
+  box-shadow:0 14px 40px #1e0e0860;
 }
+
 header:after{
-  content:"";position:absolute;inset:auto -20% -70% -20%;height:120px;
-  background:radial-gradient(ellipse,#f5c55d44,transparent 65%);pointer-events:none;
+  content:"";
+  position:absolute;
+  inset:auto -20% -70% -20%;
+  height:120px;
+  background:radial-gradient(ellipse,#f5c55d44,transparent 65%);
+  pointer-events:none;
 }
-.logo{width:58px;height:58px;object-fit:contain;position:relative;z-index:1}
-.head{position:relative;z-index:1}
-.head h1{margin:0;font-size:clamp(22px,3.4vw,38px);letter-spacing:.2px}
-.head p{margin:3px 0 0;color:#ffecc6;font-weight:800;font-size:13px}
+
+.logo{
+  width:58px;
+  height:58px;
+  object-fit:contain;
+  position:relative;
+  z-index:1;
+}
+
+.head{
+  position:relative;
+  z-index:1;
+}
+
+.head h1{
+  margin:0;
+  font-size:clamp(22px,3.4vw,38px);
+  letter-spacing:.2px;
+}
+
+.head p{
+  margin:3px 0 0;
+  color:#ffecc6;
+  font-weight:800;
+  font-size:13px;
+}
 
 .panel{
-  margin-top:12px;background:#fffaf0ed;border:2px solid #6b371d33;border-radius:22px;
-  padding:12px;box-shadow:0 10px 28px #28120833;backdrop-filter:blur(4px)
+  margin-top:12px;
+  background:#fffaf0ed;
+  border:2px solid #6b371d33;
+  border-radius:22px;
+  padding:12px;
+  box-shadow:0 10px 28px #28120833;
+  backdrop-filter:blur(4px);
 }
-.character-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+
+.character-strip{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:8px;
+}
+
 .char{
-  min-width:0;display:flex;align-items:center;justify-content:center;gap:7px;
-  padding:5px;border:2px solid #e4c77d;background:linear-gradient(#fffdf8,#ffe9ba);
-  border-radius:16px;cursor:pointer
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:5px;
+  border:2px solid #e4c77d;
+  background:linear-gradient(#fffdf8,#ffe9ba);
+  border-radius:16px;
+  cursor:pointer;
 }
-.char.active{border-color:var(--orange);box-shadow:0 0 0 3px #e9793630}
-.char img{width:55px;height:55px;object-fit:contain}
-.char b{font-size:11px}.char span{display:block;color:#a15b2d;font-weight:1000;font-size:10px}
 
-.layout{display:grid;grid-template-columns:285px 1fr;gap:12px;margin-top:12px}
-.side h2{margin:2px 0 8px;font-size:19px}
-.mission{background:#fff0cc;border:1px solid #e4bd6a;border-radius:15px;padding:10px;line-height:1.45;font-weight:800}
-.mission small{color:#795137}
-.difficulty{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:9px 0}
-.difficulty button{padding:8px 4px;border-radius:11px;background:#e8d6ac;color:var(--ink);font-weight:1000;font-size:12px}
-.difficulty button.active{background:var(--brown);color:#fff}
-.difficulty button:disabled{opacity:.45;cursor:not-allowed}
-.progress{display:flex;gap:5px;flex-wrap:wrap;margin:9px 0}
-.dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#ead8af;border:2px solid transparent}
-.dot.now{background:var(--orange);color:#fff;box-shadow:0 0 0 2px #e9793640}
-.dot.done{background:var(--green);color:#fff}
-.dot img{width:25px;height:25px;object-fit:contain}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.stat{background:#fff;border-radius:12px;padding:7px;text-align:center}
-.stat span{font-size:11px;font-weight:800;color:#76503a}.stat strong{display:block;font-size:20px}
-.hint{font-size:11px;line-height:1.4;background:#fff6df;border-radius:11px;padding:8px;margin:8px 0;color:#6e4b35}
-.action{width:100%;margin-top:7px;padding:10px;border-radius:12px;background:var(--brown);color:#fff;font-weight:1000}
-.action.new{background:var(--orange)}.action.new:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.25)}.action.exit{background:#452416}
-.lock-note{font-size:11px;color:#76503a;background:#fff8e8;border-radius:10px;padding:7px;margin-top:8px;font-weight:800}
+.char.active{
+  border-color:var(--orange);
+  box-shadow:0 0 0 3px #e9793630;
+}
 
-.maze-wrap{display:flex;flex-direction:column;align-items:center}
+.char img{
+  width:55px;
+  height:55px;
+  object-fit:contain;
+}
+
+.char b{
+  font-size:11px;
+}
+
+.char span{
+  display:block;
+  color:#a15b2d;
+  font-weight:1000;
+  font-size:10px;
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:285px 1fr;
+  gap:12px;
+  margin-top:12px;
+}
+
+.side h2{
+  margin:2px 0 8px;
+  font-size:19px;
+}
+
+.mission{
+  background:#fff0cc;
+  border:1px solid #e4bd6a;
+  border-radius:15px;
+  padding:10px;
+  line-height:1.45;
+  font-weight:800;
+}
+
+.mission small{
+  color:#795137;
+}
+
+.difficulty{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;
+  margin:9px 0;
+}
+
+.difficulty button{
+  padding:8px 4px;
+  border-radius:11px;
+  background:#e8d6ac;
+  color:var(--ink);
+  font-weight:1000;
+  font-size:12px;
+}
+
+.difficulty button.active{
+  background:var(--brown);
+  color:#fff;
+}
+
+.difficulty button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.progress{
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap;
+  margin:9px 0;
+}
+
+.dot{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:#ead8af;
+  border:2px solid transparent;
+}
+
+.dot.now{
+  background:var(--orange);
+  color:#fff;
+  box-shadow:0 0 0 2px #e9793640;
+}
+
+.dot.done{
+  background:var(--green);
+  color:#fff;
+}
+
+.dot img{
+  width:25px;
+  height:25px;
+  object-fit:contain;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+
+.stat{
+  background:#fff;
+  border-radius:12px;
+  padding:7px;
+  text-align:center;
+}
+
+.stat span{
+  font-size:11px;
+  font-weight:800;
+  color:#76503a;
+}
+
+.stat strong{
+  display:block;
+  font-size:20px;
+}
+
+.hint{
+  font-size:11px;
+  line-height:1.4;
+  background:#fff6df;
+  border-radius:11px;
+  padding:8px;
+  margin:8px 0;
+  color:#6e4b35;
+}
+
+.action{
+  width:100%;
+  margin-top:7px;
+  padding:10px;
+  border-radius:12px;
+  background:var(--brown);
+  color:#fff;
+  font-weight:1000;
+}
+
+.action.new{
+  background:var(--orange);
+}
+
+.action.new:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  filter:grayscale(.25);
+}
+
+.action.exit{
+  background:#452416;
+}
+
+.lock-note{
+  font-size:11px;
+  color:#76503a;
+  background:#fff8e8;
+  border-radius:10px;
+  padding:7px;
+  margin-top:8px;
+  font-weight:800;
+}
+
+.maze-wrap{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
 .maze{
-  position:relative;display:grid;width:min(78vw,720px);aspect-ratio:1;
-  border:8px solid #4a2412;border-radius:18px;background:#4a2412;overflow:visible;
+  position:relative;
+  display:grid;
+  width:min(78vw,720px);
+  aspect-ratio:1;
+  border:8px solid #4a2412;
+  border-radius:18px;
+  background:#4a2412;
+  overflow:visible;
   box-shadow:0 18px 42px #2a120a55;
 }
-.cell{position:relative;background:var(--path);border:1px solid #d8b76e;min-width:0}
-.cell.wall{background:var(--wall);border-color:#4a2412}
-.cell.goal{background:#ffe29a;box-shadow:inset 0 0 0 2px #f3c15b88}
+
+.cell{
+  position:relative;
+  background:var(--path);
+  border:1px solid #d8b76e;
+  min-width:0;
+}
+
+.cell.wall{
+  background:var(--wall);
+  border-color:#4a2412;
+}
+
+.cell.goal{
+  background:#ffe29a;
+  box-shadow:inset 0 0 0 2px #f3c15b88;
+}
+
 .target-img{
-  position:absolute;left:50%;top:50%;width:155%;height:155%;transform:translate(-50%,-50%);
-  object-fit:contain;z-index:3;pointer-events:none;filter:drop-shadow(0 3px 2px #2d160b55)
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:155%;
+  height:155%;
+  transform:translate(-50%,-50%);
+  object-fit:contain;
+  z-index:3;
+  pointer-events:none;
+  filter:drop-shadow(0 3px 2px #2d160b55);
 }
+
 .home-img{
-  position:absolute;left:50%;top:50%;width:230%;height:230%;transform:translate(-50%,-50%);
-  object-fit:contain;z-index:6;pointer-events:none;filter:drop-shadow(0 5px 4px #2d160b66)
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:230%;
+  height:230%;
+  transform:translate(-50%,-50%);
+  object-fit:contain;
+  z-index:6;
+  pointer-events:none;
+  filter:drop-shadow(0 5px 4px #2d160b66);
 }
+
 .player{
-  position:absolute;left:50%;top:50%;width:125%;height:125%;transform:translate3d(-50%,-50%,0);
-  z-index:8;display:flex;align-items:center;justify-content:center;pointer-events:none;overflow:visible;
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:125%;
+  height:125%;
+  transform:translate3d(-50%,-50%,0);
+  z-index:8;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  overflow:visible;
 }
+
 .player img{
-  width:100%;height:100%;object-fit:contain;object-position:50% 50%;display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:50% 50%;
+  display:block;
   filter:drop-shadow(0 4px 3px #2d160b55);
   animation:none;
   transform:none;
   transform-origin:center center;
 }
-.cell.hit .target-img{animation:targetPop .5s ease}
-.maze-caption{margin-top:8px;text-align:center;font-size:12px;font-weight:900;color:#6f4a34}
-.controls{display:grid;grid-template-columns:56px 56px 56px;gap:6px;justify-content:center;margin-top:9px}
-.controls button{width:56px;height:44px;border-radius:12px;background:var(--brown);color:#fff;font-size:19px;font-weight:1000}
-.controls .up{grid-column:2}.controls .left{grid-column:1}.controls .down{grid-column:2}.controls .right{grid-column:3}
+
+.cell.hit .target-img{
+  animation:targetPop .5s ease;
+}
+
+.maze-caption{
+  margin-top:8px;
+  text-align:center;
+  font-size:12px;
+  font-weight:900;
+  color:#6f4a34;
+}
+
+.controls{
+  display:grid;
+  grid-template-columns:56px 56px 56px;
+  gap:6px;
+  justify-content:center;
+  margin-top:9px;
+}
+
+.controls button{
+  width:56px;
+  height:44px;
+  border-radius:12px;
+  background:var(--brown);
+  color:#fff;
+  font-size:19px;
+  font-weight:1000;
+}
+
+.controls .up{grid-column:2}
+.controls .left{grid-column:1}
+.controls .down{grid-column:2}
+.controls .right{grid-column:3}
 
 .overlay{
-  position:fixed;inset:0;background:#1f0d08cc;display:grid;place-items:center;padding:16px;z-index:50
+  position:fixed;
+  inset:0;
+  background:#1f0d08cc;
+  display:grid;
+  place-items:center;
+  padding:16px;
+  z-index:50;
 }
+
 .card{
-  width:min(760px,100%);background:#fff9ec;border:3px solid #e5bc5e;border-radius:28px;
-  padding:22px;box-shadow:0 25px 80px #0008;text-align:center
+  width:min(760px,100%);
+  background:#fff9ec;
+  border:3px solid #e5bc5e;
+  border-radius:28px;
+  padding:22px;
+  box-shadow:0 25px 80px #0008;
+  text-align:center;
 }
-.intro-cupcake{width:min(260px,65vw);height:min(260px,65vw);object-fit:contain;margin:-6px auto -10px;display:block}
-.card h2{margin:0;color:var(--brown);font-size:clamp(25px,5vw,38px)}
-.card p{color:#76503a;font-weight:800;line-height:1.55}
-.picker{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px}
+
+.intro-cupcake{
+  width:min(260px,65vw);
+  height:min(260px,65vw);
+  object-fit:contain;
+  margin:-6px auto -10px;
+  display:block;
+}
+
+.card h2{
+  margin:0;
+  color:var(--brown);
+  font-size:clamp(25px,5vw,38px);
+}
+
+.card p{
+  color:#76503a;
+  font-weight:800;
+  line-height:1.55;
+}
+
+.picker{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:8px;
+  margin-top:14px;
+}
+
 .pick{
-  background:#fffdf7;border:3px solid #e4c77d;border-radius:17px;padding:8px 5px;
-  min-width:0;transition:.15s
+  background:#fffdf7;
+  border:3px solid #e4c77d;
+  border-radius:17px;
+  padding:8px 5px;
+  min-width:0;
+  transition:.15s;
 }
-.pick:hover{transform:translateY(-2px)}.pick.selected{border-color:var(--orange);background:#fff0d3;box-shadow:0 0 0 4px #e9793630}
-.pick img{width:90px;height:90px;object-fit:contain;max-width:100%}
-.pick b{display:block;margin-top:4px;color:var(--brown);font-size:12px}
-.actions{display:flex;justify-content:center;gap:8px;margin-top:15px}
-.actions button{padding:11px 18px;border-radius:12px;background:var(--brown);color:#fff;font-weight:1000}
-.actions .secondary{background:#e7d4aa;color:var(--ink)}
- .hidden{display:none!important}
-.profile-form{display:grid;gap:10px;max-width:430px;margin:14px auto 0;text-align:left}
-.profile-form label{font-size:12px;font-weight:1000;color:#76503a}
-.profile-form input{width:100%;padding:12px;border:2px solid #e4c77d;border-radius:12px;background:#fffdf7;color:var(--ink);font-weight:800}
-.profile-form .row{display:grid;grid-template-columns:1fr 150px;gap:8px}
-.ai-note{margin-top:10px;padding:9px 11px;border-radius:12px;background:#f5e3bd;color:#5f3a25;font-size:12px;font-weight:900;line-height:1.4}
 
-.modal{position:fixed;inset:0;background:#24100899;display:none;place-items:center;padding:16px;z-index:60}
-.modal.show{display:grid}
-.question-card{width:min(430px,100%);background:#fff9ec;border:3px solid #e5bc5e;border-radius:24px;padding:20px;text-align:center;box-shadow:0 25px 70px #0007}
-.question-card img{width:110px;height:110px;object-fit:contain}
-.question-card h2{margin:3px 0;color:var(--brown)}
-.question{font-size:23px;font-weight:1000;margin:8px 0}
-.answers{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.answers button{background:#a65b2c;color:#fff;padding:11px;border-radius:12px;font-weight:1000}
-.feedback{min-height:27px;margin-top:8px;font-weight:1000}
+.pick:hover{
+  transform:translateY(-2px);
+}
+
+.pick.selected{
+  border-color:var(--orange);
+  background:#fff0d3;
+  box-shadow:0 0 0 4px #e9793630;
+}
+
+.pick img{
+  width:90px;
+  height:90px;
+  object-fit:contain;
+  max-width:100%;
+}
+
+.pick b{
+  display:block;
+  margin-top:4px;
+  color:var(--brown);
+  font-size:12px;
+}
+
+.actions{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  margin-top:15px;
+}
+
+.actions button{
+  padding:11px 18px;
+  border-radius:12px;
+  background:var(--brown);
+  color:#fff;
+  font-weight:1000;
+}
+
+.actions .secondary{
+  background:#e7d4aa;
+  color:var(--ink);
+}
+
+.hidden{
+  display:none!important;
+}
+
+.profile-form{
+  display:grid;
+  gap:10px;
+  max-width:430px;
+  margin:14px auto 0;
+  text-align:left;
+}
+
+.profile-form label{
+  font-size:12px;
+  font-weight:1000;
+  color:#76503a;
+}
+
+.profile-form input{
+  width:100%;
+  padding:12px;
+  border:2px solid #e4c77d;
+  border-radius:12px;
+  background:#fffdf7;
+  color:var(--ink);
+  font-weight:800;
+}
+
+.profile-form .row{
+  display:grid;
+  grid-template-columns:1fr 150px;
+  gap:8px;
+}
+
+.ai-note{
+  margin-top:10px;
+  padding:9px 11px;
+  border-radius:12px;
+  background:#f5e3bd;
+  color:#5f3a25;
+  font-size:12px;
+  font-weight:900;
+  line-height:1.4;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:#24100899;
+  display:none;
+  place-items:center;
+  padding:16px;
+  z-index:60;
+}
+
+.modal.show{
+  display:grid;
+}
+
+.question-card{
+  width:min(430px,100%);
+  background:#fff9ec;
+  border:3px solid #e5bc5e;
+  border-radius:24px;
+  padding:20px;
+  text-align:center;
+  box-shadow:0 25px 70px #0007;
+}
+
+.question-card img{
+  width:110px;
+  height:110px;
+  object-fit:contain;
+}
+
+.question-card h2{
+  margin:3px 0;
+  color:var(--brown);
+}
+
+.question{
+  font-size:23px;
+  font-weight:1000;
+  margin:8px 0;
+}
+
+.answers{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.answers button{
+  background:#a65b2c;
+  color:#fff;
+  padding:11px;
+  border-radius:12px;
+  font-weight:1000;
+}
+
+.feedback{
+  min-height:27px;
+  margin-top:8px;
+  font-weight:1000;
+}
+
 .toast{
-  position:fixed;left:50%;bottom:20px;transform:translate(-50%,20px);opacity:0;
-  background:#3c1d10;color:#fff;padding:10px 15px;border-radius:13px;font-weight:900;
-  z-index:100;transition:.2s;pointer-events:none;text-align:center
+  position:fixed;
+  left:50%;
+  bottom:20px;
+  transform:translate(-50%,20px);
+  opacity:0;
+  background:#3c1d10;
+  color:#fff;
+  padding:10px 15px;
+  border-radius:13px;
+  font-weight:900;
+  z-index:100;
+  transition:.2s;
+  pointer-events:none;
+  text-align:center;
 }
-.toast.show{opacity:1;transform:translate(-50%,0)}
-.confetti{position:fixed;inset:0;pointer-events:none;z-index:90;overflow:hidden}
-.confetti i{position:absolute;top:-20px;width:9px;height:14px;animation:fall linear forwards}
 
-.final-card{width:min(560px,100%);background:#fff9ec;border:3px solid #f3c15b;border-radius:28px;padding:26px;text-align:center;box-shadow:0 25px 80px #0008}
-.final-trophy{font-size:110px;line-height:1;filter:drop-shadow(0 7px 4px #6a3a2440);animation:bounce .8s ease-in-out infinite alternate}
-.final-card h2{margin:5px 0;color:var(--brown);font-size:34px}
-.final-card p{color:#76503a;font-weight:800;line-height:1.5}
-.final-card button{padding:11px 20px;border-radius:12px;background:var(--brown);color:#fff;font-weight:1000;margin:4px}\n.final-card .ai-note{margin:12px 0 10px;text-align:left}
+.toast.show{
+  opacity:1;
+  transform:translate(-50%,0);
+}
 
+.confetti{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:90;
+  overflow:hidden;
+}
 
-@keyframes float{from{transform:translateY(0)}to{transform:translateY(-3px)}}
-@keyframes targetPop{0%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.14)}100%{transform:translate(-50%,-50%) scale(1)}}
-@keyframes bounce{from{transform:translateY(2px) rotate(-3deg)}to{transform:translateY(-8px) rotate(3deg)}}
-@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.95}}
+.confetti i{
+  position:absolute;
+  top:-20px;
+  width:9px;
+  height:14px;
+  animation:fall linear forwards;
+}
+
+.final-card{
+  width:min(560px,100%);
+  background:#fff9ec;
+  border:3px solid #f3c15b;
+  border-radius:28px;
+  padding:26px;
+  text-align:center;
+  box-shadow:0 25px 80px #0008;
+}
+
+.final-trophy{
+  font-size:110px;
+  line-height:1;
+  filter:drop-shadow(0 7px 4px #6a3a2440);
+  animation:bounce .8s ease-in-out infinite alternate;
+}
+
+.final-card h2{
+  margin:5px 0;
+  color:var(--brown);
+  font-size:34px;
+}
+
+.final-card p{
+  color:#76503a;
+  font-weight:800;
+  line-height:1.5;
+}
+
+.final-card button{
+  padding:11px 20px;
+  border-radius:12px;
+  background:var(--brown);
+  color:#fff;
+  font-weight:1000;
+  margin:4px;
+}
+
+.final-card .ai-note{
+  margin:12px 0 10px;
+  text-align:left;
+}
+
+@keyframes targetPop{
+  0%{
+    transform:translate(-50%,-50%) scale(1);
+  }
+  50%{
+    transform:translate(-50%,-50%) scale(1.14);
+  }
+  100%{
+    transform:translate(-50%,-50%) scale(1);
+  }
+}
+
+@keyframes bounce{
+  from{
+    transform:translateY(2px) rotate(-3deg);
+  }
+  to{
+    transform:translateY(-8px) rotate(3deg);
+  }
+}
+
+@keyframes fall{
+  to{
+    transform:translateY(110vh) rotate(720deg);
+    opacity:.95;
+  }
+}
 
 @media(max-width:820px){
-  .layout{grid-template-columns:1fr}.side{order:2}
-  .character-strip{grid-template-columns:repeat(5,1fr)}
-  .char{flex-direction:column;gap:0}.char img{width:48px;height:48px}.char b{font-size:9px}
-  .picker{grid-template-columns:repeat(2,1fr)}
-  .pick img{width:80px;height:80px}
-  .maze{width:min(92vw,720px)}
-}
 
-/* AI HackFest 2026 - Player Event Tracking debug panel */
-#debugPanel{position:fixed;right:14px;bottom:14px;width:min(360px,calc(100vw - 28px));max-height:72vh;overflow:auto;background:#fff9ec;color:#3d2418;border:2px solid #e5bc5e;border-radius:16px;padding:14px;box-shadow:0 18px 45px #0006;z-index:9999;font-size:13px}
-#debugPanel.hidden{display:none}
-#debugPanel h3{margin:0 0 10px;font-size:16px}
-.debug-grid{display:grid;grid-template-columns:1fr auto;gap:5px 10px}
-.debug-grid b{font-weight:900}
-.debug-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-.debug-actions button{flex:1;min-width:130px;background:#a65b2c;color:#fff;border:0;border-radius:10px;padding:9px;font-weight:900;cursor:pointer}
-.debug-actions button.secondary{background:#6f4b3e}
-#debugSkill{font-weight:900;margin-top:10px;padding:8px;background:#f5e3bd;border-radius:9px}
-.cupcake-ai-response {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px;
-}
-
-.cupcake-ai-image {
-  width: 90px;
-  height: 90px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.cupcake-ai-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.cupcake-ai-message {
-  margin-top: 5px;
-  white-space: pre-line;
-  line-height: 1.4;
-}
-
-.cupcake-ai-visual {
-  margin-top: 8px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  font-weight: 700;
-  text-align: center;
-  font-size: 1.1rem;
-  background: rgba(255, 255, 255, 0.7);
-}
-
-@media (max-width: 600px) {
-  .cupcake-ai-response {
-    gap: 8px;
-    align-items: flex-start;
+  .layout{
+    grid-template-columns:1fr;
   }
 
-  .cupcake-ai-image {
-    width: 70px;
-    height: 70px;
+  .side{
+    order:2;
   }
 
-  #levelAiNote .cupcake-ai-image {
-    width: 82px;
-    height: 82px;
+  .character-strip{
+    grid-template-columns:repeat(5,1fr);
+  }
+
+  .char{
+    flex-direction:column;
+    gap:0;
+  }
+
+  .char img{
+    width:48px;
+    height:48px;
+  }
+
+  .char b{
+    font-size:9px;
+  }
+
+  .picker{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .pick img{
+    width:80px;
+    height:80px;
+  }
+
+  .maze{
+    width:min(92vw,720px);
+  }
+}
+
+/* =========================================================
+   AI HACKFEST 2026 - PLAYER EVENT TRACKING DEBUG PANEL
+   ========================================================= */
+
+#debugPanel{
+  position:fixed;
+  right:14px;
+  bottom:14px;
+  width:min(360px,calc(100vw - 28px));
+  max-height:72vh;
+  overflow:auto;
+  background:#fff9ec;
+  color:#3d2418;
+  border:2px solid #e5bc5e;
+  border-radius:16px;
+  padding:14px;
+  box-shadow:0 18px 45px #0006;
+  z-index:9999;
+  font-size:13px;
+}
+
+#debugPanel.hidden{
+  display:none;
+}
+
+#debugPanel h3{
+  margin:0 0 10px;
+  font-size:16px;
+}
+
+.debug-grid{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:5px 10px;
+}
+
+.debug-grid b{
+  font-weight:900;
+}
+
+.debug-actions{
+  display:flex;
+  gap:8px;
+  margin-top:12px;
+  flex-wrap:wrap;
+}
+
+.debug-actions button{
+  flex:1;
+  min-width:130px;
+  background:#a65b2c;
+  color:#fff;
+  border:0;
+  border-radius:10px;
+  padding:9px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.debug-actions button.secondary{
+  background:#6f4b3e;
+}
+
+#debugSkill{
+  font-weight:900;
+  margin-top:10px;
+  padding:8px;
+  background:#f5e3bd;
+  border-radius:9px;
+}
+
+.cupcake-ai-response{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px;
+}
+
+.cupcake-ai-image{
+  width:90px;
+  height:90px;
+  object-fit:contain;
+  flex-shrink:0;
+}
+
+.cupcake-ai-content{
+  flex:1;
+  min-width:0;
+}
+
+.cupcake-ai-message{
+  margin-top:5px;
+  white-space:pre-line;
+  line-height:1.4;
+}
+
+.cupcake-ai-visual{
+  margin-top:8px;
+  padding:8px 12px;
+  border-radius:10px;
+  font-weight:700;
+  text-align:center;
+  font-size:1.1rem;
+  background:rgba(255,255,255,.7);
+}
+
+@media(max-width:600px){
+
+  .cupcake-ai-response{
+    gap:8px;
+    align-items:flex-start;
+  }
+
+  .cupcake-ai-image{
+    width:70px;
+    height:70px;
+  }
+
+  #levelAiNote .cupcake-ai-image{
+    width:82px;
+    height:82px;
   }
 }
 </style>
 </head>
+
 <body>
+
 <div class="app">
+
 <header>
-  <img class="logo" src="sources/logo.png" alt="Negeri Sugaria">
+  <img
+    class="logo"
+    src="sources/logo.png"
+    alt="Negeri Sugaria"
+  >
+
   <div class="head">
     <h1>Chocolate Abyss Gate</h1>
-    <p>Maze Adventure • Matematika • Strategi • Kejar skor tertinggi</p>
+    <p>
+      Maze Adventure • Matematika • Strategi • Kejar skor tertinggi
+    </p>
   </div>
 </header>
 
@@ -249,120 +928,386 @@ header:after{
 </section>
 
 <div class="layout">
+
   <aside class="panel side">
+
     <h2>🗺️ Misi Chocolate Abyss</h2>
+
     <div class="mission" id="mission"></div>
+
     <div class="difficulty" id="difficulty">
-      <button data-level="easy">🟢 Mudah</button>
-      <button data-level="medium">🟡 Sedang</button>
-      <button data-level="hard">🔴 Sulit</button>
+      <button data-level="easy">
+        🟢 Mudah
+      </button>
+
+      <button data-level="medium">
+        🟡 Sedang
+      </button>
+
+      <button data-level="hard">
+        🔴 Sulit
+      </button>
     </div>
+
     <div class="progress" id="progress"></div>
+
     <div class="stats">
-      <div class="stat"><span>SKOR LEVEL</span><strong id="score">0</strong></div>
-      <div class="stat"><span>LANGKAH</span><strong id="steps">0</strong></div>
+
+      <div class="stat">
+        <span>SKOR LEVEL</span>
+        <strong id="score">0</strong>
+      </div>
+
+      <div class="stat">
+        <span>LANGKAH</span>
+        <strong id="steps">0</strong>
+      </div>
+
     </div>
-    <div class="stat" style="margin-top:7px;background:#fff0cc;border:1px solid #e4bd6a">
-      <span>🏆 TOTAL SKOR</span><strong id="totalScore">0</strong>
+
+    <div
+      class="stat"
+      style="margin-top:7px;background:#fff0cc;border:1px solid #e4bd6a"
+    >
+      <span>🏆 TOTAL SKOR</span>
+      <strong id="totalScore">0</strong>
     </div>
+
     <div class="hint" id="levelHint"></div>
-    <button class="action new" id="newMaze">🆕 Labirin Baru</button>
-    <button class="action exit" id="exitGame">🚪 Exit</button>
-    <div class="lock-note">🔒 Sedang terbuka setelah Mudah selesai. Sulit terbuka setelah Sedang selesai.</div>
+
+    <button class="action new" id="newMaze">
+      🆕 Labirin Baru
+    </button>
+
+    <button class="action exit" id="exitGame">
+      🚪 Exit
+    </button>
+
+    <div class="lock-note">
+      🔒 Sedang terbuka setelah Mudah selesai.
+      Sulit terbuka setelah Sedang selesai.
+    </div>
+
   </aside>
 
   <main class="panel maze-wrap">
+
     <div class="maze" id="maze"></div>
-    <div class="maze-caption" id="caption">Cari teman-temanmu, lalu temukan rumah Chocolate Abyss.</div>
-    <div class="controls">
-      <button class="up" data-move="0,-1">▲</button>
-      <button class="left" data-move="-1,0">◀</button>
-      <button class="down" data-move="0,1">▼</button>
-      <button class="right" data-move="1,0">▶</button>
+
+    <div class="maze-caption" id="caption">
+      Cari teman-temanmu, lalu temukan rumah Chocolate Abyss.
     </div>
+
+    <div class="controls">
+
+      <button
+        class="up"
+        data-move="0,-1"
+        type="button"
+      >
+        ▲
+      </button>
+
+      <button
+        class="left"
+        data-move="-1,0"
+        type="button"
+      >
+        ◀
+      </button>
+
+      <button
+        class="down"
+        data-move="0,1"
+        type="button"
+      >
+        ▼
+      </button>
+
+      <button
+        class="right"
+        data-move="1,0"
+        type="button"
+      >
+        ▶
+      </button>
+
+    </div>
+
   </main>
+
 </div>
 </div>
 
-<!-- INTRO + CHARACTER SELECT -->
+<!-- =====================================================
+     INTRO + PROFILE + CHARACTER SELECT
+     ===================================================== -->
+
 <div class="overlay" id="startOverlay">
+
   <div class="card" id="introCard">
-    <img class="intro-cupcake" src="sources/chocolate-cupcake.png" alt="Chocolate Cupcake">
-    <h2>Welcome to Chocolate Abyss Gate</h2>
-    <p>Pilih karakter lalu selesaikan misi di setiap labirin.<br>Temukan teman-temanmu, cari rumah, dan kumpulkan skor setinggi mungkin.<br><b>Good luck!</b></p>
-    <button class="actions" id="goPick">🍫 Pilih Karakter</button>
+
+    <img
+      class="intro-cupcake"
+      src="sources/chocolate-cupcake.png"
+      alt="Chocolate Cupcake"
+    >
+
+    <h2>
+      Welcome to Chocolate Abyss Gate
+    </h2>
+
+    <p>
+      Pilih karakter lalu selesaikan misi di setiap labirin.
+      <br>
+      Temukan teman-temanmu, cari rumah, dan kumpulkan skor
+      setinggi mungkin.
+      <br>
+      <b>Good luck!</b>
+    </p>
+
+    <button class="actions" id="goPick" type="button">
+      🍫 Pilih Karakter
+    </button>
+
   </div>
 
   <div class="card hidden" id="profileCard">
-    <h2>👋 Kenalan dengan Petualang</h2>
-    <p>Masukkan nama panggilan dan usia agar sistem pembelajaran dapat menyesuaikan tantanganmu.</p>
+
+    <h2>
+      👋 Kenalan dengan Petualang
+    </h2>
+
+    <p>
+      Masukkan nama panggilan dan usia agar sistem pembelajaran
+      dapat menyesuaikan tantanganmu.
+    </p>
+
     <div class="profile-form">
-      <label for="playerName">Nama panggilan</label>
-      <input id="playerName" maxlength="40" autocomplete="nickname" placeholder="Contoh: Arka">
-      <label for="playerAge">Usia</label>
-      <input id="playerAge" type="number" min="4" max="18" inputmode="numeric" placeholder="Contoh: 7">
+
+      <label for="playerName">
+        Nama panggilan
+      </label>
+
+      <input
+        id="playerName"
+        maxlength="40"
+        autocomplete="nickname"
+        placeholder="Contoh: Arka"
+      >
+
+      <label for="playerAge">
+        Usia
+      </label>
+
+      <input
+        id="playerAge"
+        type="number"
+        min="4"
+        max="18"
+        inputmode="numeric"
+        placeholder="Contoh: 7"
+      >
+
     </div>
+
     <div class="actions">
-      <button class="secondary" id="backIntroFromProfile">← Kembali</button>
-      <button id="saveProfile">Lanjut →</button>
+
+      <button
+        class="secondary"
+        id="backIntroFromProfile"
+        type="button"
+      >
+        ← Kembali
+      </button>
+
+      <button
+        id="saveProfile"
+        type="button"
+      >
+        Lanjut →
+      </button>
+
     </div>
+
   </div>
 
   <div class="card hidden" id="pickerCard">
-    <h2>🎮 Pilih Karaktermu</h2>
-    <p>Karakter yang kamu pilih menjadi pemain dan tidak muncul sebagai target misi.</p>
+
+    <h2>
+      🎮 Pilih Karaktermu
+    </h2>
+
+    <p>
+      Karakter yang kamu pilih menjadi pemain dan tidak muncul
+      sebagai target misi.
+    </p>
+
     <div class="picker" id="picker"></div>
+
     <div class="actions">
-      <button class="secondary" id="backIntro">← Kembali</button>
-      <button id="startGame">🚀 Mulai Labirin</button>
+
+      <button
+        class="secondary"
+        id="backIntro"
+        type="button"
+      >
+        ← Kembali
+      </button>
+
+      <button
+        id="startGame"
+        type="button"
+      >
+        🚀 Mulai Labirin
+      </button>
+
     </div>
+
   </div>
+
 </div>
 
-<!-- MATH QUESTION -->
-<div class="modal" id="questionModal">
+<!-- =====================================================
+     MATH QUESTION
+     ===================================================== -->
+
+<div
+  class="modal"
+  id="questionModal"
+  aria-hidden="true"
+>
+
   <div class="question-card">
+
     <img id="questionImg" alt="">
-    <h2 id="questionTitle">Misi</h2>
-    <div class="question" id="questionText"></div>
-    <div class="answers" id="answers"></div>
-    <div class="feedback" id="feedback"></div>
-    <div class="ai-note hidden" id="aiNote"></div>
+
+    <h2 id="questionTitle">
+      Misi
+    </h2>
+
+    <div
+      class="question"
+      id="questionText"
+    ></div>
+
+    <div
+      class="answers"
+      id="answers"
+    ></div>
+
+    <div
+      class="feedback"
+      id="feedback"
+    ></div>
+
+    <div
+      class="ai-note hidden"
+      id="aiNote"
+    ></div>
+
   </div>
+
 </div>
 
-<!-- LEVEL COMPLETE -->
-<div class="modal" id="levelModal">
-  <div class="question-card">
-    <div style="font-size:72px">🎉</div>
+<!-- =====================================================
+     LEVEL COMPLETE
+     ===================================================== -->
 
-    <h2 id="levelTitle">Level selesai!</h2>
+<div class="modal" id="levelModal">
+
+  <div class="question-card">
+
+    <div style="font-size:72px">
+      🎉
+    </div>
+
+    <h2 id="levelTitle">
+      Level selesai!
+    </h2>
 
     <p id="levelMessage"></p>
 
-    <div class="ai-note" id="levelAiNote"></div>
+    <div
+      class="ai-note"
+      id="levelAiNote"
+    ></div>
 
-    <div class="answers" id="levelButtons"></div>
+    <div
+      class="answers"
+      id="levelButtons"
+    ></div>
+
   </div>
+
 </div>
-  
-<!-- FINAL -->
-<div class="overlay hidden" id="finalOverlay">
+
+<!-- =====================================================
+     FINAL
+     ===================================================== -->
+
+<div
+  class="overlay hidden"
+  id="finalOverlay"
+>
+
   <div class="final-card">
-    <div class="final-trophy">🏆</div>
-    <h2>Chocolate Abyss Gate Tuntas!</h2>
+
+    <div class="final-trophy">
+      🏆
+    </div>
+
+    <h2>
+      Chocolate Abyss Gate Tuntas!
+    </h2>
+
     <p id="finalMessage"></p>
-    <button id="playAgain">🎮 Main Lagi</button>
-    <button id="finalExit" style="background:#452416">🚪 Exit</button>
+
+    <button
+      id="playAgain"
+      type="button"
+    >
+      🎮 Main Lagi
+    </button>
+
+    <button
+      id="finalExit"
+      type="button"
+      style="background:#452416"
+    >
+      🚪 Exit
+    </button>
+
   </div>
+
 </div>
 
-<div class="toast" id="toast"></div>
-<div class="confetti" id="confetti"></div>
-<div id="debugPanel" class="hidden" aria-live="polite">
-  <h3>PLAYER EVENT TRACKER</h3>
+<div
+  class="toast"
+  id="toast"
+></div>
+
+<div
+  class="confetti"
+  id="confetti"
+></div>
+
+<!-- =====================================================
+     DEBUG PANEL
+     ===================================================== -->
+
+<div
+  id="debugPanel"
+  class="hidden"
+  aria-live="polite"
+>
+
+  <h3>
+    PLAYER EVENT TRACKER
+  </h3>
 
   <div class="debug-grid">
+
     <span>Player</span>
     <b id="debugPlayerName">-</b>
 
@@ -398,123 +1343,259 @@ header:after{
 
     <span>Hints Used</span>
     <b id="debugHints">0</b>
+
   </div>
 
-  <div id="debugProfileStatus"
-       style="margin-top:8px;padding:8px;background:#f5e3bd;border-radius:9px;font-weight:900">
+  <div
+    id="debugProfileStatus"
+    style="margin-top:8px;padding:8px;background:#f5e3bd;border-radius:9px;font-weight:900"
+  >
     Learning Profile: -
   </div>
 
-  <div id="debugSkill"
-       style="margin-top:8px;padding:8px;background:#f5e3bd;border-radius:9px;font-weight:900">
+  <div
+    id="debugSkill"
+    style="margin-top:8px;padding:8px;background:#f5e3bd;border-radius:9px;font-weight:900"
+  >
     Current Skill: -
   </div>
 
-  <div id="debugAI"
-       style="margin-top:8px;padding:8px;background:#e8f0d8;border-radius:9px;font-weight:900">
+  <div
+    id="debugAI"
+    style="margin-top:8px;padding:8px;background:#e8f0d8;border-radius:9px;font-weight:900"
+  >
     AI Decision: -
   </div>
 
   <div class="debug-actions">
-    <button id="exportPlayerData">
+
+    <button
+      id="exportPlayerData"
+      type="button"
+    >
       Export Player Data
     </button>
 
-    <button id="clearPlayerData" class="secondary">
+    <button
+      id="clearPlayerData"
+      class="secondary"
+      type="button"
+    >
       Clear Player Data
     </button>
+
   </div>
+
 </div>
+
+<!-- =====================================================
+     AI FILES
+     ===================================================== -->
+
 <script src="ai/chocolate-cupcake/player-event-tracker.js"></script>
 <script src="ai/chocolate-cupcake/player-learning-profile.js"></script>
 <script src="ai/chocolate-cupcake/ai-agent.js"></script>
 
 <script>
+
+/* =========================================================
+   CHARACTERS
+   ========================================================= */
+
 const chars = [
-  {name:"Cokelat Batang", img:"sources/chocolate-bar.png"},
-  {name:"Kuki Cokelat", img:"sources/kuki-cokelat.png"},
-  {name:"Kopi", img:"sources/kopi.png"},
-  {name:"Pretzel", img:"sources/pretzel.png"},
-  {name:"Croissant", img:"sources/croissant.png"}
+  {
+    name:"Cokelat Batang",
+    img:"sources/chocolate-bar.png"
+  },
+  {
+    name:"Kuki Cokelat",
+    img:"sources/kuki-cokelat.png"
+  },
+  {
+    name:"Kopi",
+    img:"sources/kopi.png"
+  },
+  {
+    name:"Pretzel",
+    img:"sources/pretzel.png"
+  },
+  {
+    name:"Croissant",
+    img:"sources/croissant.png"
+  }
 ];
 
+/* =========================================================
+   LEVELS
+   ========================================================= */
+
 const levels = {
-  easy:   {name:"Mudah", size:15, loops:3, desc:"Tambah & kurang • maze sederhana"},
-  medium: {name:"Sedang", size:21, loops:15, desc:"Tambah, kurang & perkalian • banyak percabangan"},
-  hard:   {name:"Sulit", size:27, loops:32, desc:"Operasi campuran • banyak rute & kejar waktu"}
+
+  easy:{
+    name:"Mudah",
+    size:15,
+    loops:3,
+    desc:"Tambah & kurang • maze sederhana"
+  },
+
+  medium:{
+    name:"Sedang",
+    size:21,
+    loops:15,
+    desc:"Tambah, kurang & perkalian • banyak percabangan"
+  },
+
+  hard:{
+    name:"Sulit",
+    size:27,
+    loops:32,
+    desc:"Operasi campuran • banyak rute & kejar waktu"
+  }
+
 };
 
-const STORAGE = "sugaria_chocolate_abyss_progress_v16";
-let unlocked = Number(localStorage.getItem(STORAGE) || 1);
-if (!Number.isFinite(unlocked) || unlocked < 1 || unlocked > 3) unlocked = 1;
+/* =========================================================
+   STORAGE
+   ========================================================= */
 
-let selected = 0;
-let levelKey = "easy";
-let map = [];
-let player = {x:1,y:1};
-let targets = [];
-let targetSlots = [];
-let targetOrder = [];
-let nextTarget = 0;
-let home = null;
-let score = 0;
-let totalScore = 0;
-let steps = 0;
-let locked = true;
-let gameStarted = false;
-let missionStart = {x:1,y:1};
-let missionStartSteps = 0;
-let currentQuestion = null;
-let toastTimer = null;
+const STORAGE =
+  "sugaria_chocolate_abyss_progress_v16";
 
-const DEBUG_MODE = true;
+let unlocked =
+  Number(localStorage.getItem(STORAGE) || 1);
 
-// AI HackFest 2026 tracking integration. Gameplay state remains unchanged.
-const playerEventTracker = new PlayerEventTracker({ storageKey: "chocolateAbyssPlayerData" });
-window.playerEventTracker = playerEventTracker;
-window.getCurrentGameLevel = () => levelKey;
-let questionShownAt = null;
-let currentQuestionId = null;
-let currentAttemptNumber = 0;
-let currentHintUsed = false;
-let lastAIDecision = null;
-let adaptiveDifficultyOverride = null;
+if(
+  !Number.isFinite(unlocked) ||
+  unlocked < 1 ||
+  unlocked > 3
+){
+  unlocked=1;
+}
+
+/* =========================================================
+   GAME STATE
+   ========================================================= */
+
+let selected=0;
+let levelKey="easy";
+
+let map=[];
+let player={x:1,y:1};
+
+let targets=[];
+let targetSlots=[];
+let targetOrder=[];
+
+let nextTarget=0;
+let currentTargetIndex=-1;
+
+let home=null;
+
+let score=0;
+let totalScore=0;
+let steps=0;
+
+let locked=true;
+let gameStarted=false;
+
+let missionStart={x:1,y:1};
+let missionStartSteps=0;
+
+let currentQuestion=null;
+let questionOpen=false;
+
+let toastTimer=null;
+
+/* =========================================================
+   AI / TRACKING STATE
+   ========================================================= */
+
+const DEBUG_MODE=true;
+
+const playerEventTracker =
+  new PlayerEventTracker({
+    storageKey:"chocolateAbyssPlayerData"
+  });
+
+window.playerEventTracker =
+  playerEventTracker;
+
+window.getCurrentGameLevel =
+  ()=>levelKey;
+
+let questionShownAt=null;
+let currentQuestionId=null;
+let currentAttemptNumber=0;
+let currentHintUsed=false;
+let lastAIDecision=null;
+let adaptiveDifficultyOverride=null;
+
+/* =========================================================
+   CURRENT SKILL
+   ========================================================= */
 
 function getCurrentSkill(){
-  if(!currentQuestion) return null;
-  return currentQuestion.skill || ({"+":"addition","−":"subtraction","×":"multiplication","÷":"division"}[currentQuestion.op] || currentQuestion.op);
+
+  if(!currentQuestion){
+    return null;
+  }
+
+  return currentQuestion.skill ||
+    ({
+      "+":"addition",
+      "−":"subtraction",
+      "×":"multiplication",
+      "÷":"division"
+    }[currentQuestion.op] ||
+      currentQuestion.op);
 }
+
+/* =========================================================
+   DEBUG
+   ========================================================= */
+
 function updateDebugPanel(){
-  if(typeof DEBUG_MODE === "undefined" || !DEBUG_MODE) return;
+
+  if(
+    typeof DEBUG_MODE==="undefined" ||
+    !DEBUG_MODE
+  ){
+    return;
+  }
 
   try{
-    const el=id=>document.getElementById(id);
+
+    const el =
+      id=>document.getElementById(id);
 
     if(!window.playerEventTracker){
-      console.warn("[Player Tracker] Tracker belum tersedia.");
       return;
     }
 
-    const info=playerEventTracker.getPlayerInfo
-      ? playerEventTracker.getPlayerInfo()
-      : {};
+    const info =
+      playerEventTracker.getPlayerInfo
+        ? playerEventTracker.getPlayerInfo()
+        : {};
 
-    const p=window.getPlayerLearningProfile
-      ? window.getPlayerLearningProfile()
-      : {
-          totalQuestions:0,
-          correctAnswers:0,
-          incorrectAnswers:0,
-          accuracy:0,
-          averageResponseTime:0,
-          hintsUsed:0
-        };
+    const p =
+      window.getPlayerLearningProfile
+        ? window.getPlayerLearningProfile()
+        : {
+            totalQuestions:0,
+            correctAnswers:0,
+            incorrectAnswers:0,
+            accuracy:0,
+            averageResponseTime:0,
+            hintsUsed:0
+          };
 
     if(el("debugPlayerName"))
-      el("debugPlayerName").textContent=info.name||"-";
+      el("debugPlayerName").textContent=
+        info.name||"-";
 
     if(el("debugPlayerAge"))
-      el("debugPlayerAge").textContent=info.age||"-";
+      el("debugPlayerAge").textContent=
+        info.age||"-";
 
     if(el("debugPlayerId"))
       el("debugPlayerId").textContent=
@@ -525,10 +1606,12 @@ function updateDebugPanel(){
         playerEventTracker.sessionId||"-";
 
     if(el("debugLevel"))
-      el("debugLevel").textContent=levelKey;
+      el("debugLevel").textContent=
+        levelKey;
 
     if(el("debugDifficulty"))
-      el("debugDifficulty").textContent=levelKey;
+      el("debugDifficulty").textContent=
+        adaptiveDifficultyOverride || levelKey;
 
     if(el("debugQuestions"))
       el("debugQuestions").textContent=
@@ -548,77 +1631,183 @@ function updateDebugPanel(){
 
     if(el("debugAvgTime"))
       el("debugAvgTime").textContent=
-        Math.round(p.averageResponseTime||0)+" ms";
+        Math.round(
+          p.averageResponseTime||0
+        )+" ms";
 
     if(el("debugHints"))
       el("debugHints").textContent=
         p.hintsUsed||0;
 
     if(el("debugProfileStatus")){
+
       el("debugProfileStatus").textContent=
-        `Learning Profile: ${p.totalQuestions||0} questions • `+
-        `${((p.accuracy||0)*100).toFixed(1)}% accuracy • `+
-        `${p.hintsUsed||0} hints`;
+        `Learning Profile: ${
+          p.totalQuestions||0
+        } questions • ${
+          ((p.accuracy||0)*100).toFixed(1)
+        }% accuracy • ${
+          p.hintsUsed||0
+        } hints`;
+
     }
 
     if(el("debugSkill")){
+
       el("debugSkill").textContent=
-        "Current Skill: "+(getCurrentSkill()||"-");
+        "Current Skill: "+
+        (getCurrentSkill()||"-");
+
     }
 
     if(el("debugAI")){
+
       el("debugAI").textContent=
         "AI Decision: "+
         (
           lastAIDecision
-          ? `${lastAIDecision.action} • ${lastAIDecision.skill} • ${lastAIDecision.difficulty}${lastAIDecision.useHint?" • hint":""}`
-          : "-"
+            ? `${
+                lastAIDecision.action
+              } • ${
+                lastAIDecision.skill
+              } • ${
+                lastAIDecision.difficulty
+              }${
+                lastAIDecision.useHint
+                  ? " • hint"
+                  : ""
+              }`
+            : "-"
         );
+
     }
 
   }catch(error){
+
     console.error(
       "[Player Tracker] Debug panel error:",
       error
     );
+
   }
+
 }
 
-const maze = document.getElementById("maze");
-const missionEl = document.getElementById("mission");
-const progressEl = document.getElementById("progress");
-const scoreEl = document.getElementById("score");
-const stepsEl = document.getElementById("steps");
-const totalScoreEl = document.getElementById("totalScore");
-const levelHint = document.getElementById("levelHint");
-const startOverlay = document.getElementById("startOverlay");
-const introCard = document.getElementById("introCard");
-const pickerCard = document.getElementById("pickerCard");
-const profileCard = document.getElementById("profileCard");
-const questionModal = document.getElementById("questionModal");
-const levelModal = document.getElementById("levelModal");
-const finalOverlay = document.getElementById("finalOverlay");
+/* =========================================================
+   DOM
+   ========================================================= */
+
+const maze=
+  document.getElementById("maze");
+
+const missionEl=
+  document.getElementById("mission");
+
+const progressEl=
+  document.getElementById("progress");
+
+const scoreEl=
+  document.getElementById("score");
+
+const stepsEl=
+  document.getElementById("steps");
+
+const totalScoreEl=
+  document.getElementById("totalScore");
+
+const levelHint=
+  document.getElementById("levelHint");
+
+const startOverlay=
+  document.getElementById("startOverlay");
+
+const introCard=
+  document.getElementById("introCard");
+
+const pickerCard=
+  document.getElementById("pickerCard");
+
+const profileCard=
+  document.getElementById("profileCard");
+
+const questionModal=
+  document.getElementById("questionModal");
+
+const levelModal=
+  document.getElementById("levelModal");
+
+const finalOverlay=
+  document.getElementById("finalOverlay");
+
+/* =========================================================
+   MAZE UTILITIES
+   ========================================================= */
 
 function seededRandom(seed){
-  let t = seed >>> 0;
-  return () => {
-    t += 0x6D2B79F5;
-    let r = Math.imul(t ^ (t >>> 15), 1 | t);
-    r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
-    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+
+  let t=seed>>>0;
+
+  return ()=>{
+
+    t+=0x6D2B79F5;
+
+    let r=
+      Math.imul(
+        t^(t>>>15),
+        1|t
+      );
+
+    r^=
+      r+
+      Math.imul(
+        r^(r>>>7),
+        61|r
+      );
+
+    return(
+      (r^(r>>>14))>>>0
+    )/4294967296;
+
   };
+
 }
-function shuffle(arr, rng=Math.random){
+
+function shuffle(
+  arr,
+  rng=Math.random
+){
+
   const a=[...arr];
-  for(let i=a.length-1;i>0;i--){
-    const j=Math.floor(rng()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
+
+  for(
+    let i=a.length-1;
+    i>0;
+    i--
+  ){
+
+    const j=
+      Math.floor(
+        rng()*(i+1)
+      );
+
+    [
+      a[i],
+      a[j]
+    ]=[
+      a[j],
+      a[i]
+    ];
+
   }
+
   return a;
 }
 
-/* Worksheet-inspired 21x21 maze for Medium. */
-const mediumMap = [
+/* =========================================================
+   MEDIUM MAP
+   ========================================================= */
+
+const mediumMap=[
 "#####################",
 "#.....#.......#.....#",
 "#.###.#.#####.#.###.#",
@@ -642,488 +1831,2154 @@ const mediumMap = [
 "#####################"
 ];
 
-function generateMaze(size, seed, extraLoops){
-  const rng = seededRandom(seed);
-  const grid = Array.from({length:size},()=>Array(size).fill("#"));
-  const dirs = [[0,-2],[2,0],[0,2],[-2,0]];
+/* =========================================================
+   GENERATE MAZE
+   ========================================================= */
+
+function generateMaze(
+  size,
+  seed,
+  extraLoops
+){
+
+  const rng=
+    seededRandom(seed);
+
+  const grid=
+    Array.from(
+      {length:size},
+      ()=>Array(size).fill("#")
+    );
+
+  const dirs=[
+    [0,-2],
+    [2,0],
+    [0,2],
+    [-2,0]
+  ];
+
   function carve(x,y){
+
     grid[y][x]=".";
-    for(const [dx,dy] of shuffle(dirs,rng)){
-      const nx=x+dx, ny=y+dy;
-      if(nx>0&&nx<size-1&&ny>0&&ny<size-1&&grid[ny][nx]==="#"){
+
+    for(
+      const [dx,dy]
+      of shuffle(dirs,rng)
+    ){
+
+      const nx=x+dx;
+      const ny=y+dy;
+
+      if(
+        nx>0 &&
+        nx<size-1 &&
+        ny>0 &&
+        ny<size-1 &&
+        grid[ny][nx]==="#"
+      ){
+
         grid[y+dy/2][x+dx/2]=".";
+
         carve(nx,ny);
+
       }
+
     }
+
   }
+
   carve(1,1);
 
   const candidates=[];
-  for(let y=1;y<size-1;y++){
-    for(let x=1;x<size-1;x++){
-      if(grid[y][x]!=="#") continue;
-      const h=grid[y][x-1]==="."&&grid[y][x+1]===".";
-      const v=grid[y-1][x]==="."&&grid[y+1][x]===".";
-      if(h||v) candidates.push([x,y]);
+
+  for(
+    let y=1;
+    y<size-1;
+    y++
+  ){
+
+    for(
+      let x=1;
+      x<size-1;
+      x++
+    ){
+
+      if(grid[y][x]!=="#")
+        continue;
+
+      const h=
+        grid[y][x-1]==="." &&
+        grid[y][x+1]===".";
+
+      const v=
+        grid[y-1][x]==="." &&
+        grid[y+1][x]===".";
+
+      if(h||v){
+        candidates.push([x,y]);
+      }
+
     }
+
   }
-  for(const [x,y] of shuffle(candidates,rng).slice(0,extraLoops)) grid[y][x]=".";
-  return grid.map(row=>row.join(""));
+
+  for(
+    const [x,y]
+    of shuffle(candidates,rng)
+      .slice(0,extraLoops)
+  ){
+
+    grid[y][x]=".";
+
+  }
+
+  return grid.map(
+    row=>row.join("")
+  );
+
 }
+
+/* =========================================================
+   PATH
+   ========================================================= */
 
 function neighbors(x,y){
-  return [[1,0],[-1,0],[0,1],[0,-1]]
-    .map(([dx,dy])=>({x:x+dx,y:y+dy}))
-    .filter(p=>p.x>=0&&p.y>=0&&p.y<map.length&&p.x<map[0].length&&map[p.y][p.x]!== "#");
+
+  return [
+    [1,0],
+    [-1,0],
+    [0,1],
+    [0,-1]
+  ]
+
+  .map(
+    ([dx,dy])=>({
+      x:x+dx,
+      y:y+dy
+    })
+  )
+
+  .filter(
+    p=>
+      p.x>=0 &&
+      p.y>=0 &&
+      p.y<map.length &&
+      p.x<map[0].length &&
+      map[p.y][p.x]!=="#"
+  );
+
 }
-function findNearestWalkable(sx,sy){
-  if(map[sy]?.[sx] !== "#") return {x:sx,y:sy};
-  const q=[{x:sx,y:sy}], seen=new Set([sx+","+sy]);
-  for(let i=0;i<q.length;i++){
+
+function findNearestWalkable(
+  sx,
+  sy
+){
+
+  if(
+    map[sy]?.[sx]!=="#"
+  ){
+    return {
+      x:sx,
+      y:sy
+    };
+  }
+
+  const q=[
+    {
+      x:sx,
+      y:sy
+    }
+  ];
+
+  const seen=
+    new Set([
+      sx+","+sy
+    ]);
+
+  for(
+    let i=0;
+    i<q.length;
+    i++
+  ){
+
     const p=q[i];
-    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
-      const x=p.x+dx,y=p.y+dy,k=x+","+y;
-      if(x<0||y<0||y>=map.length||x>=map[0].length||seen.has(k)) continue;
-      if(map[y][x] !== "#") return {x,y};
-      seen.add(k); q.push({x,y});
+
+    for(
+      const [dx,dy]
+      of [
+        [1,0],
+        [-1,0],
+        [0,1],
+        [0,-1]
+      ]
+    ){
+
+      const x=p.x+dx;
+      const y=p.y+dy;
+
+      const k=x+","+y;
+
+      if(
+        x<0 ||
+        y<0 ||
+        y>=map.length ||
+        x>=map[0].length ||
+        seen.has(k)
+      ){
+        continue;
+      }
+
+      if(map[y][x]!=="#"){
+        return {x,y};
+      }
+
+      seen.add(k);
+      q.push({x,y});
+
     }
+
   }
-  return {x:1,y:1};
+
+  return {
+    x:1,
+    y:1
+  };
+
 }
+
 function distanceMap(start){
-  const d=new Map([[start.x+","+start.y,0]]);
+
+  const d=
+    new Map([
+      [
+        start.x+","+start.y,
+        0
+      ]
+    ]);
+
   const q=[start];
-  for(let i=0;i<q.length;i++){
-    const p=q[i], base=d.get(p.x+","+p.y);
-    for(const n of neighbors(p.x,p.y)){
-      const k=n.x+","+n.y;
-      if(!d.has(k)){d.set(k,base+1);q.push(n);}
+
+  for(
+    let i=0;
+    i<q.length;
+    i++
+  ){
+
+    const p=q[i];
+
+    const base=
+      d.get(
+        p.x+","+p.y
+      );
+
+    for(
+      const n
+      of neighbors(p.x,p.y)
+    ){
+
+      const k=
+        n.x+","+n.y;
+
+      if(!d.has(k)){
+
+        d.set(
+          k,
+          base+1
+        );
+
+        q.push(n);
+
+      }
+
     }
+
   }
+
   return d;
+
 }
+
 function farthestReachable(){
-  const d=distanceMap({x:1,y:1});
+
+  const d=
+    distanceMap({
+      x:1,
+      y:1
+    });
+
   return [...d.entries()]
-    .map(([k,dist])=>{const [x,y]=k.split(",").map(Number);return{x,y,dist};})
-    .sort((a,b)=>b.dist-a.dist);
+    .map(
+      ([k,dist])=>{
+        const [
+          x,
+          y
+        ]=
+          k
+            .split(",")
+            .map(Number);
+
+        return {
+          x,
+          y,
+          dist
+        };
+      }
+    )
+    .sort(
+      (a,b)=>
+        b.dist-a.dist
+    );
+
 }
-function chooseTargets(count, rng=Math.random){
-  // Pilih posisi target yang benar-benar acak, tetapi tetap tersebar
-  // agar misi tidak berkumpul di satu area. Khusus Medium, setiap
-  // klik "Labirin Baru" akan menghasilkan penempatan target baru.
-  const cells=shuffle(farthestReachable().filter(p=>!(p.x===1&&p.y===1)), rng);
+
+/* =========================================================
+   TARGETS
+   ========================================================= */
+
+function chooseTargets(
+  count,
+  rng=Math.random
+){
+
+  const cells=
+    shuffle(
+      farthestReachable()
+        .filter(
+          p=>
+            !(
+              p.x===1 &&
+              p.y===1
+            )
+        ),
+      rng
+    );
+
   const chosen=[];
-  const minGap = levelKey === "medium" ? 4 : 3;
 
-  for(const c of cells){
-    if(chosen.some(p=>Math.abs(p.x-c.x)+Math.abs(p.y-c.y)<minGap)) continue;
-    chosen.push(c);
-    if(chosen.length===count) break;
-  }
+  const minGap=
+    levelKey==="medium"
+      ? 4
+      : 3;
 
-  // Fallback jika maze terlalu padat.
-  if(chosen.length<count){
-    for(const c of cells){
-      if(chosen.some(p=>p.x===c.x&&p.y===c.y)) continue;
-      chosen.push(c);
-      if(chosen.length===count) break;
+  for(
+    const c
+    of cells
+  ){
+
+    if(
+      chosen.some(
+        p=>
+          Math.abs(
+            p.x-c.x
+          )+
+          Math.abs(
+            p.y-c.y
+          )<minGap
+      )
+    ){
+      continue;
     }
+
+    chosen.push(c);
+
+    if(
+      chosen.length===count
+    ){
+      break;
+    }
+
   }
+
+  if(
+    chosen.length<count
+  ){
+
+    for(
+      const c
+      of cells
+    ){
+
+      if(
+        chosen.some(
+          p=>
+            p.x===c.x &&
+            p.y===c.y
+        )
+      ){
+        continue;
+      }
+
+      chosen.push(c);
+
+      if(
+        chosen.length===count
+      ){
+        break;
+      }
+
+    }
+
+  }
+
   return chosen;
+
 }
 
 function chooseHome(){
-  const cells=farthestReachable();
-  const candidates=cells.filter(p=>p.dist>Math.max(10, Math.floor(map.length*0.8)));
-  return candidates[Math.floor(Math.random()*Math.max(1,candidates.length))] || cells[0];
+
+  const cells=
+    farthestReachable();
+
+  const candidates=
+    cells.filter(
+      p=>
+        p.dist>
+        Math.max(
+          10,
+          Math.floor(
+            map.length*.8
+          )
+        )
+    );
+
+  return(
+    candidates[
+      Math.floor(
+        Math.random()*
+        Math.max(
+          1,
+          candidates.length
+        )
+      )
+    ] ||
+    cells[0]
+  );
+
 }
 
-function levelIndex(k){return k==="easy"?1:k==="medium"?2:3;}
-function keyFromIndex(i){return i===1?"easy":i===2?"medium":"hard";}
+/* =========================================================
+   LEVEL HELPERS
+   ========================================================= */
+
+function levelIndex(k){
+
+  return k==="easy"
+    ? 1
+    : k==="medium"
+      ? 2
+      : 3;
+
+}
+
+function keyFromIndex(i){
+
+  return i===1
+    ? "easy"
+    : i===2
+      ? "medium"
+      : "hard";
+
+}
+
+/* =========================================================
+   UI
+   ========================================================= */
 
 function updateDifficulty(){
-  document.querySelectorAll("#difficulty button").forEach(btn=>{
-    const idx=levelIndex(btn.dataset.level);
-    btn.disabled = idx>unlocked || (gameStarted && btn.dataset.level!==levelKey);
-    btn.classList.toggle("active",btn.dataset.level===levelKey);
-  });
+
+  document
+    .querySelectorAll(
+      "#difficulty button"
+    )
+    .forEach(btn=>{
+
+      const idx=
+        levelIndex(
+          btn.dataset.level
+        );
+
+      btn.disabled=
+        idx>unlocked ||
+        (
+          gameStarted &&
+          btn.dataset.level!==levelKey
+        );
+
+      btn.classList.toggle(
+        "active",
+        btn.dataset.level===levelKey
+      );
+
+    });
+
 }
+
 function updateHeaderCharacters(){
-  const strip=document.getElementById("characterStrip");
-  strip.innerHTML=chars.map((c,i)=>`
-    <button class="char ${i===selected?"active":""}" data-player="${i}" type="button">
-      <img src="${c.img}" alt="${c.name}">
-      <div><b>${c.name}</b><span>${i===selected?"PEMAIN":"TARGET"}</span></div>
-    </button>`).join("");
-  strip.querySelectorAll(".char").forEach(el=>{
-    el.onclick=()=>{
-      if(gameStarted){showToast("🔒 Karakter sudah dipilih. Gunakan Main Lagi untuk memilih karakter baru.");return;}
-      selected=Number(el.dataset.player);
-      updateHeaderCharacters();
-      renderPicker();
-    };
-  });
+
+  const strip=
+    document.getElementById(
+      "characterStrip"
+    );
+
+  strip.innerHTML=
+    chars.map(
+      (c,i)=>`
+
+        <button
+          class="char ${
+            i===selected
+              ? "active"
+              : ""
+          }"
+          data-player="${i}"
+          type="button"
+        >
+
+          <img
+            src="${c.img}"
+            alt="${c.name}"
+          >
+
+          <div>
+            <b>${c.name}</b>
+            <span>
+              ${
+                i===selected
+                  ? "PEMAIN"
+                  : "TARGET"
+              }
+            </span>
+          </div>
+
+        </button>
+
+      `
+    )
+    .join("");
+
+  strip
+    .querySelectorAll(".char")
+    .forEach(el=>{
+
+      el.onclick=()=>{
+
+        if(gameStarted){
+
+          showToast(
+            "🔒 Karakter sudah dipilih. Gunakan Main Lagi untuk memilih karakter baru."
+          );
+
+          return;
+        }
+
+        selected=
+          Number(
+            el.dataset.player
+          );
+
+        updateHeaderCharacters();
+        renderPicker();
+
+      };
+
+    });
+
 }
+
 function renderPicker(){
-  document.getElementById("picker").innerHTML=chars.map((c,i)=>`
-    <button class="pick ${i===selected?"selected":""}" data-player="${i}" type="button">
-      <img src="${c.img}" alt="${c.name}">
-      <b>${c.name}</b>
-    </button>`).join("");
-  document.querySelectorAll("#picker .pick").forEach(el=>{
-    el.onclick=()=>{selected=Number(el.dataset.player);renderPicker();updateHeaderCharacters();};
-  });
+
+  document.getElementById(
+    "picker"
+  ).innerHTML=
+    chars.map(
+      (c,i)=>`
+
+        <button
+          class="pick ${
+            i===selected
+              ? "selected"
+              : ""
+          }"
+          data-player="${i}"
+          type="button"
+        >
+
+          <img
+            src="${c.img}"
+            alt="${c.name}"
+          >
+
+          <b>${c.name}</b>
+
+        </button>
+
+      `
+    )
+    .join("");
+
+  document
+    .querySelectorAll(
+      "#picker .pick"
+    )
+    .forEach(el=>{
+
+      el.onclick=()=>{
+
+        selected=
+          Number(
+            el.dataset.player
+          );
+
+        renderPicker();
+        updateHeaderCharacters();
+
+      };
+
+    });
+
 }
 
 function showIntro(){
-  startOverlay.classList.remove("hidden");
-  introCard.classList.remove("hidden");
-  profileCard.classList.add("hidden");
-  pickerCard.classList.add("hidden");
-}
-function showProfile(){
-  introCard.classList.add("hidden");
-  profileCard.classList.remove("hidden");
-  pickerCard.classList.add("hidden");
-  const info=playerEventTracker.getPlayerInfo();
-  document.getElementById("playerName").value=info.name||"";
-  document.getElementById("playerAge").value=info.age||"";
-  setTimeout(()=>document.getElementById("playerName").focus(),50);
-}
-function showPicker(){
-  introCard.classList.add("hidden");
-  profileCard.classList.add("hidden");
-  pickerCard.classList.remove("hidden");
-  renderPicker();
-}
-function hideStart(){startOverlay.classList.add("hidden");}
 
-function prepareTargets(rng=Math.random){
-  // Target misi selalu mengecualikan karakter yang sedang dipakai pemain.
-  // Penempatan target dibuat SEKALI saat level dimulai dan tidak dihitung ulang
-  // ketika target sebelumnya berhasil, sehingga target yang tersisa tidak berpindah.
-  targetOrder = shuffle(chars.map((_,i)=>i).filter(i=>i!==selected), rng);
-  targetSlots = chooseTargets(targetOrder.length, rng).map(p=>({x:p.x,y:p.y}));
-  targets = targetSlots.map(p=>({x:p.x,y:p.y}));
-  nextTarget = 0;
-  home = null;
+  startOverlay.classList.remove(
+    "hidden"
+  );
+
+  introCard.classList.remove(
+    "hidden"
+  );
+
+  profileCard.classList.add(
+    "hidden"
+  );
+
+  pickerCard.classList.add(
+    "hidden"
+  );
+
 }
+
+function showProfile(){
+
+  introCard.classList.add(
+    "hidden"
+  );
+
+  profileCard.classList.remove(
+    "hidden"
+  );
+
+  pickerCard.classList.add(
+    "hidden"
+  );
+
+  const info=
+    playerEventTracker.getPlayerInfo();
+
+  document.getElementById(
+    "playerName"
+  ).value=
+    info.name||"";
+
+  document.getElementById(
+    "playerAge"
+  ).value=
+    info.age||"";
+
+  setTimeout(
+    ()=>{
+      document.getElementById(
+        "playerName"
+      ).focus();
+    },
+    50
+  );
+
+}
+
+function showPicker(){
+
+  introCard.classList.add(
+    "hidden"
+  );
+
+  profileCard.classList.add(
+    "hidden"
+  );
+
+  pickerCard.classList.remove(
+    "hidden"
+  );
+
+  renderPicker();
+
+}
+
+function hideStart(){
+
+  startOverlay.classList.add(
+    "hidden"
+  );
+
+}
+
+/* =========================================================
+   PREPARE TARGETS
+   ========================================================= */
+
+function prepareTargets(
+  rng=Math.random
+){
+
+  targetOrder=
+    shuffle(
+      chars
+        .map(
+          (_,i)=>i
+        )
+        .filter(
+          i=>i!==selected
+        ),
+      rng
+    );
+
+  targetSlots=
+    chooseTargets(
+      targetOrder.length,
+      rng
+    )
+    .map(
+      p=>({
+        x:p.x,
+        y:p.y
+      })
+    );
+
+  targets=
+    targetSlots.map(
+      p=>({
+        x:p.x,
+        y:p.y
+      })
+    );
+
+  nextTarget=0;
+  currentTargetIndex=-1;
+  home=null;
+
+}
+
+/* =========================================================
+   NEW MAZE BUTTON
+   ========================================================= */
 
 function updateNewMazeButton(){
-  const btn=document.getElementById("newMaze");
-  // During active play, a new maze is locked until the current maze
-  // has been completed by finding the Chocolate Abyss Gate home.
-  btn.disabled = gameStarted && !home;
-  btn.title = btn.disabled ? "Temukan rumah Chocolate Abyss terlebih dahulu." : "Buat labirin baru";
+
+  const btn=
+    document.getElementById(
+      "newMaze"
+    );
+
+  btn.disabled=
+    gameStarted &&
+    !home;
+
+  btn.title=
+    btn.disabled
+      ? "Temukan rumah Chocolate Abyss terlebih dahulu."
+      : "Buat labirin baru";
+
 }
 
-function setupLevel(){
-  const cfg=levels[levelKey];
-  const seed=Date.now()+Math.floor(Math.random()*1000000);
-  const rng=seededRandom(seed);
-  map = levelKey==="medium" ? mediumMap.map(r=>r) : generateMaze(cfg.size,seed,cfg.loops);
+/* =========================================================
+   SETUP LEVEL
+   ========================================================= */
 
-  player={x:1,y:1};
-  // Always start on a walkable cell. This prevents a newly generated maze from spawning inside a wall.
-  if(map[player.y]?.[player.x]==="#") player=findNearestWalkable(player.x,player.y);
+function setupLevel(){
+
+  const cfg=
+    levels[levelKey];
+
+  const seed=
+    Date.now()+
+    Math.floor(
+      Math.random()*1000000
+    );
+
+  const rng=
+    seededRandom(seed);
+
+  map=
+    levelKey==="medium"
+      ? mediumMap.map(
+          r=>r
+        )
+      : generateMaze(
+          cfg.size,
+          seed,
+          cfg.loops
+        );
+
+  player={
+    x:1,
+    y:1
+  };
+
+  player=
+    findNearestWalkable(
+      player.x,
+      player.y
+    );
+
   prepareTargets(rng);
+
   score=0;
   steps=0;
-  missionStart={...player};
+
+  missionStart={
+    ...player
+  };
+
   missionStartSteps=0;
+
   locked=true;
   gameStarted=false;
+
+  questionOpen=false;
+  currentQuestion=null;
+  currentTargetIndex=-1;
+
   updateNewMazeButton();
 
-  levelHint.innerHTML = `<b>${cfg.name}</b> — ${cfg.desc}<br>
-    Jawaban benar <b>+100</b> + bonus rute. Jawaban salah <b>-25</b>.`;
+  levelHint.innerHTML=
+    `<b>${cfg.name}</b> — ${cfg.desc}<br>
+    Jawaban benar <b>+100</b> + bonus rute.
+    Jawaban salah <b>-25</b>.`;
+
   updateDifficulty();
   updateMission();
   render();
   showIntro();
+
 }
+
+/* =========================================================
+   START LEVEL WITHOUT INTRO
+   ========================================================= */
+
 function startLevelWithoutIntro(){
-  playerEventTracker.track("LEVEL_STARTED", {level:levelKey,difficulty:levelKey});
+
+  try{
+
+    playerEventTracker.track(
+      "LEVEL_STARTED",
+      {
+        level:levelKey,
+        difficulty:levelKey
+      }
+    );
+
+  }catch(error){
+
+    console.warn(
+      "[Tracker] LEVEL_STARTED error:",
+      error
+    );
+
+  }
+
   updateDebugPanel();
-  /* Used for the automatic Easy → Medium → Hard transition. */
+
   gameStarted=true;
   locked=false;
+  questionOpen=false;
+
   hideStart();
+
   updateDifficulty();
   updateNewMazeButton();
   render();
+
 }
+
+/* =========================================================
+   START NEW SESSION
+   ========================================================= */
+
 function startNewSession(){
+
   totalScore=0;
+
   levelKey="easy";
   selected=0;
   unlocked=1;
-  localStorage.setItem(STORAGE,"1");
+
+  localStorage.setItem(
+    STORAGE,
+    "1"
+  );
+
   gameStarted=false;
   locked=true;
+  questionOpen=false;
+
   adaptiveDifficultyOverride=null;
   lastAIDecision=null;
+
   setupLevel();
   showIntro();
+
 }
+
+/* =========================================================
+   MISSION
+   ========================================================= */
+
 function updateMission(){
-  const names=targetOrder.map(i=>chars[i].name);
-  let text=`Temukan <b>${names.length}</b> karakter secara acak:<br>`;
-  text += `<span style="display:block;margin-top:5px">${names.map((n,i)=>`${i+1}. ${n}`).join(" → ")}</span>`;
-  if(home) text += `<br>🏠 Setelah semuanya ditemukan, cari <b>rumah Chocolate Abyss</b>.`;
+
+  const names=
+    targetOrder.map(
+      i=>chars[i].name
+    );
+
+  let text=
+    `Temukan <b>${names.length}</b> karakter secara acak:<br>`;
+
+  text+=
+    `<span style="display:block;margin-top:5px">`+
+    names
+      .map(
+        (n,i)=>
+          `${i+1}. ${n}`
+      )
+      .join(" → ") +
+    `</span>`;
+
+  if(home){
+
+    text+=
+      `<br>🏠 Setelah semuanya ditemukan,
+      cari <b>rumah Chocolate Abyss</b>.`;
+
+  }
+
   missionEl.innerHTML=text;
+
 }
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+
 function render(){
+
   maze.innerHTML="";
-  maze.style.gridTemplateColumns=`repeat(${map[0].length},1fr)`;
-  const targetMap=new Map(targets.map((p,i)=>[p.x+","+p.y,i]));
 
-  for(let y=0;y<map.length;y++){
-    for(let x=0;x<map[y].length;x++){
-      const cell=document.createElement("div");
-      cell.className="cell"+(map[y][x]==="#"?" wall":"");
+  maze.style.gridTemplateColumns=
+    `repeat(${map[0].length},1fr)`;
 
-      const ti=targetMap.get(x+","+y);
-      if(ti!==undefined && ti>=nextTarget){
-        cell.classList.add("goal");
-        const img=document.createElement("img");
-        img.className="target-img";
-        img.src=chars[targetOrder[ti]].img;
-        img.alt=chars[targetOrder[ti]].name;
+  const targetMap=
+    new Map(
+      targets.map(
+        (p,i)=>
+          [
+            p.x+","+p.y,
+            i
+          ]
+      )
+    );
+
+  for(
+    let y=0;
+    y<map.length;
+    y++
+  ){
+
+    for(
+      let x=0;
+      x<map[y].length;
+      x++
+    ){
+
+      const cell=
+        document.createElement(
+          "div"
+        );
+
+      cell.className=
+        "cell"+
+        (
+          map[y][x]==="#"
+            ? " wall"
+            : ""
+        );
+
+      const ti=
+        targetMap.get(
+          x+","+y
+        );
+
+      if(
+        ti!==undefined &&
+        ti>=nextTarget
+      ){
+
+        cell.classList.add(
+          "goal"
+        );
+
+        const img=
+          document.createElement(
+            "img"
+          );
+
+        img.className=
+          "target-img";
+
+        img.src=
+          chars[
+            targetOrder[ti]
+          ].img;
+
+        img.alt=
+          chars[
+            targetOrder[ti]
+          ].name;
+
         cell.appendChild(img);
+
       }
 
-      if(home && x===home.x && y===home.y){
-        cell.classList.add("goal");
-        const img=document.createElement("img");
-        img.className="home-img";
-        img.src="sources/chocolate-open-gate.png";
-        img.alt="Rumah Chocolate Abyss Gate";
+      if(
+        home &&
+        x===home.x &&
+        y===home.y
+      ){
+
+        cell.classList.add(
+          "goal"
+        );
+
+        const img=
+          document.createElement(
+            "img"
+          );
+
+        img.className=
+          "home-img";
+
+        img.src=
+          "sources/chocolate-open-gate.png";
+
+        img.alt=
+          "Rumah Chocolate Abyss Gate";
+
         cell.appendChild(img);
+
       }
 
-      if(x===player.x&&y===player.y){
-        const p=document.createElement("div"); p.className="player";
-        const img=document.createElement("img");
-        img.src=chars[selected].img; img.alt=chars[selected].name;
-        p.appendChild(img); cell.appendChild(p);
+      if(
+        x===player.x &&
+        y===player.y
+      ){
+
+        const p=
+          document.createElement(
+            "div"
+          );
+
+        p.className=
+          "player";
+
+        const img=
+          document.createElement(
+            "img"
+          );
+
+        img.src=
+          chars[selected].img;
+
+        img.alt=
+          chars[selected].name;
+
+        p.appendChild(img);
+        cell.appendChild(p);
+
       }
+
       maze.appendChild(cell);
+
     }
+
   }
 
   scoreEl.textContent=score;
   stepsEl.textContent=steps;
   totalScoreEl.textContent=totalScore;
-  progressEl.innerHTML=targetOrder.map((id,i)=>{
-    const c=chars[id];
-    return `<div class="dot ${i<nextTarget?"done":i===nextTarget?"now":""}" title="${i+1}. ${c.name}">
-      ${i<nextTarget?"✓":`<img src="${c.img}" alt="${c.name}">`}
-    </div>`;
-  }).join("");
+
+  progressEl.innerHTML=
+    targetOrder
+      .map(
+        (id,i)=>{
+
+          const c=chars[id];
+
+          return `
+            <div
+              class="dot ${
+                i<nextTarget
+                  ? "done"
+                  : i===nextTarget
+                    ? "now"
+                    : ""
+              }"
+              title="${i+1}. ${c.name}"
+            >
+
+              ${
+                i<nextTarget
+                  ? "✓"
+                  : `<img
+                      src="${c.img}"
+                      alt="${c.name}"
+                    >`
+              }
+
+            </div>
+          `;
+
+        }
+      )
+      .join("");
 
   if(home){
-    const dot=document.createElement("div");
-    dot.className="dot now";dot.textContent="🏠";dot.title="Cari rumah";
+
+    const dot=
+      document.createElement(
+        "div"
+      );
+
+    dot.className=
+      "dot now";
+
+    dot.textContent="🏠";
+    dot.title="Cari rumah";
+
     progressEl.appendChild(dot);
-    document.getElementById("caption").textContent="Semua teman ditemukan! Sekarang cari rumah Chocolate Abyss.";
+
+    document.getElementById(
+      "caption"
+    ).textContent=
+      "Semua teman ditemukan! Sekarang cari rumah Chocolate Abyss.";
+
   }else{
-    document.getElementById("caption").textContent="Cari teman-temanmu, jawab soal, lalu temukan rumah Chocolate Abyss.";
+
+    document.getElementById(
+      "caption"
+    ).textContent=
+      "Cari teman-temanmu, jawab soal, lalu temukan rumah Chocolate Abyss.";
+
   }
+
 }
+
+/* =========================================================
+   TOAST
+   ========================================================= */
 
 function showToast(msg){
-  const t=document.getElementById("toast");
-  clearTimeout(toastTimer);t.textContent=msg;t.classList.add("show");
-  toastTimer=setTimeout(()=>t.classList.remove("show"),1800);
+
+  const t=
+    document.getElementById(
+      "toast"
+    );
+
+  clearTimeout(toastTimer);
+
+  t.textContent=msg;
+
+  t.classList.add("show");
+
+  toastTimer=
+    setTimeout(
+      ()=>{
+        t.classList.remove(
+          "show"
+        );
+      },
+      1800
+    );
+
 }
+
+/* =========================================================
+   QUESTION GENERATOR
+   ========================================================= */
 
 function buildQuestion(){
-  const r=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+
+  const r=
+    (a,b)=>
+      Math.floor(
+        Math.random()*
+        (b-a+1)
+      )+a;
+
   let a,b,ans,op;
+
   const i=nextTarget;
-  const effectiveDifficulty=adaptiveDifficultyOverride || levelKey;
-  if(effectiveDifficulty==="easy"){
-    if(i%2===0){a=r(1,9);b=r(1,9);op="+";ans=a+b;}
-    else {a=r(3,15);b=r(1,a);op="−";ans=a-b;}
-  }else if(effectiveDifficulty==="medium"){
+
+  const effectiveDifficulty=
+    adaptiveDifficultyOverride ||
+    levelKey;
+
+  if(
+    effectiveDifficulty==="easy"
+  ){
+
+    if(i%2===0){
+
+      a=r(1,9);
+      b=r(1,9);
+      op="+";
+      ans=a+b;
+
+    }else{
+
+      a=r(3,15);
+      b=r(1,a);
+      op="−";
+      ans=a-b;
+
+    }
+
+  }else if(
+    effectiveDifficulty==="medium"
+  ){
+
     const t=i%3;
-    if(t===0){a=r(5,18);b=r(2,15);op="+";ans=a+b;}
-    else if(t===1){a=r(8,25);b=r(1,a);op="−";ans=a-b;}
-    else {a=r(2,9);b=r(2,9);op="×";ans=a*b;}
+
+    if(t===0){
+
+      a=r(5,18);
+      b=r(2,15);
+      op="+";
+      ans=a+b;
+
+    }else if(t===1){
+
+      a=r(8,25);
+      b=r(1,a);
+      op="−";
+      ans=a-b;
+
+    }else{
+
+      a=r(2,9);
+      b=r(2,9);
+      op="×";
+      ans=a*b;
+
+    }
+
   }else{
+
     const t=i%4;
-    if(t===0){a=r(3,12);b=r(2,10);op="×";ans=a*b;}
-    else if(t===1){b=r(2,10);ans=r(2,10);a=b*ans;op="÷";}
-    else if(t===2){a=r(15,35);b=r(10,30);op="+";ans=a+b;}
-    else {a=r(20,50);b=r(5,a);op="−";ans=a-b;}
+
+    if(t===0){
+
+      a=r(3,12);
+      b=r(2,10);
+      op="×";
+      ans=a*b;
+
+    }else if(t===1){
+
+      b=r(2,10);
+      ans=r(2,10);
+      a=b*ans;
+      op="÷";
+
+    }else if(t===2){
+
+      a=r(15,35);
+      b=r(10,30);
+      op="+";
+      ans=a+b;
+
+    }else{
+
+      a=r(20,50);
+      b=r(5,a);
+      op="−";
+      ans=a-b;
+
+    }
+
   }
-  const skill={"+":"addition","−":"subtraction","×":"multiplication","÷":"division"}[op] || op;
-  return {a,b,ans,op,skill};
-}
-function optionsFor(ans){
-  const values=new Set([ans]);
-  const spread=levelKey==="easy"?5:levelKey==="medium"?10:15;
-  const candidates=[];
-  for(let d=1;d<=spread;d++){candidates.push(ans+d,ans-d);}
-  for(const v of shuffle(candidates)){
-    if(v>=0) values.add(v);
-    if(values.size===4) break;
-  }
-  return shuffle([...values]).slice(0,4);
+
+  const skill=
+    {
+      "+":"addition",
+      "−":"subtraction",
+      "×":"multiplication",
+      "÷":"division"
+    }[op]||op;
+
+  return {
+    a,
+    b,
+    ans,
+    op,
+    skill
+  };
+
 }
 
+/* =========================================================
+   ANSWER OPTIONS
+   ========================================================= */
+
+function optionsFor(ans){
+
+  const values=
+    new Set([ans]);
+
+  const spread=
+    levelKey==="easy"
+      ? 5
+      : levelKey==="medium"
+        ? 10
+        : 15;
+
+  const candidates=[];
+
+  for(
+    let d=1;
+    d<=spread;
+    d++
+  ){
+
+    candidates.push(
+      ans+d,
+      ans-d
+    );
+
+  }
+
+  for(
+    const v
+    of shuffle(candidates)
+  ){
+
+    if(v>=0){
+      values.add(v);
+    }
+
+    if(values.size===4){
+      break;
+    }
+
+  }
+
+  return shuffle(
+    [...values]
+  ).slice(0,4);
+
+}
+
+/* =========================================================
+   CHECK TARGET COLLISION
+   ========================================================= */
+
+function checkTargetCollision(){
+
+  if(!gameStarted){
+    return;
+  }
+
+  if(questionOpen){
+    return;
+  }
+
+  if(
+    nextTarget>=
+    targetOrder.length
+  ){
+    return;
+  }
+
+  const target=
+    targets[nextTarget];
+
+  if(!target){
+    console.warn(
+      "[Chocolate Abyss] Target tidak ditemukan:",
+      nextTarget
+    );
+    return;
+  }
+
+  const playerOnTarget=
+    player.x===target.x &&
+    player.y===target.y;
+
+  if(!playerOnTarget){
+    return;
+  }
+
+  console.log(
+    "[Chocolate Abyss] TARGET FOUND:",
+    {
+      targetIndex:nextTarget,
+      targetCharacter:
+        chars[
+          targetOrder[nextTarget]
+        ].name,
+      x:player.x,
+      y:player.y
+    }
+  );
+
+  /* Efek visual target */
+
+  const cells=
+    maze.querySelectorAll(
+      ".cell"
+    );
+
+  const cellIndex=
+    player.y*
+      map[0].length+
+    player.x;
+
+  if(cells[cellIndex]){
+
+    cells[cellIndex]
+      .classList.add("hit");
+
+    setTimeout(
+      ()=>{
+        cells[cellIndex]
+          ?.classList
+          .remove("hit");
+      },
+      500
+    );
+
+  }
+
+  /* BUKA SOAL */
+
+  openQuestion();
+
+}
+
+/* =========================================================
+   OPEN QUESTION
+   ========================================================= */
+
 function openQuestion(){
+
+  /*
+   * Penting:
+   * Popup soal TIDAK bergantung pada keberhasilan AI.
+   * Game engine membuat dan menampilkan soal terlebih dahulu.
+   */
+
+  if(questionOpen){
+    return;
+  }
+
+  if(!gameStarted){
+    return;
+  }
+
+  if(
+    nextTarget>=
+    targetOrder.length
+  ){
+    return;
+  }
+
+  const targetPosition=
+    targets[nextTarget];
+
+  if(!targetPosition){
+
+    console.warn(
+      "[Chocolate Abyss] Target berikutnya tidak ditemukan:",
+      nextTarget
+    );
+
+    return;
+  }
+
+  currentTargetIndex=
+    nextTarget;
+
   locked=true;
-  currentQuestion=buildQuestion();
-  currentQuestionId=playerEventTracker.makeQuestionId(levelKey,nextTarget,currentQuestion);
+  questionOpen=true;
+
+  currentQuestion=
+    buildQuestion();
+
+  if(!currentQuestion){
+
+    console.error(
+      "[Chocolate Abyss] Gagal membuat soal."
+    );
+
+    questionOpen=false;
+    locked=false;
+
+    return;
+  }
+
+  /* Question ID */
+
+  try{
+
+    if(
+      window.playerEventTracker &&
+      typeof playerEventTracker.makeQuestionId===
+        "function"
+    ){
+
+      currentQuestionId=
+        playerEventTracker.makeQuestionId(
+          levelKey,
+          currentTargetIndex,
+          currentQuestion
+        );
+
+    }else{
+
+      currentQuestionId=
+        "q_"+
+        Date.now()+
+        "_"+
+        Math.random()
+          .toString(36)
+          .slice(2,8);
+
+    }
+
+  }catch(error){
+
+    console.warn(
+      "[Tracker] makeQuestionId error:",
+      error
+    );
+
+    currentQuestionId=
+      "q_"+
+      Date.now();
+
+  }
+
   currentAttemptNumber=0;
   currentHintUsed=false;
   questionShownAt=Date.now();
-  const profile = getPlayerLearningProfile();
 
-profile.currentSkill = currentQuestion.skill;
-profile.currentDifficulty = levelKey;
+  /* Learning Profile */
 
-window.currentPlayerLearningProfile = profile;
+  let profile=null;
 
-lastAIDecision = requestAIDecision(profile);
-  adaptiveDifficultyOverride=lastAIDecision.skill===currentQuestion.skill ? lastAIDecision.difficulty : null;
-  playerEventTracker.track("QUESTION_SHOWN", {
-    questionId:currentQuestionId,
-    question:`${currentQuestion.a} ${currentQuestion.op} ${currentQuestion.b} = ?`,
-    skill:getCurrentSkill(),
-    difficulty:adaptiveDifficultyOverride || levelKey,
-    timestamp:new Date().toISOString()
-  });
-  updateDebugPanel();
-  const targetName=chars[targetOrder[nextTarget]].name;
-  document.getElementById("questionImg").src=chars[targetOrder[nextTarget]].img;
-  document.getElementById("questionTitle").textContent=`Misi ${nextTarget+1} • ${targetName}`;
-  document.getElementById("questionText").textContent=`${currentQuestion.a} ${currentQuestion.op} ${currentQuestion.b} = ?`;
-  document.getElementById("feedback").textContent="";
-  const aiNote=document.getElementById("aiNote");
-  aiNote.classList.add("hidden");
-  aiNote.innerHTML="";
-  const answers=document.getElementById("answers");
-  answers.innerHTML="";
-  optionsFor(currentQuestion.ans).forEach(v=>{
-    const b=document.createElement("button");
-    b.textContent=v;
-    b.onclick=()=>answerQuestion(v);
-    answers.appendChild(b);
-  });
-  questionModal.classList.add("show");
-}
+  try{
 
-function answerQuestion(value){
-  const f=document.getElementById("feedback");
-  const aiNote=document.getElementById("aiNote");
+    profile=
+      typeof getPlayerLearningProfile===
+        "function"
+        ? getPlayerLearningProfile()
+        : null;
 
-  currentAttemptNumber++;
+    if(profile){
 
-  const responseTime=Math.max(
-    0,
-    Date.now()-(questionShownAt || Date.now())
-  );
+      profile.currentSkill=
+        currentQuestion.skill;
 
-  const isCorrect=value===currentQuestion.ans;
+      profile.currentDifficulty=
+        levelKey;
 
-  const answerEvent={
-    questionId:currentQuestionId,
-    level:levelKey,
-    difficulty:levelKey,
-    playerAnswer:value,
-    correctAnswer:currentQuestion.ans,
-    isCorrect,
-    responseTime,
-    attemptNumber:currentAttemptNumber,
-    hintUsed:currentHintUsed
-  };
+      window.currentPlayerLearningProfile=
+        profile;
 
-  playerEventTracker.track("ANSWER_SUBMITTED", answerEvent);
+    }
 
-  // AI hanya menerima event. Game engine tetap menjadi sumber kebenaran.
-  if(typeof window.askCupcakeAfterAnswer==="function"){
-    window.askCupcakeAfterAnswer({
-      question:currentQuestion,
-      playerAnswer:value,
-      correctAnswer:currentQuestion.ans,
-      isCorrect,
-      attemptNumber:currentAttemptNumber,
-      responseTime,
-      skill:currentQuestion.skill,
-      difficulty:levelKey,
-      playerId:playerEventTracker.getPlayerInfo().playerId
-    });
+  }catch(error){
+
+    console.warn(
+      "[Chocolate Cupcake] Learning profile error:",
+      error
+    );
+
+  }
+
+  /* AI decision */
+
+  lastAIDecision=null;
+
+  try{
+
+    if(
+      typeof requestAIDecision===
+        "function" &&
+      profile
+    ){
+
+      lastAIDecision=
+        requestAIDecision(profile);
+
+    }
+
+  }catch(error){
+
+    console.warn(
+      "[Chocolate Cupcake] AI decision error:",
+      error
+    );
+
+    lastAIDecision=null;
+
+  }
+
+  if(
+    lastAIDecision &&
+    lastAIDecision.skill===
+      currentQuestion.skill &&
+    lastAIDecision.difficulty
+  ){
+
+    adaptiveDifficultyOverride=
+      lastAIDecision.difficulty;
+
+  }else{
+
+    adaptiveDifficultyOverride=null;
+
+  }
+
+  /* Tracking */
+
+  try{
+
+    if(window.playerEventTracker){
+
+      playerEventTracker.track(
+        "QUESTION_SHOWN",
+        {
+          questionId:
+            currentQuestionId,
+
+          question:
+            `${currentQuestion.a} ${currentQuestion.op} ${currentQuestion.b} = ?`,
+
+          skill:
+            getCurrentSkill(),
+
+          difficulty:
+            adaptiveDifficultyOverride ||
+            levelKey,
+
+          targetIndex:
+            currentTargetIndex,
+
+          targetName:
+            chars[
+              targetOrder[
+                currentTargetIndex
+              ]
+            ].name,
+
+          timestamp:
+            new Date().toISOString()
+        }
+      );
+
+    }
+
+  }catch(error){
+
+    console.warn(
+      "[Player Tracker] QUESTION_SHOWN error:",
+      error
+    );
+
   }
 
   updateDebugPanel();
 
-  if(!isCorrect){
-    score=Math.max(0,score-25);
-    totalScore=Math.max(0,totalScore-25);
+  /* =====================================================
+     ISI POPUP
+     ===================================================== */
 
-    const profile = getPlayerLearningProfile();
+  const questionImg=
+    document.getElementById(
+      "questionImg"
+    );
 
-profile.currentSkill = currentQuestion.skill;
-profile.currentDifficulty = levelKey;
+  const questionTitle=
+    document.getElementById(
+      "questionTitle"
+    );
 
-window.currentPlayerLearningProfile = profile;
+  const questionText=
+    document.getElementById(
+      "questionText"
+    );
 
-lastAIDecision = requestAIDecision(profile);
-    currentHintUsed=!!lastAIDecision.useHint;
+  const feedback=
+    document.getElementById(
+      "feedback"
+    );
 
-    if(lastAIDecision.useHint){
-      const hintMap={
-        addition:"Coba hitung dari angka pertama, lalu tambahkan angka kedua secara bertahap.",
-        subtraction:"Coba mulai dari angka pertama lalu kurangi perlahan.",
-        multiplication:"Ingat bahwa perkalian bisa dihitung sebagai penjumlahan berulang.",
-        division:"Coba cari angka yang jika dikalikan pembagi menghasilkan bilangan pertama."
+  const aiNote=
+    document.getElementById(
+      "aiNote"
+    );
+
+  const answers=
+    document.getElementById(
+      "answers"
+    );
+
+  const targetChar=
+    chars[
+      targetOrder[
+        currentTargetIndex
+      ]
+    ];
+
+  questionImg.src=
+    targetChar.img;
+
+  questionImg.alt=
+    targetChar.name;
+
+  questionTitle.textContent=
+    `Misi ${
+      currentTargetIndex+1
+    } • ${
+      targetChar.name
+    }`;
+
+  questionText.textContent=
+    `${currentQuestion.a} ${
+      currentQuestion.op
+    } ${
+      currentQuestion.b
+    } = ?`;
+
+  feedback.textContent="";
+
+  aiNote.classList.add(
+    "hidden"
+  );
+
+  aiNote.innerHTML="";
+
+  answers.innerHTML="";
+
+  const options=
+    optionsFor(
+      currentQuestion.ans
+    );
+
+  options.forEach(
+    value=>{
+
+      const button=
+        document.createElement(
+          "button"
+        );
+
+      button.type="button";
+      button.textContent=value;
+
+      button.onclick=()=>{
+
+        if(!questionOpen){
+          return;
+        }
+
+        answerQuestion(value);
+
       };
 
-      const hint=hintMap[currentQuestion.skill] ||
+      answers.appendChild(
+        button
+      );
+
+    }
+  );
+
+  /*
+   * Popup ditampilkan PALING AKHIR.
+   * Jadi AI/API tidak bisa menggagalkan popup.
+   */
+
+  questionModal.classList.add(
+    "show"
+  );
+
+  questionModal.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  console.log(
+    "[Chocolate Abyss] QUESTION OPEN:",
+    `${currentQuestion.a} ${currentQuestion.op} ${currentQuestion.b} = ?`,
+    "Target:",
+    targetChar.name,
+    "Position:",
+    targetPosition
+  );
+
+}
+
+/* =========================================================
+   ANSWER QUESTION
+   ========================================================= */
+
+function answerQuestion(value){
+
+  if(
+    !currentQuestion ||
+    !questionOpen
+  ){
+    return;
+  }
+
+  const f=
+    document.getElementById(
+      "feedback"
+    );
+
+  const aiNote=
+    document.getElementById(
+      "aiNote"
+    );
+
+  currentAttemptNumber++;
+
+  const responseTime=
+    Math.max(
+      0,
+      Date.now()-
+      (
+        questionShownAt ||
+        Date.now()
+      )
+    );
+
+  const isCorrect=
+    value===
+    currentQuestion.ans;
+
+  const answerEvent={
+    questionId:
+      currentQuestionId,
+
+    level:
+      levelKey,
+
+    difficulty:
+      levelKey,
+
+    playerAnswer:
+      value,
+
+    correctAnswer:
+      currentQuestion.ans,
+
+    isCorrect,
+
+    responseTime,
+
+    attemptNumber:
+      currentAttemptNumber,
+
+    hintUsed:
+      currentHintUsed
+  };
+
+  /* Tracking */
+
+  try{
+
+    playerEventTracker.track(
+      "ANSWER_SUBMITTED",
+      answerEvent
+    );
+
+  }catch(error){
+
+    console.warn(
+      "[Tracker] ANSWER_SUBMITTED error:",
+      error
+    );
+
+  }
+
+  /*
+   * AI hanya menerima event.
+   * Gameplay tetap menjadi sumber kebenaran.
+   */
+
+  try{
+
+    if(
+      typeof window.askCupcakeAfterAnswer===
+        "function"
+    ){
+
+      window.askCupcakeAfterAnswer({
+        question:
+          currentQuestion,
+
+        playerAnswer:
+          value,
+
+        correctAnswer:
+          currentQuestion.ans,
+
+        isCorrect,
+
+        attemptNumber:
+          currentAttemptNumber,
+
+        responseTime,
+
+        skill:
+          currentQuestion.skill,
+
+        difficulty:
+          levelKey,
+
+        playerId:
+          playerEventTracker
+            .getPlayerInfo()
+            .playerId
+      });
+
+    }
+
+  }catch(error){
+
+    console.warn(
+      "[Chocolate Cupcake] Answer AI error:",
+      error
+    );
+
+  }
+
+  updateDebugPanel();
+
+  /* =====================================================
+     WRONG ANSWER
+     ===================================================== */
+
+  if(!isCorrect){
+
+    score=
+      Math.max(
+        0,
+        score-25
+      );
+
+    totalScore=
+      Math.max(
+        0,
+        totalScore-25
+      );
+
+    let profile=null;
+
+    try{
+
+      profile=
+        typeof getPlayerLearningProfile===
+          "function"
+          ? getPlayerLearningProfile()
+          : null;
+
+      if(profile){
+
+        profile.currentSkill=
+          currentQuestion.skill;
+
+        profile.currentDifficulty=
+          levelKey;
+
+        window.currentPlayerLearningProfile=
+          profile;
+
+      }
+
+    }catch(error){
+
+      console.warn(
+        "[Chocolate Cupcake] Profile error:",
+        error
+      );
+
+    }
+
+    lastAIDecision=null;
+
+    try{
+
+      if(
+        typeof requestAIDecision===
+          "function" &&
+        profile
+      ){
+
+        lastAIDecision=
+          requestAIDecision(profile);
+
+      }
+
+    }catch(error){
+
+      console.warn(
+        "[Chocolate Cupcake] AI decision error:",
+        error
+      );
+
+    }
+
+    currentHintUsed=
+      !!(
+        lastAIDecision &&
+        lastAIDecision.useHint
+      );
+
+    if(currentHintUsed){
+
+      const hintMap={
+
+        addition:
+          "Coba hitung dari angka pertama, lalu tambahkan angka kedua secara bertahap.",
+
+        subtraction:
+          "Coba mulai dari angka pertama lalu kurangi perlahan.",
+
+        multiplication:
+          "Ingat bahwa perkalian bisa dihitung sebagai penjumlahan berulang.",
+
+        division:
+          "Coba cari angka yang jika dikalikan pembagi menghasilkan bilangan pertama."
+
+      };
+
+      const hint=
+        hintMap[
+          currentQuestion.skill
+        ] ||
         "Coba perhatikan kembali operasi matematikanya.";
 
-      aiNote.textContent=`🤖 Chocolate Guide: ${hint}`;
-      aiNote.classList.remove("hidden");
+      aiNote.textContent=
+        `🤖 Chocolate Guide: ${hint}`;
+
+      aiNote.classList.remove(
+        "hidden"
+      );
 
       f.textContent=
         `❌ Belum tepat. -25 poin. ${
-          lastAIDecision.action==="REMEDIATE"
+          lastAIDecision &&
+          lastAIDecision.action===
+            "REMEDIATE"
             ? "Kita turunkan tingkat tantangannya."
             : "Aku bantu sedikit."
         }`;
 
-      playerEventTracker.track("HINT_USED",{
-        questionId:currentQuestionId,
-        hintLevel:lastAIDecision.action,
-        skill:currentQuestion.skill
-      });
+      try{
+
+        playerEventTracker.track(
+          "HINT_USED",
+          {
+            questionId:
+              currentQuestionId,
+
+            hintLevel:
+              lastAIDecision?.action ||
+              "HINT",
+
+            skill:
+              currentQuestion.skill
+          }
+        );
+
+      }catch(error){
+
+        console.warn(
+          "[Tracker] HINT_USED error:",
+          error
+        );
+
+      }
+
     }else{
-      f.textContent="❌ Salah. -25 poin. Coba lagi!";
+
+      f.textContent=
+        "❌ Salah. -25 poin. Coba lagi!";
+
     }
 
     if(
+      lastAIDecision &&
       lastAIDecision.difficulty &&
       lastAIDecision.difficulty!==levelKey
     ){
-      adaptiveDifficultyOverride=lastAIDecision.difficulty;
+
+      adaptiveDifficultyOverride=
+        lastAIDecision.difficulty;
+
     }
 
     updateDebugPanel();
     render();
+
     return;
+
   }
 
-  // Jawaban benar: gameplay langsung memberi skor.
-  const actual=steps-missionStartSteps;
+  /* =====================================================
+     CORRECT ANSWER
+     ===================================================== */
+
+  const actual=
+    steps-
+    missionStartSteps;
+
   const optimal=
-    distanceMap(missionStart).get(player.x+","+player.y) ?? actual;
-  const extra=Math.max(0,actual-optimal);
-  const bonus=Math.max(20,100-extra*5);
-  const earned=100+bonus;
+    distanceMap(
+      missionStart
+    ).get(
+      player.x+
+      ","+
+      player.y
+    ) ??
+    actual;
+
+  const extra=
+    Math.max(
+      0,
+      actual-optimal
+    );
+
+  const bonus=
+    Math.max(
+      20,
+      100-extra*5
+    );
+
+  const earned=
+    100+bonus;
 
   score+=earned;
   totalScore+=earned;
@@ -1132,404 +3987,1483 @@ lastAIDecision = requestAIDecision(profile);
     `🎉 Benar! <b>+${earned} poin</b><br>`+
     `<small>Rute ${actual} langkah • rute tercepat ${optimal}</small>`;
 
-  playerEventTracker.track("QUESTION_COMPLETED",{
-    questionId:currentQuestionId,
-    question:`${currentQuestion.a} ${currentQuestion.op} ${currentQuestion.b} = ?`,
-    skill:getCurrentSkill(),
-    responseTime,
-    attemptNumber:currentAttemptNumber,
-    hintUsed:currentHintUsed
-  });
+  try{
+
+    playerEventTracker.track(
+      "QUESTION_COMPLETED",
+      {
+        questionId:
+          currentQuestionId,
+
+        question:
+          `${currentQuestion.a} ${currentQuestion.op} ${currentQuestion.b} = ?`,
+
+        skill:
+          getCurrentSkill(),
+
+        responseTime,
+
+        attemptNumber:
+          currentAttemptNumber,
+
+        hintUsed:
+          currentHintUsed
+      }
+    );
+
+  }catch(error){
+
+    console.warn(
+      "[Tracker] QUESTION_COMPLETED error:",
+      error
+    );
+
+  }
+
+  /*
+   * Target selesai.
+   */
 
   nextTarget++;
-  missionStart={...player};
-  missionStartSteps=steps;
+
+  missionStart={
+    ...player
+  };
+
+  missionStartSteps=
+    steps;
 
   render();
 
-  // Beri waktu agar respons celebrating dari Chocolate Cupcake
-  // tetap terlihat sebelum modal pertanyaan ditutup.
-  setTimeout(()=>{
-    questionModal.classList.remove("show");
+  /*
+   * Beri waktu 3 detik agar celebration AI
+   * dan feedback dapat terlihat.
+   */
 
-    if(nextTarget===targetOrder.length){
-      home=chooseHome();
-      updateMission();
-      locked=false;
-      updateNewMazeButton();
-      render();
-      showToast("🏠 Semua teman ditemukan! Cari rumah Chocolate Abyss.");
-    }else{
-      locked=false;
-    }
-  },3000);
+  setTimeout(
+    ()=>{
+
+      questionModal.classList.remove(
+        "show"
+      );
+
+      questionModal.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+      questionOpen=false;
+
+      currentQuestion=null;
+      currentQuestionId=null;
+
+      currentAttemptNumber=0;
+      currentHintUsed=false;
+      currentTargetIndex=-1;
+
+      if(
+        nextTarget===
+        targetOrder.length
+      ){
+
+        home=
+          chooseHome();
+
+        updateMission();
+
+        locked=false;
+
+        updateNewMazeButton();
+
+        render();
+
+        showToast(
+          "🏠 Semua teman ditemukan! Cari rumah Chocolate Abyss."
+        );
+
+      }else{
+
+        locked=false;
+
+        render();
+
+        showToast(
+          `🎯 Cari ${
+            chars[
+              targetOrder[nextTarget]
+            ].name
+          } berikutnya!`
+        );
+
+      }
+
+    },
+    3000
+  );
+
 }
+
+/* =========================================================
+   MOVEMENT
+   ========================================================= */
 
 function move(dx,dy){
-  // Movement is allowed only after the player has started the current level.
-  // Keep this independent from overlay animations/classes so keyboard and touch controls behave identically.
-  if(!gameStarted || locked || !startOverlay.classList.contains("hidden") || questionModal.classList.contains("show") || levelModal.classList.contains("show") || !finalOverlay.classList.contains("hidden")) return;
-  const nx=player.x+dx, ny=player.y+dy;
-  if(!Number.isInteger(nx)||!Number.isInteger(ny)) return;
-  if(nx<0||ny<0||ny>=map.length||nx>=map[0].length||map[ny][nx]==="#") return;
-  player={x:nx,y:ny};
+
+  /*
+   * Movement hanya boleh ketika game aktif.
+   */
+
+  if(!gameStarted){
+    return;
+  }
+
+  /*
+   * Jangan bergerak ketika popup soal aktif.
+   */
+
+  if(questionOpen){
+    return;
+  }
+
+  if(
+    questionModal.classList.contains(
+      "show"
+    )
+  ){
+    return;
+  }
+
+  if(
+    levelModal.classList.contains(
+      "show"
+    )
+  ){
+    return;
+  }
+
+  if(
+    !finalOverlay.classList.contains(
+      "hidden"
+    )
+  ){
+    return;
+  }
+
+  if(
+    !startOverlay.classList.contains(
+      "hidden"
+    )
+  ){
+    return;
+  }
+
+  if(locked){
+    return;
+  }
+
+  const nx=
+    player.x+dx;
+
+  const ny=
+    player.y+dy;
+
+  if(
+    !Number.isInteger(nx) ||
+    !Number.isInteger(ny)
+  ){
+    return;
+  }
+
+  if(
+    nx<0 ||
+    ny<0 ||
+    ny>=map.length ||
+    nx>=map[0].length
+  ){
+    return;
+  }
+
+  /*
+   * Wall collision.
+   */
+
+  if(
+    map[ny][nx]==="#"
+  ){
+    return;
+  }
+
+  /*
+   * Update player position.
+   */
+
+  player={
+    x:nx,
+    y:ny
+  };
+
   steps++;
+
+  /*
+   * Render posisi baru.
+   */
+
   render();
 
-  const ti=targets.findIndex(p=>p.x===nx&&p.y===ny);
-  if(!home && ti===nextTarget) openQuestion();
-  else if(!home && ti>nextTarget) showToast(`🔎 Temukan ${chars[targetOrder[nextTarget]].name} lebih dulu.`);
-  else if(home && nx===home.x && ny===home.y) completeLevel();
+  /* =====================================================
+     CHECK TARGET
+     ===================================================== */
+
+  if(!home){
+
+    const nextTargetPosition=
+      targets[nextTarget];
+
+    /*
+     * TARGET YANG BENAR
+     */
+
+    if(
+      nextTargetPosition &&
+      player.x===
+        nextTargetPosition.x &&
+      player.y===
+        nextTargetPosition.y
+    ){
+
+      checkTargetCollision();
+
+      return;
+
+    }
+
+    /*
+     * TARGET LAIN
+     */
+
+    const otherTargetIndex=
+      targets.findIndex(
+        (p,index)=>
+          index!==nextTarget &&
+          p.x===player.x &&
+          p.y===player.y
+      );
+
+    if(
+      otherTargetIndex!==-1
+    ){
+
+      const targetName=
+        chars[
+          targetOrder[nextTarget]
+        ].name;
+
+      showToast(
+        `🔎 Temukan ${targetName} lebih dulu.`
+      );
+
+      return;
+
+    }
+
+  }
+
+  /* =====================================================
+     CHECK HOME
+     ===================================================== */
+
+  if(
+    home &&
+    player.x===home.x &&
+    player.y===home.y
+  ){
+
+    completeLevel();
+
+  }
+
 }
-function showLevelCelebration(levelName){
-  const note=document.getElementById("levelAiNote");
-  if(!note) return;
+
+/* =========================================================
+   LEVEL CELEBRATION
+   ========================================================= */
+
+function showLevelCelebration(
+  levelName
+){
+
+  const note=
+    document.getElementById(
+      "levelAiNote"
+    );
+
+  if(!note){
+    return;
+  }
 
   note.innerHTML=`
+
     <div class="cupcake-ai-response">
+
       <img
         class="cupcake-ai-image"
         src="sources/celebrating.png"
         alt="Chocolate Cupcake celebrating"
       >
+
       <div class="cupcake-ai-content">
+
         <div class="cupcake-ai-message">
           🎉 Hebat! Kamu menyelesaikan level ${levelName}! 🍫
         </div>
-        <div class="cupcake-ai-visual">🎉🏆🍫</div>
+
+        <div class="cupcake-ai-visual">
+          🎉🏆🍫
+        </div>
+
       </div>
+
     </div>
+
   `;
 
-  note.classList.remove("hidden");
+  note.classList.remove(
+    "hidden"
+  );
 
-  if("speechSynthesis" in window){
+  if(
+    "speechSynthesis"
+    in window
+  ){
+
     try{
+
       window.speechSynthesis.cancel();
-      const utterance=new SpeechSynthesisUtterance(
-        `Hebat! Kamu menyelesaikan level ${levelName}!`
-      );
+
+      const utterance=
+        new SpeechSynthesisUtterance(
+          `Hebat! Kamu menyelesaikan level ${levelName}!`
+        );
+
       utterance.lang="id-ID";
-      utterance.rate=0.95;
+      utterance.rate=.95;
       utterance.pitch=1.05;
-      window.speechSynthesis.speak(utterance);
+
+      window.speechSynthesis.speak(
+        utterance
+      );
+
     }catch(error){
-      console.warn("[Chocolate Cupcake] Level TTS error:",error);
+
+      console.warn(
+        "[Chocolate Cupcake] Level TTS error:",
+        error
+      );
+
     }
+
   }
+
 }
 
-function showFinalVictory(){
-  const card=document.querySelector("#finalOverlay .final-card");
-  if(!card) return;
+/* =========================================================
+   FINAL VICTORY
+   ========================================================= */
 
-  let note=document.getElementById("finalAiNote");
+function showFinalVictory(){
+
+  const card=
+    document.querySelector(
+      "#finalOverlay .final-card"
+    );
+
+  if(!card){
+    return;
+  }
+
+  let note=
+    document.getElementById(
+      "finalAiNote"
+    );
 
   if(!note){
-    note=document.createElement("div");
-    note.id="finalAiNote";
-    note.className="ai-note";
-    const message=document.getElementById("finalMessage");
-    message.insertAdjacentElement("afterend",note);
+
+    note=
+      document.createElement(
+        "div"
+      );
+
+    note.id=
+      "finalAiNote";
+
+    note.className=
+      "ai-note";
+
+    const message=
+      document.getElementById(
+        "finalMessage"
+      );
+
+    message.insertAdjacentElement(
+      "afterend",
+      note
+    );
+
   }
 
   note.innerHTML=`
+
     <div class="cupcake-ai-response">
+
       <img
         class="cupcake-ai-image"
         src="sources/victory.png"
         alt="Chocolate Cupcake victory"
       >
+
       <div class="cupcake-ai-content">
+
         <div class="cupcake-ai-message">
           🏆 Luar biasa! Kamu menaklukkan Chocolate Abyss Gate! 🍫🎉
         </div>
-        <div class="cupcake-ai-visual">🏆🎉🍫</div>
+
+        <div class="cupcake-ai-visual">
+          🏆🎉🍫
+        </div>
+
       </div>
+
     </div>
+
   `;
 
-  note.classList.remove("hidden");
+  note.classList.remove(
+    "hidden"
+  );
 
-  if("speechSynthesis" in window){
+  if(
+    "speechSynthesis"
+    in window
+  ){
+
     try{
+
       window.speechSynthesis.cancel();
-      const utterance=new SpeechSynthesisUtterance(
-        "Luar biasa! Kamu menaklukkan Chocolate Abyss Gate!"
-      );
+
+      const utterance=
+        new SpeechSynthesisUtterance(
+          "Luar biasa! Kamu menaklukkan Chocolate Abyss Gate!"
+        );
+
       utterance.lang="id-ID";
-      utterance.rate=0.95;
+      utterance.rate=.95;
       utterance.pitch=1.05;
-      window.speechSynthesis.speak(utterance);
+
+      window.speechSynthesis.speak(
+        utterance
+      );
+
     }catch(error){
-      console.warn("[Chocolate Cupcake] Victory TTS error:",error);
+
+      console.warn(
+        "[Chocolate Cupcake] Victory TTS error:",
+        error
+      );
+
     }
+
   }
+
 }
 
+/* =========================================================
+   COMPLETE LEVEL
+   ========================================================= */
+
 function completeLevel(){
+
   locked=true;
+  questionOpen=false;
 
-  // Kirim hasil level ke Chocolate Cupcake AI
-  if(typeof window.sendCupcakeVictory === "function"){
-    const playerInfo=playerEventTracker.getPlayerInfo();
+  try{
 
-    const levelEvents=playerEventTracker.getEvents()
-      .filter(e =>
-        e.type==="ANSWER_SUBMITTED" &&
-        e.level===levelKey
-      );
+    if(
+      typeof window.sendCupcakeVictory===
+        "function"
+    ){
 
-    const correctAnswers=levelEvents
-      .filter(e=>e.isCorrect).length;
+      const playerInfo=
+        playerEventTracker
+          .getPlayerInfo();
 
-    const incorrectAnswers=levelEvents
-      .filter(e=>!e.isCorrect).length;
+      const levelEvents=
+        playerEventTracker
+          .getEvents()
+          .filter(
+            e=>
+              e.type===
+                "ANSWER_SUBMITTED" &&
+              e.level===
+                levelKey
+          );
 
-    window.sendCupcakeVictory({
-      playerId:playerInfo.playerId,
-      level:levelKey,
-      correct:correctAnswers,
-      wrong:incorrectAnswers
-    });
+      const correctAnswers=
+        levelEvents
+          .filter(
+            e=>e.isCorrect
+          )
+          .length;
+
+      const incorrectAnswers=
+        levelEvents
+          .filter(
+            e=>!e.isCorrect
+          )
+          .length;
+
+      window.sendCupcakeVictory({
+        playerId:
+          playerInfo.playerId,
+
+        level:
+          levelKey,
+
+        correct:
+          correctAnswers,
+
+        wrong:
+          incorrectAnswers
+      });
+
+    }
+
+  }catch(error){
+
+    console.warn(
+      "[Chocolate Cupcake] Victory API error:",
+      error
+    );
+
   }
 
-  const profile=getPlayerLearningProfile();
+  const profile=
+    getPlayerLearningProfile();
 
-  const levelEvents=playerEventTracker.getEvents().filter(e=>e.type==="ANSWER_SUBMITTED" && e.level===levelKey);
-  const correctAnswers=levelEvents.filter(e=>e.isCorrect).length;
-  const incorrectAnswers=levelEvents.filter(e=>!e.isCorrect).length;
-  const responseTimes=levelEvents.map(e=>Number(e.responseTime)).filter(Number.isFinite);
+  const levelEvents=
+    playerEventTracker
+      .getEvents()
+      .filter(
+        e=>
+          e.type===
+            "ANSWER_SUBMITTED" &&
+          e.level===
+            levelKey
+      );
 
-  playerEventTracker.track("LEVEL_COMPLETED", {
-    level:levelKey,
-    difficulty:levelKey,
-    accuracy:(correctAnswers+incorrectAnswers)
-      ? correctAnswers/(correctAnswers+incorrectAnswers)
-      : 0,
-    averageResponseTime:responseTimes.length
-      ? responseTimes.reduce((a,b)=>a+b,0)/responseTimes.length
-      : 0,
-    totalQuestions:correctAnswers+incorrectAnswers,
-    correctAnswers,
-    incorrectAnswers,
-    hintsUsed:profile.hintsUsed
-  });
+  const correctAnswers=
+    levelEvents
+      .filter(
+        e=>e.isCorrect
+      )
+      .length;
+
+  const incorrectAnswers=
+    levelEvents
+      .filter(
+        e=>!e.isCorrect
+      )
+      .length;
+
+  const responseTimes=
+    levelEvents
+      .map(
+        e=>Number(
+          e.responseTime
+        )
+      )
+      .filter(
+        Number.isFinite
+      );
+
+  try{
+
+    playerEventTracker.track(
+      "LEVEL_COMPLETED",
+      {
+        level:
+          levelKey,
+
+        difficulty:
+          levelKey,
+
+        accuracy:
+          (
+            correctAnswers+
+            incorrectAnswers
+          )
+            ? correctAnswers/
+              (
+                correctAnswers+
+                incorrectAnswers
+              )
+            : 0,
+
+        averageResponseTime:
+          responseTimes.length
+            ? responseTimes.reduce(
+                (a,b)=>a+b,
+                0
+              )/
+              responseTimes.length
+            : 0,
+
+        totalQuestions:
+          correctAnswers+
+          incorrectAnswers,
+
+        correctAnswers,
+        incorrectAnswers,
+
+        hintsUsed:
+          profile.hintsUsed
+
+      }
+    );
+
+  }catch(error){
+
+    console.warn(
+      "[Tracker] LEVEL_COMPLETED error:",
+      error
+    );
+
+  }
 
   updateDebugPanel();
 
-  const idx=levelIndex(levelKey);
+  const idx=
+    levelIndex(levelKey);
+
+  /* =====================================================
+     MASIH ADA LEVEL
+     ===================================================== */
+
   if(idx<3){
-    unlocked=idx+1;
-    localStorage.setItem(STORAGE,String(unlocked));
-    document.getElementById("levelTitle").textContent=`🎉 ${levels[levelKey].name} selesai!`;
-    document.getElementById("levelMessage").innerHTML=
-      `Skor level <b>${score}</b> • <b>${steps}</b> langkah<br>🏆 Total skor <b>${totalScore}</b><br><br>
-       🔓 <b>${levels[keyFromIndex(idx+1)].name}</b> terbuka.<br>
-       Petualangan langsung berlanjut tanpa intro dan tanpa memilih karakter lagi.`;
-    const buttons=document.getElementById("levelButtons");
-    const nextKey=keyFromIndex(idx+1);
+
+    unlocked=
+      idx+1;
+
+    localStorage.setItem(
+      STORAGE,
+      String(unlocked)
+    );
+
+    document.getElementById(
+      "levelTitle"
+    ).textContent=
+      `🎉 ${
+        levels[levelKey].name
+      } selesai!`;
+
+    document.getElementById(
+      "levelMessage"
+    ).innerHTML=
+      `
+        Skor level <b>${score}</b>
+        • <b>${steps}</b> langkah
+        <br>
+        🏆 Total skor
+        <b>${totalScore}</b>
+        <br><br>
+        🔓 <b>${
+          levels[
+            keyFromIndex(idx+1)
+          ].name
+        }</b> terbuka.
+        <br>
+        Petualangan langsung berlanjut
+        tanpa intro dan tanpa memilih karakter lagi.
+      `;
+
+    const buttons=
+      document.getElementById(
+        "levelButtons"
+      );
+
+    const nextKey=
+      keyFromIndex(
+        idx+1
+      );
+
     buttons.innerHTML=`
-      <button id="replayMazeBtn">🔄 Labirin Baru</button>
-      <button id="nextLevelBtn">🚀 Lanjut ke ${levels[nextKey].name}</button>
+
+      <button
+        id="replayMazeBtn"
+        type="button"
+      >
+        🔄 Labirin Baru
+      </button>
+
+      <button
+        id="nextLevelBtn"
+        type="button"
+      >
+        🚀 Lanjut ke
+        ${levels[nextKey].name}
+      </button>
+
     `;
 
-    // Setelah satu tingkat selesai, pemain boleh mengulang tingkat yang sama
-    // dengan labirin baru ATAU langsung melanjutkan ke tingkat berikutnya.
-    document.getElementById("replayMazeBtn").onclick=()=>{
-      levelModal.classList.remove("show");
-      document.getElementById("levelAiNote").classList.add("hidden");
+    /* Replay */
+
+    document.getElementById(
+      "replayMazeBtn"
+    ).onclick=()=>{
+
+      levelModal.classList.remove(
+        "show"
+      );
+
+      document.getElementById(
+        "levelAiNote"
+      ).classList.add(
+        "hidden"
+      );
+
       setupLevel();
+
       startLevelWithoutIntro();
+
       updateNewMazeButton();
-      showToast(`🔄 Labirin ${levels[levelKey].name} baru dimulai!`);
+
+      showToast(
+        `🔄 Labirin ${
+          levels[levelKey].name
+        } baru dimulai!`
+      );
+
     };
 
-    document.getElementById("nextLevelBtn").onclick=()=>{
-      levelKey=nextKey;
-      levelModal.classList.remove("show");
-      document.getElementById("levelAiNote").classList.add("hidden");
+    /* Next level */
+
+    document.getElementById(
+      "nextLevelBtn"
+    ).onclick=()=>{
+
+      levelKey=
+        nextKey;
+
+      levelModal.classList.remove(
+        "show"
+      );
+
+      document.getElementById(
+        "levelAiNote"
+      ).classList.add(
+        "hidden"
+      );
+
       setupLevel();
+
       startLevelWithoutIntro();
+
       updateNewMazeButton();
+
     };
 
-    // Tombol Labirin Baru di header juga sudah aktif setelah rumah ditemukan.
-    // Pastikan statusnya diperbarui saat dialog selesai ditampilkan.
     updateNewMazeButton();
 
-    // Tampilkan celebration di dalam modal level agar tidak tertutup
-    // oleh modal berikutnya dan tidak hilang saat #aiNote pertanyaan di-reset.
-    const levelAiNote=document.getElementById("levelAiNote");
+    const levelAiNote=
+      document.getElementById(
+        "levelAiNote"
+      );
+
     if(levelAiNote){
+
       levelAiNote.innerHTML="";
-      levelAiNote.classList.add("hidden");
+
+      levelAiNote.classList.add(
+        "hidden"
+      );
+
     }
 
-    levelModal.classList.add("show");
-    showLevelCelebration(levels[levelKey].name);
+    levelModal.classList.add(
+      "show"
+    );
+
+    showLevelCelebration(
+      levels[levelKey].name
+    );
+
   }else{
-    playerEventTracker.track("GAME_COMPLETED", {level:levelKey, difficulty:levelKey, totalScore});
+
+    /* ===================================================
+       FINAL GAME
+       =================================================== */
+
+    try{
+
+      playerEventTracker.track(
+        "GAME_COMPLETED",
+        {
+          level:
+            levelKey,
+
+          difficulty:
+            levelKey,
+
+          totalScore
+        }
+      );
+
+    }catch(error){
+
+      console.warn(
+        "[Tracker] GAME_COMPLETED error:",
+        error
+      );
+
+    }
+
     updateDebugPanel();
+
     launchConfetti();
-    document.getElementById("finalMessage").innerHTML=
-      `Semua tingkat Chocolate Abyss Gate berhasil ditaklukkan!<br>
-       Skor akumulasi Easy + Medium + Hard: <b>${totalScore}</b><br>Skor Hard: <b>${score}</b> dengan <b>${steps}</b> langkah.<br><br>
-       🏆 Piala menunggu sang petualang hebat!`;
-    finalOverlay.classList.remove("hidden");
+
+    document.getElementById(
+      "finalMessage"
+    ).innerHTML=
+      `
+        Semua tingkat Chocolate Abyss Gate
+        berhasil ditaklukkan!
+        <br>
+        Skor akumulasi Easy + Medium + Hard:
+        <b>${totalScore}</b>
+        <br>
+        Skor Hard:
+        <b>${score}</b>
+        dengan
+        <b>${steps}</b>
+        langkah.
+        <br><br>
+        🏆 Piala menunggu sang petualang hebat!
+      `;
+
+    finalOverlay.classList.remove(
+      "hidden"
+    );
+
     showFinalVictory();
+
   }
+
 }
+
+/* =========================================================
+   CONFETTI
+   ========================================================= */
 
 function launchConfetti(){
-  const c=document.getElementById("confetti");c.innerHTML="";
-  for(let i=0;i<90;i++){
-    const p=document.createElement("i");
-    p.style.left=Math.random()*100+"%";
-    p.style.animationDuration=(2+Math.random()*2.5)+"s";
-    p.style.animationDelay=(Math.random()*0.8)+"s";
-    p.style.background=["#f3c15b","#e97936","#6da34d","#c9523d","#7b4bd8"][Math.floor(Math.random()*5)];
-    p.style.transform=`rotate(${Math.random()*360}deg)`;
+
+  const c=
+    document.getElementById(
+      "confetti"
+    );
+
+  c.innerHTML="";
+
+  for(
+    let i=0;
+    i<90;
+    i++
+  ){
+
+    const p=
+      document.createElement(
+        "i"
+      );
+
+    p.style.left=
+      Math.random()*100+
+      "%";
+
+    p.style.animationDuration=
+      (
+        2+
+        Math.random()*2.5
+      )+
+      "s";
+
+    p.style.animationDelay=
+      (
+        Math.random()*.8
+      )+
+      "s";
+
+    p.style.background=
+      [
+        "#f3c15b",
+        "#e97936",
+        "#6da34d",
+        "#c9523d",
+        "#7b4bd8"
+      ][
+        Math.floor(
+          Math.random()*5
+        )
+      ];
+
+    p.style.transform=
+      `rotate(${
+        Math.random()*360
+      }deg)`;
+
     c.appendChild(p);
+
   }
-  setTimeout(()=>c.innerHTML="",5000);
+
+  setTimeout(
+    ()=>{
+      c.innerHTML="";
+    },
+    5000
+  );
+
 }
 
+/* =========================================================
+   EXIT
+   ========================================================= */
+
 function exitGame(){
-  // Exit selalu menghapus progres sesi dan mengembalikan permainan
-  // ke awal: Easy + intro + pilih karakter.
+
   locked=true;
   gameStarted=false;
-  questionModal.classList.remove("show");
-  levelModal.classList.remove("show");
-  document.getElementById("levelAiNote").classList.add("hidden");
-  finalOverlay.classList.add("hidden");
+  questionOpen=false;
+
+  questionModal.classList.remove(
+    "show"
+  );
+
+  questionModal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  levelModal.classList.remove(
+    "show"
+  );
+
+  document.getElementById(
+    "levelAiNote"
+  ).classList.add(
+    "hidden"
+  );
+
+  finalOverlay.classList.add(
+    "hidden"
+  );
+
+  currentQuestion=null;
+  currentQuestionId=null;
+  currentAttemptNumber=0;
+  currentHintUsed=false;
+  currentTargetIndex=-1;
+
   adaptiveDifficultyOverride=null;
   lastAIDecision=null;
 
   levelKey="easy";
   unlocked=1;
   selected=0;
-  localStorage.setItem(STORAGE,"1");
+
+  localStorage.setItem(
+    STORAGE,
+    "1"
+  );
 
   setupLevel();
+
   showIntro();
+
   updateDifficulty();
   updateNewMazeButton();
-  showToast("🚪 Game di-reset. Mulai lagi dari level Mudah.");
+
+  showToast(
+    "🚪 Game di-reset. Mulai lagi dari level Mudah."
+  );
+
 }
 
-document.getElementById("goPick").onclick=showProfile;
-document.getElementById("backIntroFromProfile").onclick=showIntro;
-document.getElementById("saveProfile").onclick=()=>{
-  const name=document.getElementById("playerName").value.trim();
-  const age=Number(document.getElementById("playerAge").value);
-  if(!name){showToast("✏️ Masukkan nama panggilan terlebih dahulu.");return;}
-  if(!Number.isInteger(age)||age<4||age>18){showToast("🎂 Masukkan usia antara 4–18 tahun.");return;}
-  playerEventTracker.setPlayerInfo(name,age);
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+document.getElementById(
+  "goPick"
+).onclick=
+  showProfile;
+
+document.getElementById(
+  "backIntroFromProfile"
+).onclick=
+  showIntro;
+
+document.getElementById(
+  "saveProfile"
+).onclick=()=>{
+
+  const name=
+    document.getElementById(
+      "playerName"
+    ).value.trim();
+
+  const age=
+    Number(
+      document.getElementById(
+        "playerAge"
+      ).value
+    );
+
+  if(!name){
+
+    showToast(
+      "✏️ Masukkan nama panggilan terlebih dahulu."
+    );
+
+    return;
+
+  }
+
+  if(
+    !Number.isInteger(age) ||
+    age<4 ||
+    age>18
+  ){
+
+    showToast(
+      "🎂 Masukkan usia antara 4–18 tahun."
+    );
+
+    return;
+
+  }
+
+  try{
+
+    playerEventTracker.setPlayerInfo(
+      name,
+      age
+    );
+
+  }catch(error){
+
+    console.warn(
+      "[Tracker] setPlayerInfo error:",
+      error
+    );
+
+  }
+
   updateDebugPanel();
+
   showPicker();
+
 };
-document.getElementById("backIntro").onclick=showProfile;
-document.getElementById("startGame").onclick=()=>{
-  // Karakter baru dipilih setelah setup awal. Siapkan ulang misi SEKALI
-  // agar karakter pemain tidak pernah muncul sebagai target.
-  const seed=Date.now()+Math.floor(Math.random()*1000000);
-  prepareTargets(seededRandom(seed));
+
+document.getElementById(
+  "backIntro"
+).onclick=
+  showProfile;
+
+/* =========================================================
+   START GAME
+   ========================================================= */
+
+document.getElementById(
+  "startGame"
+).onclick=()=>{
+
+  const seed=
+    Date.now()+
+    Math.floor(
+      Math.random()*1000000
+    );
+
+  /*
+   * Target dibuat ulang setelah karakter dipilih.
+   */
+
+  prepareTargets(
+    seededRandom(seed)
+  );
+
+  /*
+   * Pastikan player berada di cell yang bisa dilalui.
+   */
+
+  player=
+    findNearestWalkable(
+      player.x,
+      player.y
+    );
+
   score=0;
   steps=0;
-  missionStart={...player};
+
+  missionStart={
+    ...player
+  };
+
   missionStartSteps=0;
+
   locked=false;
   gameStarted=true;
+  questionOpen=false;
+
   adaptiveDifficultyOverride=null;
   lastAIDecision=null;
-  playerEventTracker.startSession();
-  playerEventTracker.track("GAME_STARTED", {playerName:playerEventTracker.getPlayerInfo().name,playerAge:playerEventTracker.getPlayerInfo().age});
-  playerEventTracker.track("LEVEL_STARTED", {level:levelKey,difficulty:levelKey});
+
+  try{
+
+    playerEventTracker.startSession();
+
+    const info=
+      playerEventTracker
+        .getPlayerInfo();
+
+    playerEventTracker.track(
+      "GAME_STARTED",
+      {
+        playerName:
+          info.name,
+
+        playerAge:
+          info.age
+      }
+    );
+
+    playerEventTracker.track(
+      "LEVEL_STARTED",
+      {
+        level:
+          levelKey,
+
+        difficulty:
+          levelKey
+      }
+    );
+
+  }catch(error){
+
+    console.warn(
+      "[Tracker] Game start tracking error:",
+      error
+    );
+
+  }
+
   hideStart();
+
   updateMission();
   updateDifficulty();
   updateNewMazeButton();
+
   render();
+
 };
-document.getElementById("newMaze").onclick=()=>{
-  /* During active play, the button is locked until the home is found.
-     Once unlocked, keep the selected player and current difficulty,
-     and randomize the target character placement for the new maze. */
-  if(gameStarted && !home){
-    showToast("🔒 Temukan rumah Chocolate Abyss terlebih dahulu.");
+
+/* =========================================================
+   NEW MAZE
+   ========================================================= */
+
+document.getElementById(
+  "newMaze"
+).onclick=()=>{
+
+  if(
+    gameStarted &&
+    !home
+  ){
+
+    showToast(
+      "🔒 Temukan rumah Chocolate Abyss terlebih dahulu."
+    );
+
     return;
+
   }
+
+  questionOpen=false;
+
   setupLevel();
+
   startLevelWithoutIntro();
+
 };
-document.getElementById("exitGame").onclick=exitGame;
-document.getElementById("playAgain").onclick=()=>{
-  finalOverlay.classList.add("hidden");
+
+/* =========================================================
+   EXIT
+   ========================================================= */
+
+document.getElementById(
+  "exitGame"
+).onclick=
+  exitGame;
+
+document.getElementById(
+  "playAgain"
+).onclick=()=>{
+
+  finalOverlay.classList.add(
+    "hidden"
+  );
+
   startNewSession();
+
 };
-document.getElementById("finalExit").onclick=exitGame;
 
-document.querySelectorAll("#difficulty button").forEach(btn=>{
-  btn.onclick=()=>{
-    const idx=levelIndex(btn.dataset.level);
-    if(idx>unlocked){showToast("🔒 Selesaikan tingkat sebelumnya terlebih dahulu.");return;}
-    if(gameStarted && btn.dataset.level!==levelKey){showToast("Selesaikan level yang sedang dimainkan terlebih dahulu.");return;}
-    levelKey=btn.dataset.level;
-    setupLevel();
-    startLevelWithoutIntro();
-  };
-});
-document.querySelectorAll(".controls button").forEach(btn=>{
-  const handler=(e)=>{ e.preventDefault(); const [x,y]=btn.dataset.move.split(",").map(Number); move(x,y); };
-  btn.addEventListener("click",handler);
-  btn.addEventListener("pointerdown",e=>e.preventDefault());
-});
-document.addEventListener("keydown", e => {
-  // Jangan tangkap keyboard game saat user sedang mengetik
-  const target = e.target;
+document.getElementById(
+  "finalExit"
+).onclick=
+  exitGame;
 
-  if (
-    target instanceof HTMLInputElement ||
-    target instanceof HTMLTextAreaElement ||
-    target instanceof HTMLSelectElement ||
-    target.isContentEditable
-  ) {
-    return;
+/* =========================================================
+   DIFFICULTY BUTTONS
+   ========================================================= */
+
+document
+  .querySelectorAll(
+    "#difficulty button"
+  )
+  .forEach(btn=>{
+
+    btn.onclick=()=>{
+
+      const idx=
+        levelIndex(
+          btn.dataset.level
+        );
+
+      if(idx>unlocked){
+
+        showToast(
+          "🔒 Selesaikan tingkat sebelumnya terlebih dahulu."
+        );
+
+        return;
+
+      }
+
+      if(
+        gameStarted &&
+        btn.dataset.level!==levelKey
+      ){
+
+        showToast(
+          "Selesaikan level yang sedang dimainkan terlebih dahulu."
+        );
+
+        return;
+
+      }
+
+      levelKey=
+        btn.dataset.level;
+
+      setupLevel();
+
+      startLevelWithoutIntro();
+
+    };
+
+  });
+
+/* =========================================================
+   MOBILE CONTROLS
+   ========================================================= */
+
+document
+  .querySelectorAll(
+    ".controls button"
+  )
+  .forEach(btn=>{
+
+    const handler=e=>{
+
+      e.preventDefault();
+
+      const [
+        x,
+        y
+      ]=
+        btn.dataset.move
+          .split(",")
+          .map(Number);
+
+      move(x,y);
+
+    };
+
+    btn.addEventListener(
+      "click",
+      handler
+    );
+
+    btn.addEventListener(
+      "pointerdown",
+      e=>{
+        e.preventDefault();
+      }
+    );
+
+  });
+
+/* =========================================================
+   KEYBOARD
+   ========================================================= */
+
+document.addEventListener(
+  "keydown",
+  e=>{
+
+    /*
+     * PENTING:
+     * Jangan tangkap W/A/S/D saat user mengetik nama.
+     */
+
+    const target=
+      e.target;
+
+    if(
+      target instanceof HTMLInputElement ||
+      target instanceof HTMLTextAreaElement ||
+      target instanceof HTMLSelectElement ||
+      target.isContentEditable
+    ){
+
+      return;
+
+    }
+
+    const key=
+      e.key.toLowerCase();
+
+    const d={
+
+      arrowup:
+        [0,-1],
+
+      w:
+        [0,-1],
+
+      arrowdown:
+        [0,1],
+
+      s:
+        [0,1],
+
+      arrowleft:
+        [-1,0],
+
+      a:
+        [-1,0],
+
+      arrowright:
+        [1,0],
+
+      d:
+        [1,0]
+
+    }[key];
+
+    if(d){
+
+      e.preventDefault();
+
+      move(...d);
+
+    }
+
+  }
+);
+
+/* =========================================================
+   DEBUG BUTTONS
+   ========================================================= */
+
+document.getElementById(
+  "exportPlayerData"
+).onclick=()=>{
+
+  try{
+
+    playerEventTracker.exportJSON();
+
+  }catch(error){
+
+    console.error(
+      "[Tracker] Export error:",
+      error
+    );
+
   }
 
-  const key = e.key.toLowerCase();
-
-  const d = {
-    arrowup: [0, -1],
-    w: [0, -1],
-    arrowdown: [0, 1],
-    s: [0, 1],
-    arrowleft: [-1, 0],
-    a: [-1, 0],
-    arrowright: [1, 0],
-    d: [1, 0]
-  }[key];
-
-  if (d) {
-    e.preventDefault();
-    move(...d);
-  }
-});
-
-document.getElementById("exportPlayerData").onclick=()=>playerEventTracker.exportJSON();
-document.getElementById("clearPlayerData").onclick=()=>{
-  if(confirm("Hapus seluruh data tracking pemain? Progres game juga tidak diubah.")){
-    playerEventTracker.clearPlayerData();
-    updateDebugPanel();
-    showToast("🗑️ Player tracking data dihapus.");
-  }
 };
-window.addEventListener("player-event",updateDebugPanel);
+
+document.getElementById(
+  "clearPlayerData"
+).onclick=()=>{
+
+  if(
+    confirm(
+      "Hapus seluruh data tracking pemain? Progres game juga tidak diubah."
+    )
+  ){
+
+    try{
+
+      playerEventTracker.clearPlayerData();
+
+      updateDebugPanel();
+
+      showToast(
+        "🗑️ Player tracking data dihapus."
+      );
+
+    }catch(error){
+
+      console.error(
+        "[Tracker] Clear data error:",
+        error
+      );
+
+    }
+
+  }
+
+};
+
+/* =========================================================
+   TRACKER EVENT
+   ========================================================= */
+
+window.addEventListener(
+  "player-event",
+  updateDebugPanel
+);
+
+/* =========================================================
+   INITIALIZE
+   ========================================================= */
+
 updateHeaderCharacters();
+
 setupLevel();
+
 updateDebugPanel();
+
 </script>
+
 </body>
 </html>
