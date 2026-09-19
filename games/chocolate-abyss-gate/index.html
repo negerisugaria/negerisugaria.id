@@ -328,12 +328,17 @@ header:after{
 <div class="modal" id="levelModal">
   <div class="question-card">
     <div style="font-size:72px">🎉</div>
+
     <h2 id="levelTitle">Level selesai!</h2>
+
     <p id="levelMessage"></p>
+
+    <div class="ai-note" id="levelAiNote"></div>
+
     <div class="answers" id="levelButtons"></div>
   </div>
 </div>
-
+  
 <!-- FINAL -->
 <div class="overlay hidden" id="finalOverlay">
   <div class="final-card">
@@ -956,8 +961,11 @@ updateDebugPanel();
   missionStart={...player}; missionStartSteps=steps;
   render();
 
+    // Beri waktu Chocolate Cupcake menampilkan celebration
+  // sebelum pertanyaan ditutup.
   setTimeout(()=>{
     questionModal.classList.remove("show");
+
     if(nextTarget===targetOrder.length){
       home=chooseHome();
       updateMission();
@@ -968,9 +976,8 @@ updateDebugPanel();
     }else{
       locked=false;
     }
-  },750);
-}
-
+  },3000);
+  
 function move(dx,dy){
   // Movement is allowed only after the player has started the current level.
   // Keep this independent from overlay animations/classes so keyboard and touch controls behave identically.
@@ -987,29 +994,55 @@ function move(dx,dy){
   else if(!home && ti>nextTarget) showToast(`🔎 Temukan ${chars[targetOrder[nextTarget]].name} lebih dulu.`);
   else if(home && nx===home.x && ny===home.y) completeLevel();
 }
+function showLevelCelebration(levelName){
+  const note=document.getElementById("levelAiNote");
 
+  if(!note) return;
+
+  note.innerHTML=`
+    <div class="cupcake-ai-response">
+      <img
+        class="cupcake-ai-image"
+        src="sources/celebrating.png"
+        alt="Chocolate Cupcake celebrating"
+      >
+
+      <div class="cupcake-ai-content">
+        <div class="cupcake-ai-message">
+          🎉 Hebat! Kamu menyelesaikan level ${levelName}! 🍫
+        </div>
+
+        <div class="cupcake-ai-visual">
+          🎉🏆🍫
+        </div>
+      </div>
+    </div>
+  `;
+
+  note.classList.remove("hidden");
+
+  // TTS
+  if("speechSynthesis" in window){
+    try{
+      window.speechSynthesis.cancel();
+
+      const utterance=new SpeechSynthesisUtterance(
+        `Hebat! Kamu menyelesaikan level ${levelName}!`
+      );
+
+      utterance.lang="id-ID";
+      utterance.rate=0.95;
+      utterance.pitch=1.05;
+
+      window.speechSynthesis.speak(utterance);
+    }catch(error){
+      console.warn("[Chocolate Cupcake] Level TTS error:",error);
+    }
+  }
+}
+  
 function completeLevel(){
   locked=true;
-
-  // ==========================================
-  // CHOCOLATE CUPCAKE — LEVEL CELEBRATION
-  // ==========================================
-  if(typeof window.showCupcakeResponse === "function"){
-    window.showCupcakeResponse({
-      success:true,
-      response:{
-        state:"celebrating",
-        message:`Hebat! Kamu menyelesaikan level ${levels[levelKey].name}! 🎉🍫`,
-        hint:"Siap untuk tantangan berikutnya?",
-        visual:{
-          enabled:true,
-          content:"🎉🏆🍫"
-        },
-        speak:true,
-        emotion:"excited"
-      }
-    });
-  }
 
   // Kirim hasil level ke Chocolate Cupcake AI
   if(typeof window.sendCupcakeVictory === "function"){
