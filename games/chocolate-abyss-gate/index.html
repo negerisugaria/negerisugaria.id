@@ -990,17 +990,75 @@ function move(dx,dy){
 
 function completeLevel(){
   locked=true;
+
+  // ==========================================
+  // CHOCOLATE CUPCAKE — LEVEL CELEBRATION
+  // ==========================================
+  if(typeof window.showCupcakeResponse === "function"){
+    window.showCupcakeResponse({
+      success:true,
+      response:{
+        state:"celebrating",
+        message:`Hebat! Kamu menyelesaikan level ${levels[levelKey].name}! 🎉🍫`,
+        hint:"Siap untuk tantangan berikutnya?",
+        visual:{
+          enabled:true,
+          content:"🎉🏆🍫"
+        },
+        speak:true,
+        emotion:"excited"
+      }
+    });
+  }
+
+  // Kirim hasil level ke Chocolate Cupcake AI
+  if(typeof window.sendCupcakeVictory === "function"){
+    const playerInfo=playerEventTracker.getPlayerInfo();
+
+    const levelEvents=playerEventTracker.getEvents()
+      .filter(e =>
+        e.type==="ANSWER_SUBMITTED" &&
+        e.level===levelKey
+      );
+
+    const correctAnswers=levelEvents
+      .filter(e=>e.isCorrect).length;
+
+    const incorrectAnswers=levelEvents
+      .filter(e=>!e.isCorrect).length;
+
+    window.sendCupcakeVictory({
+      playerId:playerInfo.playerId,
+      level:levelKey,
+      correct:correctAnswers,
+      wrong:incorrectAnswers
+    });
+  }
+
   const profile=getPlayerLearningProfile();
+
   const levelEvents=playerEventTracker.getEvents().filter(e=>e.type==="ANSWER_SUBMITTED" && e.level===levelKey);
   const correctAnswers=levelEvents.filter(e=>e.isCorrect).length;
   const incorrectAnswers=levelEvents.filter(e=>!e.isCorrect).length;
   const responseTimes=levelEvents.map(e=>Number(e.responseTime)).filter(Number.isFinite);
+
   playerEventTracker.track("LEVEL_COMPLETED", {
-    level:levelKey, difficulty:levelKey, accuracy:(correctAnswers+incorrectAnswers)?correctAnswers/(correctAnswers+incorrectAnswers):0,
-    averageResponseTime:responseTimes.length?responseTimes.reduce((a,b)=>a+b,0)/responseTimes.length:0,
-    totalQuestions:correctAnswers+incorrectAnswers, correctAnswers, incorrectAnswers, hintsUsed:profile.hintsUsed
+    level:levelKey,
+    difficulty:levelKey,
+    accuracy:(correctAnswers+incorrectAnswers)
+      ? correctAnswers/(correctAnswers+incorrectAnswers)
+      : 0,
+    averageResponseTime:responseTimes.length
+      ? responseTimes.reduce((a,b)=>a+b,0)/responseTimes.length
+      : 0,
+    totalQuestions:correctAnswers+incorrectAnswers,
+    correctAnswers,
+    incorrectAnswers,
+    hintsUsed:profile.hintsUsed
   });
+
   updateDebugPanel();
+
   const idx=levelIndex(levelKey);
   if(idx<3){
     unlocked=idx+1;
