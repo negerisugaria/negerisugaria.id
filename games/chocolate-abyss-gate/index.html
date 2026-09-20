@@ -900,6 +900,52 @@ header:after{
     width:82px;
     height:82px;
   }
+
+  /* Deterministic math visual + home gate popup */
+  .math-visual{
+    margin-top:10px;
+    padding:12px;
+    border-radius:14px;
+    background:#fff3cf;
+    border:2px solid #e5bc5e;
+    text-align:center;
+  }
+  .math-visual-title{
+    font-size:12px;
+    color:#76503a;
+    font-weight:900;
+    margin-bottom:7px;
+  }
+  .math-visual-equation{
+    font-size:25px;
+    font-weight:1000;
+    line-height:1.35;
+    letter-spacing:1px;
+  }
+  .math-visual-help{
+    margin-top:7px;
+    font-size:12px;
+    color:#5f3a25;
+    font-weight:800;
+  }
+  .home-gate-image{
+    width:min(230px,70vw);
+    height:min(190px,55vw);
+    object-fit:contain;
+    display:block;
+    margin:0 auto 4px;
+    filter:drop-shadow(0 6px 4px #2d160b44);
+  }
+  .home-gate-badge{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:999px;
+    background:#ffe8b2;
+    color:#5b2d16;
+    font-size:12px;
+    font-weight:1000;
+    margin-bottom:7px;
+  }
 }
 </style>
 </head>
@@ -1240,6 +1286,27 @@ header:after{
 
   </div>
 
+</div>
+
+<!-- =====================================================
+     HOME / CHOCOLATE ABYSS GATE POPUP
+     Gameplay popup tidak bergantung pada AI/TTS.
+     ===================================================== -->
+<div class="modal" id="homeModal" aria-hidden="true">
+  <div class="question-card">
+    <img class="home-gate-image"
+         src="sources/chocolate-open-gate.png"
+         alt="Chocolate Abyss Gate">
+    <div class="home-gate-badge">🏠 CHOCOLATE ABYSS GATE</div>
+    <h2 id="homeTitle">Kamu menemukan rumah!</h2>
+    <p id="homeMessage">
+      Semua teman sudah ditemukan. Kamu berhasil mencapai Chocolate Abyss Gate.
+    </p>
+    <div class="ai-note" id="homeAiNote"></div>
+    <div class="actions">
+      <button id="continueHomeBtn" type="button">🚪 Lanjut</button>
+    </div>
+  </div>
 </div>
 
 <!-- =====================================================
@@ -1735,6 +1802,9 @@ const questionModal=
 
 const levelModal=
   document.getElementById("levelModal");
+
+const homeModal=
+  document.getElementById("homeModal");
 
 const finalOverlay=
   document.getElementById("finalOverlay");
@@ -3639,6 +3709,76 @@ function openQuestion(){
 }
 
 /* =========================================================
+   DETERMINISTIC MATH VISUAL
+   ========================================================= */
+
+function mathItems(count,emoji="🍫"){
+  const n=Math.max(0,Math.min(Number(count)||0,20));
+  return Array.from({length:n},()=>emoji).join(" ");
+}
+
+function buildMathVisual(question){
+  if(!question) return "";
+
+  const a=Number(question.a);
+  const b=Number(question.b);
+  const ans=Number(question.ans);
+
+  if(question.op==="−"){
+    return `
+      <div class="math-visual">
+        <div class="math-visual-title">Visualisasi pengurangan</div>
+        <div class="math-visual-equation">
+          ${mathItems(a)}<br>
+          − ${mathItems(b)}<br>
+          ─────────<br>
+          = ${mathItems(ans)}
+        </div>
+        <div class="math-visual-help">
+          Ambil ${b} dari ${a}. Jadi tersisa ${ans}.
+        </div>
+      </div>`;
+  }
+
+  if(question.op==="+"){
+    return `
+      <div class="math-visual">
+        <div class="math-visual-title">Visualisasi penjumlahan</div>
+        <div class="math-visual-equation">
+          ${mathItems(a)} + ${mathItems(b)} = ${mathItems(ans)}
+        </div>
+        <div class="math-visual-help">
+          Gabungkan ${a} dan ${b}, hasilnya ${ans}.
+        </div>
+      </div>`;
+  }
+
+  if(question.op==="×"){
+    return `
+      <div class="math-visual">
+        <div class="math-visual-title">Visualisasi perkalian</div>
+        <div class="math-visual-equation">${a} × ${b} = ${ans}</div>
+        <div class="math-visual-help">
+          ${Array.from({length:Math.min(a,10)},()=>b).join(" + ")} = ${ans}
+        </div>
+      </div>`;
+  }
+
+  if(question.op==="÷"){
+    return `
+      <div class="math-visual">
+        <div class="math-visual-title">Visualisasi pembagian</div>
+        <div class="math-visual-equation">${a} ÷ ${b} = ${ans}</div>
+        <div class="math-visual-help">
+          ${a} dibagi menjadi ${b} kelompok, masing-masing ${ans}.
+        </div>
+      </div>`;
+  }
+
+  return "";
+}
+
+/* =========================================================
    ANSWER QUESTION
    ========================================================= */
 
@@ -3929,6 +4069,16 @@ function answerQuestion(value){
 
     }
 
+    /* Visual selalu mengikuti operasi soal asli.
+       Pengurangan tidak pernah diubah menjadi penjumlahan. */
+    const visual=buildMathVisual(currentQuestion);
+    if(visual){
+      aiNote.innerHTML=
+        `<div class="cupcake-ai-message">🍫 Coba gunakan cara ini:</div>`+
+        visual;
+      aiNote.classList.remove("hidden");
+    }
+
     if(
       lastAIDecision &&
       lastAIDecision.difficulty &&
@@ -4102,6 +4252,79 @@ function answerQuestion(value){
   );
 
 }
+
+/* =========================================================
+   HOME / CHOCOLATE ABYSS GATE POPUP
+   ========================================================= */
+
+function openHomePopup(){
+  if(!homeModal){
+    console.error("[Chocolate Abyss] homeModal tidak ditemukan.");
+    completeLevel();
+    return;
+  }
+
+  locked=true;
+  questionOpen=false;
+
+  const levelName=levels[levelKey]?.name||levelKey;
+
+  document.getElementById("homeTitle").textContent=
+    `🏠 ${levelName}: Gerbang ditemukan!`;
+
+  document.getElementById("homeMessage").innerHTML=`
+    Semua teman sudah ditemukan.
+    <br>
+    Kamu berhasil mencapai <b>Chocolate Abyss Gate</b>.
+    <br><br>
+    Tekan <b>Lanjut</b> untuk menyelesaikan level.
+  `;
+
+  const note=document.getElementById("homeAiNote");
+  if(note){
+    note.innerHTML=`
+      <div class="cupcake-ai-response">
+        <img class="cupcake-ai-image"
+             src="sources/celebrating.png"
+             alt="Chocolate Cupcake">
+        <div class="cupcake-ai-content">
+          <div class="cupcake-ai-message">
+            🎉 Hebat! Kamu menemukan Chocolate Abyss Gate.
+          </div>
+          <div class="cupcake-ai-visual">🏠🍫🚪✨</div>
+        </div>
+      </div>`;
+  }
+
+  homeModal.classList.add("show");
+  homeModal.setAttribute("aria-hidden","false");
+
+  if("speechSynthesis" in window){
+    try{
+      window.speechSynthesis.cancel();
+      const utterance=new SpeechSynthesisUtterance(
+        `Hebat! Kamu menemukan Chocolate Abyss Gate. Tekan lanjut untuk menyelesaikan level ${levelName}.`
+      );
+      utterance.lang="id-ID";
+      utterance.rate=.95;
+      utterance.pitch=1.05;
+      window.speechSynthesis.speak(utterance);
+    }catch(error){
+      console.warn("[Chocolate Cupcake] Home TTS error:",error);
+    }
+  }
+}
+
+function closeHomePopup(){
+  if(!homeModal) return;
+  homeModal.classList.remove("show");
+  homeModal.setAttribute("aria-hidden","true");
+}
+
+document.getElementById("continueHomeBtn").onclick=()=>{
+  closeHomePopup();
+  completeLevel();
+};
 
 /* =========================================================
    MOVEMENT
@@ -4278,7 +4501,7 @@ function move(dx,dy){
     player.y===home.y
   ){
 
-    completeLevel();
+    openHomePopup();
 
   }
 
@@ -4953,6 +5176,8 @@ function exitGame(){
   levelModal.classList.remove(
     "show"
   );
+
+  closeHomePopup();
 
   document.getElementById(
     "levelAiNote"
