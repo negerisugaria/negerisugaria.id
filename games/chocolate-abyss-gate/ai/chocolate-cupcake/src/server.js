@@ -99,6 +99,19 @@ const MAX_BODY_SIZE =
     2 * 1024 * 1024
   );
 
+/*
+ * Local persistent memory store used by /api/memory.
+ * The browser keeps localStorage as its fallback; this file
+ * makes the configured Memory API real and prevents HTTP 404.
+ */
+const MEMORY_DIR =
+  process.env.MEMORY_DIR ||
+  path.join(__dirname, "..", "data");
+
+const MEMORY_FILE =
+  process.env.MEMORY_FILE ||
+  path.join(MEMORY_DIR, "player-memory.jsonl");
+
 
 /* =========================================================
    CORS
@@ -1523,6 +1536,63 @@ async function runOpenClawWithRetry(
 
 
 /* =========================================================
+   MEMORY API
+========================================================= */
+
+function normalizeMemoryPayload(payload = {}) {
+
+  return {
+    type:
+      typeof payload.type === "string"
+        ? payload.type.slice(0, 80)
+        : "player_learning_profile",
+
+    playerId:
+      typeof payload.playerId === "string"
+        ? payload.playerId.slice(0, 120)
+        : null,
+
+    sessionId:
+      typeof payload.sessionId === "string"
+        ? payload.sessionId.slice(0, 120)
+        : null,
+
+    player:
+      payload.player && typeof payload.player === "object"
+        ? payload.player
+        : {},
+
+    profile:
+      payload.profile && typeof payload.profile === "object"
+        ? payload.profile
+        : {},
+
+    recentEvents:
+      Array.isArray(payload.recentEvents)
+        ? payload.recentEvents.slice(-20)
+        : [],
+
+    timestamp:
+      typeof payload.timestamp === "string"
+        ? payload.timestamp
+        : new Date().toISOString()
+  };
+}
+
+
+function saveMemoryPayload(payload) {
+
+  fs.mkdirSync(MEMORY_DIR, { recursive: true });
+
+  fs.appendFileSync(
+    MEMORY_FILE,
+    JSON.stringify(payload) + "\n",
+    "utf8"
+  );
+}
+
+
+/* =========================================================
    API HANDLER
 ========================================================= */
 
@@ -1859,6 +1929,56 @@ const server =
         );
 
         return;
+      }
+
+
+      /* ---------------------------------------------------
+         PLAYER MEMORY
+      --------------------------------------------------- */
+
+      if (
+        req.method === "POST" &&
+        req.url === "/api/memory"
+      ) {
+
+        try {
+          const body = await readRequestBody(req);
+          const parsed = body ? JSON.parse(body) : {};
+          const memory = normalizeMemoryPayload(parsed);
+
+          if (!memory.playerId && !memory.sessionId) {
+            sendJson(res, 400, {
+              success: false,
+              error: "playerId or sessionId is required"
+            });
+            return;
+          }
+
+          saveMemoryPayload(memory);
+
+          sendJson(res, 200, {
+            success: true,
+            stored: true,
+            playerId: memory.playerId,
+            sessionId: memory.sessionId,
+            timestamp: memory.timestamp
+          });
+
+          return;
+
+        } catch (error) {
+          console.error(
+            "[Chocolate Cupcake] Memory API error:",
+            error.message
+          );
+
+          sendJson(res, 400, {
+            success: false,
+            error: "Invalid memory payload"
+          });
+
+          return;
+        }
       }
 
 
