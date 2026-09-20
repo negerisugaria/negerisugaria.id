@@ -900,7 +900,157 @@ header:after{
     width:82px;
     height:82px;
   }
+
+  /* Deterministic math visual + home gate popup */
+  .math-visual{
+    margin-top:10px;
+    padding:12px;
+    border-radius:14px;
+    background:#fff3cf;
+    border:2px solid #e5bc5e;
+    text-align:center;
+  }
+  .math-visual-title{
+    font-size:12px;
+    color:#76503a;
+    font-weight:900;
+    margin-bottom:7px;
+  }
+  .math-visual-equation{
+    font-size:25px;
+    font-weight:1000;
+    line-height:1.35;
+    letter-spacing:1px;
+  }
+  .math-subtraction-visual{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .math-items-row{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:7px;
+    max-width:100%;
+    padding:8px 4px;
+  }
+  .math-item{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:40px;
+    height:40px;
+    border-radius:10px;
+    background:#fff;
+    border:2px solid #e5bc5e;
+    box-sizing:border-box;
+    font-size:24px;
+    line-height:1;
+  }
+  .math-item-removed{
+    opacity:.72;
+  }
+  .math-item-x{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#c62828;
+    font-size:42px;
+    font-weight:1000;
+    line-height:1;
+    text-shadow:0 1px 0 #fff;
+  }
+  .math-item-removed .math-item-emoji{
+    filter:grayscale(.35);
+  }
+  .math-subtraction-equation{
+    font-size:25px;
+    font-weight:1000;
+  }
+  .math-groups{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(74px,1fr));
+    gap:8px;
+    width:100%;
+    max-width:620px;
+    margin:0 auto;
+  }
+  .math-group-box{
+    min-height:72px;
+    padding:7px 5px;
+    border:2px solid #d49b35;
+    border-radius:12px;
+    background:#fffdf7;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    box-sizing:border-box;
+  }
+  .math-group-label{
+    font-size:11px;
+    font-weight:1000;
+    color:#76503a;
+    margin-bottom:3px;
+  }
+  .math-group-items{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:2px;
+    line-height:1;
+  }
+  .math-group-items .math-item{
+    width:27px;
+    height:27px;
+    border-radius:7px;
+    border-width:1px;
+    font-size:18px;
+  }
+  .math-visual-instruction{
+    margin-top:7px;
+    font-size:13px;
+    color:#5f3a25;
+    font-weight:900;
+  }
+  .math-visual-help{
+    margin-top:7px;
+    font-size:12px;
+    color:#5f3a25;
+    font-weight:800;
+  }
+  .home-gate-image{
+    width:min(230px,70vw);
+    height:min(190px,55vw);
+    object-fit:contain;
+    display:block;
+    margin:0 auto 4px;
+    filter:drop-shadow(0 6px 4px #2d160b44);
+  }
+  .home-gate-badge{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:999px;
+    background:#ffe8b2;
+    color:#5b2d16;
+    font-size:12px;
+    font-weight:1000;
+    margin-bottom:7px;
+  }
 }
+
+/* Parent learning evaluation */
+.parent-evaluation{margin:18px 0;padding:16px;border:1px solid rgba(243,193,91,.45);border-radius:16px;background:rgba(255,248,230,.96);color:#452416;text-align:left}
+.parent-evaluation-title{font-size:18px;font-weight:800;margin-bottom:10px}
+.parent-evaluation-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.parent-evaluation-item{padding:10px;border-radius:12px;background:#fff;border:1px solid rgba(91,45,22,.12)}
+.parent-evaluation-item strong{display:block;margin-bottom:4px}
+.parent-evaluation-note{margin-top:12px;padding:11px 12px;border-radius:12px;background:#fff7df;line-height:1.5}
+@media(max-width:600px){.parent-evaluation-grid{grid-template-columns:1fr}}
 </style>
 </head>
 
@@ -1049,8 +1199,8 @@ header:after{
 
     <img
       class="intro-cupcake"
-      src="sources/chocolate-cupcake.png"
-      alt="Chocolate Cupcake"
+      src="sources/welcome.png"
+      alt="Chocolate Cupcake — Welcome"
     >
 
     <h2>
@@ -1128,6 +1278,7 @@ header:after{
         Lanjut →
       </button>
 
+
     </div>
 
   </div>
@@ -1161,6 +1312,7 @@ header:after{
       >
         🚀 Mulai Labirin
       </button>
+
 
     </div>
 
@@ -1243,6 +1395,27 @@ header:after{
 </div>
 
 <!-- =====================================================
+     HOME / CHOCOLATE ABYSS GATE POPUP
+     Gameplay popup tidak bergantung pada AI/TTS.
+     ===================================================== -->
+<div class="modal" id="homeModal" aria-hidden="true">
+  <div class="question-card">
+    <img class="home-gate-image"
+         src="sources/chocolate-open-gate.png"
+         alt="Chocolate Abyss Gate">
+    <div class="home-gate-badge">🏠 CHOCOLATE ABYSS GATE</div>
+    <h2 id="homeTitle">Kamu menemukan rumah!</h2>
+    <p id="homeMessage">
+      Semua teman sudah ditemukan. Kamu berhasil mencapai Chocolate Abyss Gate.
+    </p>
+    <div class="ai-note" id="homeAiNote"></div>
+    <div class="actions">
+      <button id="continueHomeBtn" type="button">🚪 Lanjut</button>
+    </div>
+  </div>
+</div>
+
+<!-- =====================================================
      FINAL
      ===================================================== -->
 
@@ -1262,6 +1435,11 @@ header:after{
     </h2>
 
     <p id="finalMessage"></p>
+
+    <div id="parentEvaluation" class="parent-evaluation" aria-live="polite">
+      <div class="parent-evaluation-title">👨‍👩‍👧 Evaluasi Belajar untuk Orang Tua</div>
+      <div id="parentEvaluationContent"></div>
+    </div>
 
     <button
       id="playAgain"
@@ -1520,122 +1698,6 @@ const playerEventTracker =
 window.playerEventTracker =
   playerEventTracker;
 
-/* =========================================================
-   MEMORY API INTEGRATION
-   ---------------------------------------------------------
-   Semua event yang sudah dicatat oleh PlayerEventTracker
-   juga dikirim ke Memory API. Pengiriman berjalan async dan
-   TIDAK menjadi dependency gameplay. Jika API gagal, game
-   tetap berjalan dan event tetap tersimpan di localStorage.
-   ========================================================= */
-
-const MEMORY_API_URL =
-  "https://api.negerisugaria.id/api/memory";
-
-let memoryApiSequence = 0;
-
-async function sendGameEventToMemoryAPI(event){
-
-  if(!event || typeof event!=="object"){
-    return;
-  }
-
-  const payload={
-    playerId:event.playerId || playerEventTracker.playerId || null,
-    sessionId:event.sessionId || playerEventTracker.sessionId || null,
-    type:event.type || "PLAYER_EVENT",
-    event:{
-      ...event,
-      memorySequence:++memoryApiSequence
-    }
-  };
-
-  if(!payload.playerId && !payload.sessionId){
-    console.warn("[Memory API] Event skipped: missing player/session ID");
-    return;
-  }
-
-  try{
-
-    const response=await fetch(
-      MEMORY_API_URL,
-      {
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json"
-        },
-        body:JSON.stringify(payload),
-        keepalive:true
-      }
-    );
-
-    if(!response.ok){
-      console.warn(
-        "[Memory API] HTTP error:",
-        response.status,
-        event.type
-      );
-      return;
-    }
-
-    let result=null;
-
-    try{
-      result=await response.json();
-    }catch(_){
-      result=null;
-    }
-
-    if(result && result.success){
-      console.log(
-        "[Memory API] Stored:",
-        event.type,
-        "player=",
-        payload.playerId,
-        "session=",
-        payload.sessionId
-      );
-    }else{
-      console.warn(
-        "[Memory API] Unexpected response:",
-        result
-      );
-    }
-
-  }catch(error){
-
-    /*
-     * Memory API adalah telemetry/learning storage.
-     * Kegagalan network TIDAK boleh menghentikan game.
-     */
-    console.warn(
-      "[Memory API] Send failed:",
-      event.type,
-      error && error.message ? error.message : error
-    );
-
-  }
-}
-
-/*
- * PlayerEventTracker tetap menjadi sumber event utama.
- * Kita hanya mendengarkan event-nya sehingga kode gameplay
- * tidak perlu diubah satu per satu.
- */
-window.addEventListener(
-  "player-event",
-  event=>{
-    const gameEvent=event && event.detail;
-    if(gameEvent){
-      void sendGameEventToMemoryAPI(gameEvent);
-    }
-  }
-);
-
-/* Memudahkan verifikasi dari DevTools tanpa mengubah gameplay. */
-window.sendGameEventToMemoryAPI=sendGameEventToMemoryAPI;
-window.MEMORY_API_URL=MEMORY_API_URL;
-
 window.getCurrentGameLevel =
   ()=>levelKey;
 
@@ -1643,6 +1705,7 @@ let questionShownAt=null;
 let currentQuestionId=null;
 let currentAttemptNumber=0;
 let currentHintUsed=false;
+let cupcakeWrongCount=0;
 let lastAIDecision=null;
 let adaptiveDifficultyOverride=null;
 
@@ -1851,6 +1914,9 @@ const questionModal=
 
 const levelModal=
   document.getElementById("levelModal");
+
+const homeModal=
+  document.getElementById("homeModal");
 
 const finalOverlay=
   document.getElementById("finalOverlay");
@@ -2554,6 +2620,122 @@ function renderPicker(){
 
 }
 
+
+/* =========================================================
+   CHOCOLATE CUPCAKE — VOICE DISCUSSION HELPERS
+   ========================================================= */
+let cupcakeNudgeTimer=null;
+let cupcakeAutoVoice=false;
+let cupcakeVoicePermission=false;
+
+function cupcakeSpeak(text){
+  showCupcakeAgentState("welcome", text);
+  speakCupcake(text);
+}
+
+function clearCupcakeNudge(){
+  if(cupcakeNudgeTimer){
+    clearTimeout(cupcakeNudgeTimer);
+    cupcakeNudgeTimer=null;
+  }
+}
+
+function scheduleCupcakeNudge(text, delay=7000){
+  clearCupcakeNudge();
+  cupcakeNudgeTimer=setTimeout(()=>{
+    cupcakeNudgeTimer=null;
+    cupcakeSpeak(text);
+  }, delay);
+}
+
+async function ensureCupcakeVoicePermission(){
+  if(cupcakeVoicePermission) return true;
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return true;
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    stream.getTracks().forEach(track=>track.stop());
+    cupcakeVoicePermission=true;
+    return true;
+  }catch(error){
+    console.warn("[Chocolate Cupcake] Voice permission unavailable:",error);
+    return false;
+  }
+}
+
+function startCupcakeListening(){
+  if(!cupcakeAutoVoice || !window.startChocolateCupcakeSTT) return;
+  const result=window.startChocolateCupcakeSTT();
+  if(!result || result.success===false){
+    scheduleCupcakeNudge("Aku masih di sini. Kalau kamu siap, ceritakan jawabanmu dengan suara.",5000);
+  }
+}
+
+function speakCupcakeAndListen(text){
+  cupcakeSpeak(text);
+  if(!cupcakeAutoVoice) return;
+  const begin=()=>setTimeout(startCupcakeListening,350);
+  if("speechSynthesis" in window){
+    try{
+      const utterances=window.speechSynthesis.getVoices();
+      void utterances;
+      window.speechSynthesis.cancel();
+      const utterance=new SpeechSynthesisUtterance(text);
+      utterance.lang="id-ID";
+      utterance.rate=.95;
+      utterance.pitch=1.05;
+      utterance.onend=begin;
+      utterance.onerror=begin;
+      window.speechSynthesis.speak(utterance);
+      return;
+    }catch(error){
+      console.warn("[Chocolate Cupcake] Auto voice TTS error:",error);
+    }
+  }
+  begin();
+}
+
+async function startCupcakeDiscussion(){
+  clearCupcakeNudge();
+  cupcakeAutoVoice=true;
+  const permitted=await ensureCupcakeVoicePermission();
+  if(permitted) startCupcakeListening();
+}
+
+window.addEventListener("cupcake-stt-end",()=>{
+  if(!cupcakeAutoVoice) return;
+  const transcript=(window.__chocolateCupcakeLastTranscript||"").trim();
+  if(transcript) return;
+  scheduleCupcakeNudge("Aku belum mendengar suaramu. Yuk, ceritakan apa yang kamu pikirkan.",3500);
+});
+
+window.addEventListener("cupcake-stt-result",event=>{
+  if(event.detail && event.detail.final){
+    window.__chocolateCupcakeLastTranscript=event.detail.transcript||"";
+  }
+});
+
+function buildGuidedMathStep(question, attempt){
+  if(!question) return "Coba kita pecah soalnya menjadi langkah yang lebih kecil. Apa yang bisa kamu hitung lebih dulu?";
+  const a=Number(question.a), b=Number(question.b);
+  if(question.op==="−"){
+    if(attempt===2) return `Kita pelan-pelan. Ada ${a} cokelat. Sekarang, kalau ${b} cokelat diambil, coba kurangi sedikit demi sedikit. Berapa yang tersisa setelah beberapa cokelat diambil?`;
+    return `Kita ambil satu langkah saja. Mulai dari ${a}, lalu kurangi satu cokelat. Sekarang menjadi berapa?`;
+  }
+  if(question.op==="+"){
+    if(attempt===2) return `Kita pecah menjadi dua bagian. Mulai dari ${a}, lalu tambahkan ${b} satu per satu. Coba hitung bersama Chocolate Cupcake.`;
+    return `Mulai dari ${a}. Tambahkan satu lagi. Sekarang berapa?`;
+  }
+  if(question.op==="×"){
+    if(attempt===2) return `Jangan hitung semuanya sekaligus. Ada ${b} kelompok, masing-masing ${a}. Coba hitung satu kelompok dulu. Berapa cokelatnya?`;
+    return `Sekarang fokus satu kelompok saja. Ada ${a} cokelat di kelompok itu. Bisa kamu hitung?`;
+  }
+  if(question.op==="÷"){
+    if(attempt===2) return `Kita bagi sedikit demi sedikit. Ada ${a} cokelat dan ${b} kotak. Coba masukkan satu cokelat ke setiap kotak. Sudah berapa yang kita bagikan?`;
+    return `Sekarang fokus pada satu kotak. Menurutmu, berapa cokelat yang ada di kotak itu?`;
+  }
+  return "Kita lakukan satu langkah kecil dulu. Apa yang kamu lihat dari soal ini?";
+}
+
 function showIntro(){
 
   startOverlay.classList.remove(
@@ -2808,6 +2990,16 @@ function startLevelWithoutIntro(){
   gameStarted=true;
   locked=false;
   questionOpen=false;
+  cupcakeWrongCount=0;
+
+  showCupcakeAgentState(
+    "welcome",
+    `Hai! Aku Chocolate Cupcake. Selamat bermain di ${levels[levelKey].name}!`
+  );
+
+  speakCupcake(
+    `Hai! Aku Chocolate Cupcake. Selamat bermain di ${levels[levelKey].name}!`
+  );
 
   hideStart();
 
@@ -3755,6 +3947,131 @@ function openQuestion(){
 }
 
 /* =========================================================
+   DETERMINISTIC MATH VISUAL
+   ========================================================= */
+
+function mathItems(count,emoji="🍫"){
+  const n=Math.max(0,Math.min(Number(count)||0,20));
+  return Array.from({length:n},(_,i)=>
+    `<span class="math-item">${emoji}</span>`
+  ).join("");
+}
+
+function subtractionVisual(total,removed,emoji="🍫"){
+  const a=Math.max(0,Math.min(Number(total)||0,20));
+  const b=Math.max(0,Math.min(Number(removed)||0,a));
+  return Array.from({length:a},(_,i)=>`
+    <span class="math-item ${i < b ? "math-item-removed" : "math-item-remaining"}">
+      <span class="math-item-emoji">${emoji}</span>
+      ${i < b ? '<span class="math-item-x" aria-hidden="true">×</span>' : ''}
+    </span>
+  `).join("");
+}
+
+function buildMathVisual(question){
+  if(!question) return "";
+
+  const a=Number(question.a);
+  const b=Number(question.b);
+
+  /*
+     Perkalian: a cokelat di setiap kotak, sebanyak b kotak.
+     Contoh 3 × 6 = 6 kotak, masing-masing berisi 3 cokelat.
+     Jawaban sengaja tidak ditampilkan agar pemain menghitung.
+  */
+  function multiplicationGroups(perBox,groupCount){
+    const groups=Math.max(0,Math.min(groupCount,12));
+    const items=Math.max(0,Math.min(perBox,12));
+    return Array.from({length:groups},(_,i)=>`
+      <div class="math-group-box" aria-label="Kotak ${i+1}, berisi ${items} cokelat">
+        <div class="math-group-label">Kotak ${i+1}</div>
+        <div class="math-group-items">${mathItems(items)}</div>
+      </div>
+    `).join("");
+  }
+
+  /*
+     Pembagian: seluruh cokelat dibagikan sama rata ke b kotak.
+     Contoh 18 ÷ 3 = 3 kotak, masing-masing berisi 6 cokelat.
+     Jawaban sengaja tidak ditampilkan agar pemain menghitung.
+  */
+  function divisionGroups(total,groupCount){
+    const groups=Math.max(1,Math.min(groupCount,12));
+    const each=Math.floor(total/groups);
+    return Array.from({length:groups},(_,i)=>`
+      <div class="math-group-box" aria-label="Kotak ${i+1}, berisi ${each} cokelat">
+        <div class="math-group-label">Kotak ${i+1}</div>
+        <div class="math-group-items">${mathItems(each)}</div>
+      </div>
+    `).join("");
+  }
+
+  if(question.op==="−"){
+    return `
+      <div class="math-visual">
+        <div class="math-visual-title">Perhatikan cokelatnya</div>
+        <div class="math-visual-equation math-subtraction-visual">
+          <div class="math-items-row" aria-label="${a} cokelat, ${b} dicoret">
+            ${subtractionVisual(a,b)}
+          </div>
+          <div class="math-subtraction-equation">
+            ${a} − ${b} = ?
+          </div>
+        </div>
+        <div class="math-visual-help">
+          Ada <b>${a}</b> cokelat. Tanda <b>×</b> menunjukkan <b>${b}</b> cokelat yang diambil. Hitung cokelat yang masih tersisa.
+        </div>
+      </div>`;
+  }
+
+  if(question.op==="+"){
+    return `
+      <div class="math-visual">
+        <div class="math-visual-title">Coba lihat soalnya</div>
+        <div class="math-visual-equation">
+          ${mathItems(a)} + ${mathItems(b)} = ?
+        </div>
+        <div class="math-visual-help">
+          Gabungkan kelompok pertama dan kedua. Cari jawabannya sendiri.
+        </div>
+      </div>`;
+  }
+
+  if(question.op==="×"){
+    return `
+      <div class="math-visual">
+        <div class="math-visual-title">Hitung semua cokelat di dalam kotak</div>
+        <div class="math-visual-equation">${a} × ${b} = ?</div>
+        <div class="math-visual-instruction">${b} kotak, setiap kotak berisi ${a} cokelat</div>
+        <div class="math-groups" aria-label="${b} kotak, masing-masing berisi ${a} cokelat">
+          ${multiplicationGroups(a,b)}
+        </div>
+        <div class="math-visual-help">
+          Hitung semua cokelat dari ${b} kotak. Jangan melihat hasilnya—cari jawabannya sendiri!
+        </div>
+      </div>`;
+  }
+
+  if(question.op==="÷"){
+    const each=b>0 ? Math.floor(a/b) : 0;
+    return `
+      <div class="math-visual">
+        <div class="math-visual-title">Bagikan cokelat sama rata</div>
+        <div class="math-visual-equation">${a} ÷ ${b} = ?</div>
+        <div class="math-visual-instruction">${a} cokelat dibagi rata ke ${b} kotak</div>
+        <div class="math-groups" aria-label="${a} cokelat dibagi rata ke ${b} kotak">
+          ${divisionGroups(a,b)}
+        </div>
+        <div class="math-visual-help">
+          Perhatikan jumlah cokelat di setiap kotak. Hitung berapa cokelat yang diterima setiap kotak!
+        </div>
+      </div>`;
+  }
+
+  return "";
+}
+
+/* =========================================================
    ANSWER QUESTION
    ========================================================= */
 
@@ -4045,6 +4362,49 @@ function answerQuestion(value){
 
     }
 
+    /* Agent state:
+       salah pertama = Encouraging
+       salah kedua+ = Teaching */
+    cupcakeWrongCount++;
+
+    const cupcakeState=
+      cupcakeWrongCount===1
+        ? "encouraging"
+        : "teaching";
+
+    const cupcakeMessage=
+      cupcakeWrongCount===1
+        ? "Hampir! Tidak apa-apa kalau salah. Yuk kita hitung bersama."
+        : buildGuidedMathStep(currentQuestion, currentAttemptNumber);
+
+    showCupcakeAgentState(
+      cupcakeState,
+      cupcakeMessage
+    );
+
+    /* Tahap 1: tampilkan visualisasi lengkap.
+       Tahap 2+: kecilkan masalah menjadi satu langkah sederhana. */
+    if(cupcakeWrongCount===1){
+      const visual=buildMathVisual(currentQuestion);
+      if(visual){
+        aiNote.innerHTML+=visual;
+        aiNote.classList.remove("hidden");
+        aiNote.scrollIntoView({behavior:"smooth",block:"nearest"});
+      }
+    }else{
+      aiNote.innerHTML+=`<div class="math-visual math-guided-step"><div class="math-visual-title">🧁 Kita lakukan satu langkah kecil</div><div class="math-visual-help">${cupcakeMessage}</div></div>`;
+      aiNote.classList.remove("hidden");
+      aiNote.scrollIntoView({behavior:"smooth",block:"nearest"});
+    }
+
+    speakCupcake(cupcakeMessage);
+    scheduleCupcakeNudge(
+      cupcakeWrongCount===1
+        ? "Coba ceritakan kepada Chocolate Cupcake: apa yang kamu lihat dari gambar cokelat tadi?"
+        : "Tidak perlu terburu-buru. Ceritakan langkah kecil yang menurutmu harus dilakukan berikutnya.",
+      8000
+    );
+
     if(
       lastAIDecision &&
       lastAIDecision.difficulty &&
@@ -4062,6 +4422,8 @@ function answerQuestion(value){
     return;
 
   }
+
+  clearCupcakeNudge();
 
   /* =====================================================
      CORRECT ANSWER
@@ -4102,6 +4464,15 @@ function answerQuestion(value){
   f.innerHTML=
     `🎉 Benar! <b>+${earned} poin</b><br>`+
     `<small>Rute ${actual} langkah • rute tercepat ${optimal}</small>`;
+
+  showCupcakeAgentState(
+    "celebrating",
+    `Hebat! Jawabanmu benar. Kamu mendapat +${earned} poin!`
+  );
+
+  speakCupcake(
+    `Hebat! Jawabanmu benar. Kamu mendapat ${earned} poin!`
+  );
 
   try{
 
@@ -4218,6 +4589,164 @@ function answerQuestion(value){
   );
 
 }
+
+/* =========================================================
+   CHOCOLATE CUPCAKE AGENT — STATE CONTROLLER
+   State:
+   welcome -> game starts
+   encouraging -> first wrong answer
+   teaching -> second+ wrong answer
+   celebrating -> correct answer / level complete
+   victory -> all levels complete
+   ========================================================= */
+
+function showCupcakeAgentState(state, message=""){
+  const targets=[
+    document.getElementById("aiNote"),
+    document.getElementById("levelAiNote"),
+    document.getElementById("homeAiNote")
+  ].filter(Boolean);
+
+  if(!targets.length) return;
+
+  const config={
+    welcome:{
+      image:"sources/welcome.png",
+      fallback:"sources/chocolate-cupcake.png",
+      label:"🧁 Welcome",
+      text:message||"Hai! Aku Chocolate Cupcake. Yuk mulai petualangan!"
+    },
+    encouraging:{
+      image:"sources/encouraging.png",
+      fallback:"sources/chocolate-cupcake.png",
+      label:"💪 Encouraging",
+      text:message||"Tidak apa-apa! Kamu pasti bisa. Coba perhatikan soalnya lagi."
+    },
+    teaching:{
+      image:"sources/theaching.png",
+      fallback:"sources/chocolate-cupcake.png",
+      label:"🧠 Teaching",
+      text:message||"Ayo kita pelajari langkahnya bersama."
+    },
+    celebrating:{
+      image:"sources/celebrating.png",
+      fallback:"sources/chocolate-cupcake.png",
+      label:"🎉 Celebrating",
+      text:message||"Hebat! Jawabanmu benar!"
+    },
+    victory:{
+      image:"sources/victory.png",
+      fallback:"sources/chocolate-cupcake.png",
+      label:"🏆 Victory",
+      text:message||"Luar biasa! Semua level berhasil kamu selesaikan!"
+    }
+  };
+
+  const cfg=config[state]||config.welcome;
+
+  targets.forEach(note=>{
+    note.innerHTML=`
+      <div class="cupcake-ai-response cupcake-state-${state}">
+        <img
+          class="cupcake-ai-image"
+          src="${cfg.image}"
+          alt="Chocolate Cupcake — ${cfg.label}"
+          onerror="this.onerror=null;this.src='${cfg.fallback}';"
+        >
+        <div class="cupcake-ai-content">
+          <div class="cupcake-ai-message">
+            <b>${cfg.label}</b><br>
+            ${cfg.text}
+          </div>
+        </div>
+      </div>`;
+    note.classList.remove("hidden");
+  });
+}
+
+function speakCupcake(text){
+  if(!("speechSynthesis" in window)) return;
+  try{
+    window.speechSynthesis.cancel();
+    const utterance=new SpeechSynthesisUtterance(text);
+    utterance.lang="id-ID";
+    utterance.rate=.95;
+    utterance.pitch=1.05;
+    window.speechSynthesis.speak(utterance);
+  }catch(error){
+    console.warn("[Chocolate Cupcake] TTS error:",error);
+  }
+}
+
+/* =========================================================
+   HOME / CHOCOLATE ABYSS GATE POPUP
+   ========================================================= */
+
+function openHomePopup(){
+  if(!homeModal){
+    console.error("[Chocolate Abyss] homeModal tidak ditemukan.");
+    completeLevel();
+    return;
+  }
+
+  locked=true;
+  questionOpen=false;
+
+  const levelName=levels[levelKey]?.name||levelKey;
+
+  document.getElementById("homeTitle").textContent=
+    `🏠 ${levelName}: Gerbang ditemukan!`;
+
+  document.getElementById("homeMessage").innerHTML=`
+    Semua teman sudah ditemukan.
+    <br>
+    Kamu berhasil mencapai <b>Chocolate Abyss Gate</b>.
+    <br><br>
+    Tekan <b>Lanjut</b> untuk menyelesaikan level.
+  `;
+
+  showCupcakeAgentState(
+    "celebrating",
+    "🎉 Hebat! Kamu menemukan Chocolate Abyss Gate. Tekan Lanjut untuk menyelesaikan level."
+  );
+
+  homeModal.classList.add("show");
+  homeModal.setAttribute("aria-hidden","false");
+
+  if("speechSynthesis" in window){
+    try{
+      window.speechSynthesis.cancel();
+      const utterance=new SpeechSynthesisUtterance(
+        `Hebat! Kamu menemukan Chocolate Abyss Gate. Tekan lanjut untuk menyelesaikan level ${levelName}.`
+      );
+      utterance.lang="id-ID";
+      utterance.rate=.95;
+      utterance.pitch=1.05;
+      window.speechSynthesis.speak(utterance);
+    }catch(error){
+      console.warn("[Chocolate Cupcake] Home TTS error:",error);
+    }
+  }
+}
+
+function closeHomePopup(){
+  if(!homeModal) return;
+  homeModal.classList.remove("show");
+  homeModal.setAttribute("aria-hidden","true");
+}
+
+document.getElementById("continueHomeBtn").onclick=()=>{
+  closeHomePopup();
+
+  const currentKey=levelKey;
+  const idx=levelIndex(currentKey);
+
+  if(idx<2){
+    completeLevel(true);
+  }else{
+    completeLevel(false);
+  }
+};
 
 /* =========================================================
    MOVEMENT
@@ -4394,7 +4923,7 @@ function move(dx,dy){
     player.y===home.y
   ){
 
-    completeLevel();
+    openHomePopup();
 
   }
 
@@ -4487,6 +5016,15 @@ function showLevelCelebration(
    ========================================================= */
 
 function showFinalVictory(){
+
+  showCupcakeAgentState(
+    "victory",
+    "🏆 Luar biasa! Semua level Chocolate Abyss Gate berhasil kamu selesaikan!"
+  );
+
+  speakCupcake(
+    "Luar biasa! Semua level Chocolate Abyss Gate berhasil kamu selesaikan!"
+  );
 
   const card=
     document.querySelector(
@@ -4596,7 +5134,64 @@ function showFinalVictory(){
    COMPLETE LEVEL
    ========================================================= */
 
-function completeLevel(){
+function renderParentLearningEvaluation(){
+  const box=document.getElementById("parentEvaluation");
+  const content=document.getElementById("parentEvaluationContent");
+  if(!box || !content) return;
+
+  let profile=null;
+  try{
+    profile=typeof getPlayerLearningProfile==="function"
+      ? getPlayerLearningProfile()
+      : (window.currentPlayerLearningProfile || null);
+  }catch(error){
+    console.warn("[Parent Evaluation] profile error:",error);
+  }
+
+  if(!profile){
+    content.innerHTML="<div class=\"parent-evaluation-note\">Data evaluasi belum tersedia.</div>";
+    return;
+  }
+
+  const skills=profile.skills || {};
+  const labels={addition:"Penjumlahan",subtraction:"Pengurangan",multiplication:"Perkalian",division:"Pembagian"};
+  const entries=Object.keys(labels).map(skill=>{
+    const d=skills[skill] || {};
+    const attempts=Number(d.attempts)||0;
+    const correct=Number(d.correct)||0;
+    const accuracy=attempts ? Math.round(correct/attempts*100) : 0;
+    return {skill,label:labels[skill],attempts,correct,accuracy};
+  });
+  const practiced=entries.filter(x=>x.attempts>0);
+  const strongest=practiced.length ? [...practiced].sort((a,b)=>b.accuracy-a.accuracy || b.attempts-a.attempts)[0] : null;
+  const support=practiced.length ? [...practiced].sort((a,b)=>a.accuracy-b.accuracy || b.attempts-a.attempts)[0] : null;
+  const overall=profile.performance || {};
+  const overallAccuracy=Math.round((Number(overall.accuracy)||0)*100);
+  const statusMap={strong:"Sudah kuat",progressing:"Berkembang baik",developing:"Sedang berkembang",needs_support:"Masih membutuhkan pendampingan",new:"Belum cukup data"};
+  const trendMap={improving:"menunjukkan perkembangan positif",needs_support:"masih perlu latihan bertahap",stable:"relatif stabil",unknown:"belum dapat dinilai"};
+  let playerName="Anak";
+  try{playerName=(profile.player&&profile.player.name)||playerEventTracker.getPlayerInfo().name||"Anak";}catch(e){}
+  const strengthText=strongest
+    ? `${playerName} menunjukkan kekuatan relatif pada <b>${strongest.label}</b> dengan akurasi <b>${strongest.accuracy}%</b> dari ${strongest.attempts} percobaan.`
+    : "Belum ada cukup data untuk menentukan kekuatan matematika.";
+  const supportText=support
+    ? `Area yang paling perlu diperkuat saat ini adalah <b>${support.label}</b> (${support.accuracy}% dari ${support.attempts} percobaan). Ini adalah indikator dari permainan, bukan diagnosis kemampuan anak.`
+    : "Mainkan beberapa soal lagi agar area yang perlu diperkuat dapat terlihat.";
+  const recommendation=support
+    ? `Orang tua dapat mengajak anak berlatih <b>${support.label.toLowerCase()}</b> dengan benda nyata seperti cokelat, kancing, atau gambar. Gunakan langkah kecil dan minta anak menjelaskan cara berpikirnya.`
+    : "Lanjutkan latihan dengan soal yang beragam dan minta anak menjelaskan cara mendapatkan jawabannya.";
+  content.innerHTML=`
+    <div class="parent-evaluation-grid">
+      <div class="parent-evaluation-item"><strong>📊 Akurasi keseluruhan</strong>${overallAccuracy}%</div>
+      <div class="parent-evaluation-item"><strong>🌱 Status belajar</strong>${statusMap[profile.learning?.status]||"Belum dapat dinilai"}</div>
+      <div class="parent-evaluation-item"><strong>💪 Kekuatan</strong>${strengthText}</div>
+      <div class="parent-evaluation-item"><strong>🎯 Perlu diperkuat</strong>${supportText}</div>
+    </div>
+    <div class="parent-evaluation-note"><b>📈 Perkembangan:</b> Saat ini performa ${trendMap[profile.learning?.trend]||"belum dapat dinilai"}.</div>
+    <div class="parent-evaluation-note"><b>💡 Saran pendampingan:</b> ${recommendation}</div>`;
+}
+
+function completeLevel(autoContinue=false){
 
   locked=true;
   questionOpen=false;
@@ -4889,6 +5484,36 @@ function completeLevel(){
 
     updateNewMazeButton();
 
+    /* Saat pemain menekan "Lanjut" dari Chocolate Abyss Gate,
+       langsung buka level berikutnya tanpa berhenti di popup level selesai. */
+    if(autoContinue){
+      levelKey=nextKey;
+
+      levelModal.classList.remove(
+        "show"
+      );
+
+      const levelAiNoteAuto=
+        document.getElementById(
+          "levelAiNote"
+        );
+
+      if(levelAiNoteAuto){
+        levelAiNoteAuto.innerHTML="";
+        levelAiNoteAuto.classList.add("hidden");
+      }
+
+      setupLevel();
+      startLevelWithoutIntro();
+      updateNewMazeButton();
+
+      showToast(
+        `🚀 Level berikutnya dimulai: ${levels[levelKey].name}`
+      );
+
+      return;
+    }
+
     const levelAiNote=
       document.getElementById(
         "levelAiNote"
@@ -4969,6 +5594,7 @@ function completeLevel(){
       "hidden"
     );
 
+    renderParentLearningEvaluation();
     showFinalVictory();
 
   }
@@ -5070,6 +5696,8 @@ function exitGame(){
     "show"
   );
 
+  closeHomePopup();
+
   document.getElementById(
     "levelAiNote"
   ).classList.add(
@@ -5115,10 +5743,13 @@ function exitGame(){
    BUTTONS
    ========================================================= */
 
-document.getElementById(
-  "goPick"
-).onclick=
-  showProfile;
+document.getElementById("goPick").onclick=()=>{
+  showProfile();
+  cupcakeAutoVoice=true;
+  ensureCupcakeVoicePermission().then(()=>{
+    speakCupcakeAndListen("Halo! Sekarang kita kenalan dulu. Tuliskan nama dan usia kamu. Setelah itu Chocolate Cupcake akan menyebut namamu dan mengajakmu memilih karakter.");
+  });
+};
 
 document.getElementById(
   "backIntroFromProfile"
@@ -5185,6 +5816,11 @@ document.getElementById(
 
   showPicker();
 
+  cupcakeAutoVoice=true;
+  ensureCupcakeVoicePermission().then(()=>{
+    speakCupcakeAndListen(`Senang bertemu denganmu, ${name}! Usiamu ${age} tahun. Sekarang pilih karakter yang paling kamu suka. Ceritakan kepada Chocolate Cupcake karakter mana yang kamu pilih.`);
+  });
+
 };
 
 document.getElementById(
@@ -5196,9 +5832,10 @@ document.getElementById(
    START GAME
    ========================================================= */
 
-document.getElementById(
-  "startGame"
-).onclick=()=>{
+document.getElementById("startGame").onclick=()=>{
+  clearCupcakeNudge();
+  cupcakeAutoVoice=false;
+  if(window.stopChocolateCupcakeSTT) window.stopChocolateCupcakeSTT();
 
   const seed=
     Date.now()+
