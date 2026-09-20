@@ -202,7 +202,7 @@
   /* Visual matematika satu langkah, ramah anak. */
   function formatVisualMath(value){
     if(value === null || value === undefined) return "";
-    if(typeof value === "string" || typeof value === "number") return escapeHtml(value);
+    if(typeof value === "string" || typeof value === "number") return escapeHtml(String(value));
     if(Array.isArray(value)) return value.map(formatVisualMath).join(" ");
     if(typeof value === "object"){
       if(value.display !== undefined) return formatVisualMath(value.display);
@@ -215,86 +215,57 @@
         return buildChildVisual(value.a, op, value.b, answer);
       }
       return Object.entries(value).map(function(pair){
-        return "<div><b>" + escapeHtml(pair[0]) + ":</b> " + formatVisualMath(pair[1]) + "</div>";
+        return "<div>" + escapeHtml(pair[0]) + ": " + formatVisualMath(pair[1]) + "</div>";
       }).join("");
     }
-    return escapeHtml(value);
+    return escapeHtml(String(value));
+  }
+
+  function buildObjectGroup(count, icon, taken){
+    const n = Math.max(0, Math.min(20, Math.floor(Number(count) || 0)));
+    const t = Math.max(0, Math.min(n, Math.floor(Number(taken) || 0)));
+    let html = '<span class="math-object-group" aria-label="' + n + ' benda">';
+    for(let i=0;i<n;i++){
+      html += '<span class="math-object' + (i < t ? ' taken' : '') + '">' + icon + '</span>';
+    }
+    html += '</span>';
+    return html;
   }
 
   function buildChildVisual(a, op, b, suffix){
-    const n1 = Math.max(0, Math.min(20, Number(a)));
-    const n2 = Math.max(0, Math.min(20, Number(b)));
-    if(!Number.isFinite(n1) || !Number.isFinite(n2)) return escapeHtml(String(a) + " " + op + " " + String(b) + suffix);
-    const icon = op === "-" ? "🍫" : op === "×" || op === "*" ? "🧁" : "🍫";
-    const second = icon;
-    const left = Array.from({length:Math.min(n1,12)},()=>icon).join(" ");
-    const right = Array.from({length:Math.min(n2,12)},()=>second).join(" ");
-    return '<div class="math-visual-row"><span>' + left + '</span><strong> ' + escapeHtml(op) + ' </strong><span>' + right + '</span><strong>' + escapeHtml(suffix || " = ?") + '</strong></div>';
-  }
-
-  function speakCupcake(message){
-
-    if(
-      !message ||
-      !("speechSynthesis" in window)
-    ){
-      return;
+    const n1 = Math.max(0, Math.min(20, Math.floor(Number(a))));
+    const n2 = Math.max(0, Math.min(20, Math.floor(Number(b))));
+    if(!Number.isFinite(n1) || !Number.isFinite(n2)){
+      return '<div class="math-visual-label">' + escapeHtml(String(a) + ' ' + op + ' ' + String(b) + suffix) + '</div>';
     }
 
-    try{
+    const operation = String(op).replace('*','×');
+    let html = '<div class="math-visual-label">Mari kita lihat bendanya:</div>';
 
-      window.speechSynthesis.cancel();
-
-      const utterance =
-        new SpeechSynthesisUtterance(message);
-
-      utterance.lang = "id-ID";
-      utterance.rate = 0.95;
-      utterance.pitch = 1.05;
-
-      window.speechSynthesis.speak(utterance);
-
-    }catch(error){
-
-      console.warn(
-        "[Chocolate Cupcake] TTS error:",
-        error
-      );
-
+    if(operation === '+'){
+      html += '<div class="math-visual-row">' +
+        buildObjectGroup(n1, '🍫', 0) +
+        '<strong class="math-op">+</strong>' +
+        buildObjectGroup(n2, '🍫', 0) +
+        '</div>';
+      html += '<div class="math-visual-question">' + n1 + ' 🍫 + ' + n2 + ' 🍫 = ?</div>';
+    }else if(operation === '-'){
+      html += '<div class="math-visual-row">' +
+        buildObjectGroup(n1, '🍫', n2) +
+        '</div>';
+      html += '<div class="math-visual-question">' + n1 + ' 🍫 − ' + n2 + ' 🍫 = ?<br><small>🍫 yang dicoret = diambil</small></div>';
+    }else if(operation === '×'){
+      html += '<div class="math-visual-row">' +
+        '<span class="math-mult-group">' + buildObjectGroup(n1, '🧁', 0) + '</span>' +
+        '<strong class="math-op">×</strong>' +
+        '<span class="math-mult-group">' + buildObjectGroup(n2, '🍫', 0) + '</span>' +
+        '</div>';
+      html += '<div class="math-visual-question">' + n1 + ' kelompok × ' + n2 + ' = ?</div>';
+    }else{
+      html += '<div class="math-visual-row"><strong>' + escapeHtml(String(a) + ' ' + operation + ' ' + String(b)) + '</strong></div>';
+      html += '<div class="math-visual-question">' + escapeHtml(String(a) + ' ' + operation + ' ' + String(b) + suffix) + '</div>';
     }
-
-  }
-
-  function escapeHtml(value){
-    return String(value).replace(/[&<>\"']/g, c => ({
-      "&":"&amp;", "<":"&lt;", ">":"&gt;",
-      "\"":"&quot;", "'":"&#39;"
-    }[c]));
-  }
-
-  /* Visual matematika sederhana untuk anak.
-     Object dari API tidak boleh berubah menjadi [object Object]. */
-  function formatVisualMath(value){
-    if(value === null || value === undefined) return "";
-    if(typeof value === "string" || typeof value === "number") {
-      return escapeHtml(String(value));
-    }
-    if(Array.isArray(value)){
-      return value.map(formatVisualMath).join(" ");
-    }
-    if(typeof value === "object"){
-      if(value.display !== undefined) return formatVisualMath(value.display);
-      if(value.text !== undefined) return formatVisualMath(value.text);
-      if(value.equation !== undefined) return formatVisualMath(value.equation);
-      if(value.expression !== undefined) return formatVisualMath(value.expression);
-      if(value.a !== undefined && value.b !== undefined){
-        const op=value.operation || value.op || "+";
-        const ans=value.answer !== undefined ? ` = ${value.answer}` : " = ?";
-        return escapeHtml(`${value.a} ${op} ${value.b}${ans}`);
-      }
-      return Object.entries(value).map(([k,v]) => `<div>${escapeHtml(k)}: ${formatVisualMath(v)}</div>`).join("");
-    }
-    return escapeHtml(String(value));
+    return html;
   }
 
   function getPlayerName(){
