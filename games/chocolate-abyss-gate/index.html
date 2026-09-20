@@ -922,6 +922,101 @@ header:after{
     line-height:1.35;
     letter-spacing:1px;
   }
+  .math-subtraction-visual{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .math-items-row{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:7px;
+    max-width:100%;
+    padding:8px 4px;
+  }
+  .math-item{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:40px;
+    height:40px;
+    border-radius:10px;
+    background:#fff;
+    border:2px solid #e5bc5e;
+    box-sizing:border-box;
+    font-size:24px;
+    line-height:1;
+  }
+  .math-item-removed{
+    opacity:.72;
+  }
+  .math-item-x{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#c62828;
+    font-size:42px;
+    font-weight:1000;
+    line-height:1;
+    text-shadow:0 1px 0 #fff;
+  }
+  .math-item-removed .math-item-emoji{
+    filter:grayscale(.35);
+  }
+  .math-subtraction-equation{
+    font-size:25px;
+    font-weight:1000;
+  }
+  .math-groups{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(74px,1fr));
+    gap:8px;
+    width:100%;
+    max-width:620px;
+    margin:0 auto;
+  }
+  .math-group-box{
+    min-height:72px;
+    padding:7px 5px;
+    border:2px solid #d49b35;
+    border-radius:12px;
+    background:#fffdf7;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    box-sizing:border-box;
+  }
+  .math-group-label{
+    font-size:11px;
+    font-weight:1000;
+    color:#76503a;
+    margin-bottom:3px;
+  }
+  .math-group-items{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:2px;
+    line-height:1;
+  }
+  .math-group-items .math-item{
+    width:27px;
+    height:27px;
+    border-radius:7px;
+    border-width:1px;
+    font-size:18px;
+  }
+  .math-visual-instruction{
+    margin-top:7px;
+    font-size:13px;
+    color:#5f3a25;
+    font-weight:900;
+  }
   .math-visual-help{
     margin-top:7px;
     font-size:12px;
@@ -947,6 +1042,15 @@ header:after{
     margin-bottom:7px;
   }
 }
+
+/* Parent learning evaluation */
+.parent-evaluation{margin:18px 0;padding:16px;border:1px solid rgba(243,193,91,.45);border-radius:16px;background:rgba(255,248,230,.96);color:#452416;text-align:left}
+.parent-evaluation-title{font-size:18px;font-weight:800;margin-bottom:10px}
+.parent-evaluation-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.parent-evaluation-item{padding:10px;border-radius:12px;background:#fff;border:1px solid rgba(91,45,22,.12)}
+.parent-evaluation-item strong{display:block;margin-bottom:4px}
+.parent-evaluation-note{margin-top:12px;padding:11px 12px;border-radius:12px;background:#fff7df;line-height:1.5}
+@media(max-width:600px){.parent-evaluation-grid{grid-template-columns:1fr}}
 </style>
 </head>
 
@@ -1329,6 +1433,11 @@ header:after{
     </h2>
 
     <p id="finalMessage"></p>
+
+    <div id="parentEvaluation" class="parent-evaluation" aria-live="polite">
+      <div class="parent-evaluation-title">👨‍👩‍👧 Evaluasi Belajar untuk Orang Tua</div>
+      <div id="parentEvaluationContent"></div>
+    </div>
 
     <button
       id="playAgain"
@@ -3725,7 +3834,20 @@ function openQuestion(){
 
 function mathItems(count,emoji="🍫"){
   const n=Math.max(0,Math.min(Number(count)||0,20));
-  return Array.from({length:n},()=>emoji).join(" ");
+  return Array.from({length:n},(_,i)=>
+    `<span class="math-item">${emoji}</span>`
+  ).join("");
+}
+
+function subtractionVisual(total,removed,emoji="🍫"){
+  const a=Math.max(0,Math.min(Number(total)||0,20));
+  const b=Math.max(0,Math.min(Number(removed)||0,a));
+  return Array.from({length:a},(_,i)=>`
+    <span class="math-item ${i < b ? "math-item-removed" : "math-item-remaining"}">
+      <span class="math-item-emoji">${emoji}</span>
+      ${i < b ? '<span class="math-item-x" aria-hidden="true">×</span>' : ''}
+    </span>
+  `).join("");
 }
 
 function buildMathVisual(question){
@@ -3734,15 +3856,52 @@ function buildMathVisual(question){
   const a=Number(question.a);
   const b=Number(question.b);
 
+  /*
+     Perkalian: a cokelat di setiap kotak, sebanyak b kotak.
+     Contoh 3 × 6 = 6 kotak, masing-masing berisi 3 cokelat.
+     Jawaban sengaja tidak ditampilkan agar pemain menghitung.
+  */
+  function multiplicationGroups(perBox,groupCount){
+    const groups=Math.max(0,Math.min(groupCount,12));
+    const items=Math.max(0,Math.min(perBox,12));
+    return Array.from({length:groups},(_,i)=>`
+      <div class="math-group-box" aria-label="Kotak ${i+1}, berisi ${items} cokelat">
+        <div class="math-group-label">Kotak ${i+1}</div>
+        <div class="math-group-items">${mathItems(items)}</div>
+      </div>
+    `).join("");
+  }
+
+  /*
+     Pembagian: seluruh cokelat dibagikan sama rata ke b kotak.
+     Contoh 18 ÷ 3 = 3 kotak, masing-masing berisi 6 cokelat.
+     Jawaban sengaja tidak ditampilkan agar pemain menghitung.
+  */
+  function divisionGroups(total,groupCount){
+    const groups=Math.max(1,Math.min(groupCount,12));
+    const each=Math.floor(total/groups);
+    return Array.from({length:groups},(_,i)=>`
+      <div class="math-group-box" aria-label="Kotak ${i+1}, berisi ${each} cokelat">
+        <div class="math-group-label">Kotak ${i+1}</div>
+        <div class="math-group-items">${mathItems(each)}</div>
+      </div>
+    `).join("");
+  }
+
   if(question.op==="−"){
     return `
       <div class="math-visual">
-        <div class="math-visual-title">Coba lihat soalnya</div>
-        <div class="math-visual-equation">
-          ${mathItems(a)} − ${mathItems(b)} = ?
+        <div class="math-visual-title">Perhatikan cokelatnya</div>
+        <div class="math-visual-equation math-subtraction-visual">
+          <div class="math-items-row" aria-label="${a} cokelat, ${b} dicoret">
+            ${subtractionVisual(a,b)}
+          </div>
+          <div class="math-subtraction-equation">
+            ${a} − ${b} = ?
+          </div>
         </div>
         <div class="math-visual-help">
-          Perhatikan tanda <b>−</b>. Kita belum menampilkan jawabannya.
+          Ada <b>${a}</b> cokelat. Tanda <b>×</b> menunjukkan <b>${b}</b> cokelat yang diambil. Hitung cokelat yang masih tersisa.
         </div>
       </div>`;
   }
@@ -3763,25 +3922,30 @@ function buildMathVisual(question){
   if(question.op==="×"){
     return `
       <div class="math-visual">
-        <div class="math-visual-title">Coba lihat soalnya</div>
-        <div class="math-visual-equation">
-          ${a} × ${b} = ?
+        <div class="math-visual-title">Hitung semua cokelat di dalam kotak</div>
+        <div class="math-visual-equation">${a} × ${b} = ?</div>
+        <div class="math-visual-instruction">${b} kotak, setiap kotak berisi ${a} cokelat</div>
+        <div class="math-groups" aria-label="${b} kotak, masing-masing berisi ${a} cokelat">
+          ${multiplicationGroups(a,b)}
         </div>
         <div class="math-visual-help">
-          Pikirkan ${a} kelompok yang masing-masing berisi ${b}.
+          Hitung semua cokelat dari ${b} kotak. Jangan melihat hasilnya—cari jawabannya sendiri!
         </div>
       </div>`;
   }
 
   if(question.op==="÷"){
+    const each=b>0 ? Math.floor(a/b) : 0;
     return `
       <div class="math-visual">
-        <div class="math-visual-title">Coba lihat soalnya</div>
-        <div class="math-visual-equation">
-          ${a} ÷ ${b} = ?
+        <div class="math-visual-title">Bagikan cokelat sama rata</div>
+        <div class="math-visual-equation">${a} ÷ ${b} = ?</div>
+        <div class="math-visual-instruction">${a} cokelat dibagi rata ke ${b} kotak</div>
+        <div class="math-groups" aria-label="${a} cokelat dibagi rata ke ${b} kotak">
+          ${divisionGroups(a,b)}
         </div>
         <div class="math-visual-help">
-          Bayangkan ${a} benda dibagi rata menjadi ${b} kelompok.
+          Perhatikan jumlah cokelat di setiap kotak. Hitung berapa cokelat yang diterima setiap kotak!
         </div>
       </div>`;
   }
@@ -4332,7 +4496,7 @@ function showCupcakeAgentState(state, message=""){
       text:message||"Tidak apa-apa! Kamu pasti bisa. Coba perhatikan soalnya lagi."
     },
     teaching:{
-      image:"sources/teaching.png",
+      image:"sources/theaching.png",
       fallback:"sources/chocolate-cupcake.png",
       label:"🧠 Teaching",
       text:message||"Ayo kita pelajari langkahnya bersama."
@@ -4843,6 +5007,63 @@ function showFinalVictory(){
    COMPLETE LEVEL
    ========================================================= */
 
+function renderParentLearningEvaluation(){
+  const box=document.getElementById("parentEvaluation");
+  const content=document.getElementById("parentEvaluationContent");
+  if(!box || !content) return;
+
+  let profile=null;
+  try{
+    profile=typeof getPlayerLearningProfile==="function"
+      ? getPlayerLearningProfile()
+      : (window.currentPlayerLearningProfile || null);
+  }catch(error){
+    console.warn("[Parent Evaluation] profile error:",error);
+  }
+
+  if(!profile){
+    content.innerHTML="<div class=\"parent-evaluation-note\">Data evaluasi belum tersedia.</div>";
+    return;
+  }
+
+  const skills=profile.skills || {};
+  const labels={addition:"Penjumlahan",subtraction:"Pengurangan",multiplication:"Perkalian",division:"Pembagian"};
+  const entries=Object.keys(labels).map(skill=>{
+    const d=skills[skill] || {};
+    const attempts=Number(d.attempts)||0;
+    const correct=Number(d.correct)||0;
+    const accuracy=attempts ? Math.round(correct/attempts*100) : 0;
+    return {skill,label:labels[skill],attempts,correct,accuracy};
+  });
+  const practiced=entries.filter(x=>x.attempts>0);
+  const strongest=practiced.length ? [...practiced].sort((a,b)=>b.accuracy-a.accuracy || b.attempts-a.attempts)[0] : null;
+  const support=practiced.length ? [...practiced].sort((a,b)=>a.accuracy-b.accuracy || b.attempts-a.attempts)[0] : null;
+  const overall=profile.performance || {};
+  const overallAccuracy=Math.round((Number(overall.accuracy)||0)*100);
+  const statusMap={strong:"Sudah kuat",progressing:"Berkembang baik",developing:"Sedang berkembang",needs_support:"Masih membutuhkan pendampingan",new:"Belum cukup data"};
+  const trendMap={improving:"menunjukkan perkembangan positif",needs_support:"masih perlu latihan bertahap",stable:"relatif stabil",unknown:"belum dapat dinilai"};
+  let playerName="Anak";
+  try{playerName=(profile.player&&profile.player.name)||playerEventTracker.getPlayerInfo().name||"Anak";}catch(e){}
+  const strengthText=strongest
+    ? `${playerName} menunjukkan kekuatan relatif pada <b>${strongest.label}</b> dengan akurasi <b>${strongest.accuracy}%</b> dari ${strongest.attempts} percobaan.`
+    : "Belum ada cukup data untuk menentukan kekuatan matematika.";
+  const supportText=support
+    ? `Area yang paling perlu diperkuat saat ini adalah <b>${support.label}</b> (${support.accuracy}% dari ${support.attempts} percobaan). Ini adalah indikator dari permainan, bukan diagnosis kemampuan anak.`
+    : "Mainkan beberapa soal lagi agar area yang perlu diperkuat dapat terlihat.";
+  const recommendation=support
+    ? `Orang tua dapat mengajak anak berlatih <b>${support.label.toLowerCase()}</b> dengan benda nyata seperti cokelat, kancing, atau gambar. Gunakan langkah kecil dan minta anak menjelaskan cara berpikirnya.`
+    : "Lanjutkan latihan dengan soal yang beragam dan minta anak menjelaskan cara mendapatkan jawabannya.";
+  content.innerHTML=`
+    <div class="parent-evaluation-grid">
+      <div class="parent-evaluation-item"><strong>📊 Akurasi keseluruhan</strong>${overallAccuracy}%</div>
+      <div class="parent-evaluation-item"><strong>🌱 Status belajar</strong>${statusMap[profile.learning?.status]||"Belum dapat dinilai"}</div>
+      <div class="parent-evaluation-item"><strong>💪 Kekuatan</strong>${strengthText}</div>
+      <div class="parent-evaluation-item"><strong>🎯 Perlu diperkuat</strong>${supportText}</div>
+    </div>
+    <div class="parent-evaluation-note"><b>📈 Perkembangan:</b> Saat ini performa ${trendMap[profile.learning?.trend]||"belum dapat dinilai"}.</div>
+    <div class="parent-evaluation-note"><b>💡 Saran pendampingan:</b> ${recommendation}</div>`;
+}
+
 function completeLevel(autoContinue=false){
 
   locked=true;
@@ -5246,6 +5467,7 @@ function completeLevel(autoContinue=false){
       "hidden"
     );
 
+    renderParentLearningEvaluation();
     showFinalVictory();
 
   }
