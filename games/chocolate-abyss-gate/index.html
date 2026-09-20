@@ -926,31 +926,6 @@ header:after{
   .math-object{width:27px;height:27px;font-size:20px;}
   #debugPanel{right:8px;bottom:8px;width:calc(100vw - 16px);max-height:78vh;padding:10px;}
 }
-
-/* =========================================================
-   Chocolate Cupcake AI visible-learning layer
-   ========================================================= */
-.cupcake-math-one-step{
-  margin-top:10px;padding:10px;border-radius:12px;background:#fff7df;border:1px solid #e5bc5e;text-align:center;
-}
-.cupcake-math-expression{font-size:1.15rem;font-weight:900;margin-bottom:7px;}
-.cupcake-math-row{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;}
-.cupcake-math-group{max-width:100%;font-size:22px;line-height:1.45;overflow-wrap:anywhere;}
-.cupcake-math-symbol{font-size:1.4rem;font-weight:900;}
-.cupcake-math-result{margin-top:8px;font-weight:900;line-height:1.35;}
-.cupcake-ai-decision{margin-top:9px;padding:9px 10px;border-radius:10px;background:#f0ead7;border-left:4px solid #a65b2c;font-size:.92rem;line-height:1.4;}
-.cupcake-ai-memory{margin-top:9px;padding:10px;border-radius:10px;background:#fff9ec;border:1px solid #e5bc5e;}
-.cupcake-ai-memory-grid{display:grid;grid-template-columns:1fr auto;gap:5px 10px;margin-top:6px;}
-#finalOverlay .final-card{max-height:min(88vh,760px);overflow:auto;}
-.final-learning-panel{margin:14px 0;text-align:left;padding:12px;border-radius:14px;background:#fff9ec;border:2px solid #e5bc5e;}
-.final-learning-panel h3{margin:0 0 9px;}
-.final-learning-panel .learning-grid{display:grid;grid-template-columns:1fr auto;gap:6px 12px;}
-.final-learning-panel .learning-grid b{text-align:right;}
-.final-learning-panel .learning-why{margin-top:10px;padding:9px;border-radius:10px;background:#f4e8ca;line-height:1.4;}
-@media(max-width:600px){
-  .cupcake-math-group{font-size:19px;}
-  .final-learning-panel{padding:10px;}
-}
 </style>
 </head>
 
@@ -1099,8 +1074,8 @@ header:after{
 
     <img
       class="intro-cupcake"
-      src="sources/chocolate-cupcake.png"
-      alt="Chocolate Cupcake"
+      src="sources/welcome.png"
+      alt="Chocolate Cupcake Welcome"
     >
 
     <h2>
@@ -1115,6 +1090,8 @@ header:after{
       <br>
       <b>Good luck!</b>
     </p>
+
+    <div class="ai-note" id="startAiNote"></div>
 
     <button class="actions" id="goPick" type="button">
       🍫 Pilih Karakter
@@ -1194,6 +1171,8 @@ header:after{
     </p>
 
     <div class="picker" id="picker"></div>
+
+    <div class="ai-note" id="pickerAiNote"></div>
 
     <div class="actions">
 
@@ -1312,8 +1291,6 @@ header:after{
     </h2>
 
     <p id="finalMessage"></p>
-
-    <div id="finalLearningPanel" class="final-learning-panel" aria-live="polite"></div>
 
     <button
       id="playAgain"
@@ -2603,6 +2580,10 @@ function renderPicker(){
         renderPicker();
         updateHeaderCharacters();
 
+        if(typeof window.cupcakeCharacterSelected === "function") {
+          window.cupcakeCharacterSelected(selected);
+        }
+
       };
 
     });
@@ -2882,7 +2863,6 @@ function startLevelWithoutIntro(){
 
 function startNewSession(){
 
-  if("speechSynthesis" in window) window.speechSynthesis.cancel();
   totalScore=0;
 
   levelKey="easy";
@@ -2900,7 +2880,6 @@ function startNewSession(){
 
   adaptiveDifficultyOverride=null;
   lastAIDecision=null;
-  window.currentAIDecision=null;
 
   setupLevel();
   showIntro();
@@ -3636,9 +3615,6 @@ function openQuestion(){
 
   }
 
-  // Satu sumber keputusan AI untuk UI Chocolate Cupcake.
-  window.currentAIDecision = lastAIDecision || null;
-
   /* Tracking */
 
   try{
@@ -4038,26 +4014,63 @@ function answerQuestion(value){
 
     if(currentHintUsed){
 
-      // Chocolate Cupcake AI agent sudah menampilkan feedback +
-      // visualisasi satu langkah. Jangan membuat agent/popup kedua.
-      f.textContent =
-        currentAttemptNumber >= 2
-          ? "🧠 Aku bantu dengan satu langkah visual. -25 poin."
-          : "💪 Belum tepat. -25 poin. Coba lagi!";
+      const hintMap={
+
+        addition:
+          "Coba hitung dari angka pertama, lalu tambahkan angka kedua secara bertahap.",
+
+        subtraction:
+          "Coba mulai dari angka pertama lalu kurangi perlahan.",
+
+        multiplication:
+          "Ingat bahwa perkalian bisa dihitung sebagai penjumlahan berulang.",
+
+        division:
+          "Coba cari angka yang jika dikalikan pembagi menghasilkan bilangan pertama."
+
+      };
+
+      const hint=
+        hintMap[
+          currentQuestion.skill
+        ] ||
+        "Coba perhatikan kembali operasi matematikanya.";
+
+      /* Chocolate Cupcake AI menampilkan feedback visualnya sendiri.
+         Jangan menimpa #aiNote dengan legacy "Chocolate Guide". */
+      f.textContent=
+        `❌ Belum tepat. -25 poin. ${
+          lastAIDecision &&
+          lastAIDecision.action===
+            "REMEDIATE"
+            ? "Kita turunkan tingkat tantangannya."
+            : "Aku bantu sedikit."
+        }`;
 
       try{
 
         playerEventTracker.track(
           "HINT_USED",
           {
-            questionId:currentQuestionId,
-            hintLevel:lastAIDecision?.action || "HINT",
-            skill:currentQuestion.skill
+            questionId:
+              currentQuestionId,
+
+            hintLevel:
+              lastAIDecision?.action ||
+              "HINT",
+
+            skill:
+              currentQuestion.skill
           }
         );
 
       }catch(error){
-        console.warn("[Tracker] HINT_USED error:",error);
+
+        console.warn(
+          "[Tracker] HINT_USED error:",
+          error
+        );
+
       }
 
     }else{
@@ -4429,53 +4442,9 @@ function move(dx,dy){
 function showLevelCelebration(levelName){
   const note=document.getElementById("levelAiNote");
   if(!note) return;
-
-  const events=playerEventTracker.getEvents().filter(e=>
-    e.type==="ANSWER_SUBMITTED" && e.level===levelKey
-  );
-  const correct=events.filter(e=>e.isCorrect===true).length;
-  const wrong=events.filter(e=>e.isCorrect!==true).length;
-  const accuracy=events.length?Math.round(correct/events.length*100):0;
-  const skillCounts={};
-  events.forEach(e=>{
-    if(!e.skill) return;
-    skillCounts[e.skill] ||= {correct:0,total:0};
-    skillCounts[e.skill].total++;
-    if(e.isCorrect===true) skillCounts[e.skill].correct++;
-  });
-  const ranked=Object.entries(skillCounts).map(([skill,v])=>({skill,accuracy:v.correct/v.total})).sort((a,b)=>b.accuracy-a.accuracy);
-  const strong=ranked[0]?.skill || "Belum cukup data";
-  const weak=ranked.length>1 ? ranked[ranked.length-1].skill : (ranked[0]?.skill || "Belum cukup data");
-  const name=playerEventTracker.getPlayerInfo().name || "Petualang";
-
-  const next=levelIndex(levelKey)<3 ? keyFromIndex(levelIndex(levelKey)+1) : null;
-  const decision=window.currentAIDecision || lastAIDecision;
-  const decisionText=decision?.difficulty
-    ? (decision.difficulty!==levelKey
-      ? `Chocolate Cupcake menyesuaikan tantangan ke ${levels[decision.difficulty]?.name || decision.difficulty}.`
-      : "Chocolate Cupcake mempertahankan tingkat tantangan berdasarkan performamu.")
-    : "Chocolate Cupcake akan terus membaca performamu pada soal berikutnya.";
-
-  note.innerHTML=`
-    <div class="cupcake-ai-response">
-      <img class="cupcake-ai-image" src="sources/celebrating.png" alt="Chocolate Cupcake celebrating">
-      <div class="cupcake-ai-content">
-        <div class="cupcake-ai-message">🎉 Hebat, ${name}! Kamu menyelesaikan level ${levelName}.</div>
-        <div class="cupcake-ai-memory">
-          <b>📚 Yang Chocolate Cupcake Ingat</b>
-          <div class="cupcake-ai-memory-grid">
-            <span>Benar</span><b>${correct}</b>
-            <span>Salah</span><b>${wrong}</b>
-            <span>Akurasi</span><b>${accuracy}%</b>
-            <span>Kekuatan</span><b>${strong}</b>
-            <span>Perlu latihan</span><b>${weak}</b>
-          </div>
-        </div>
-        <div class="cupcake-ai-decision"><b>🤖 AI Learning Decision</b><br>${decisionText}<br><small>Why: keputusan berikutnya menggunakan data jawaban dan performa pemain.</small></div>
-      </div>
-    </div>`;
+  note.innerHTML=`<div class="cupcake-ai-response"><img class="cupcake-ai-image" src="sources/celebrating.png" alt="Chocolate Cupcake celebrating"><div class="cupcake-ai-content"><div class="cupcake-ai-message">🎉 Hebat! Kamu menyelesaikan level ${levelName}! 🍫</div><div class="cupcake-ai-visual">🎉🏆🍫</div></div></div>`;
   note.classList.remove("hidden");
-  if(typeof window.queueCupcakeTTS==="function") window.queueCupcakeTTS(`Hebat, ${name}! Kamu menyelesaikan level ${levelName}.`);
+  if(typeof window.queueCupcakeTTS==="function") window.queueCupcakeTTS(`Hebat! Kamu menyelesaikan level ${levelName}!`);
 }
 
 /* =========================================================
@@ -4485,45 +4454,6 @@ function showLevelCelebration(levelName){
 function showFinalVictory(){
   const card=document.querySelector("#finalOverlay .final-card");
   if(!card) return;
-
-  const info=playerEventTracker.getPlayerInfo();
-  const name=info.name || "Petualang";
-  const all=playerEventTracker.getEvents();
-  const answers=all.filter(e=>e.type==="ANSWER_SUBMITTED");
-  const correct=answers.filter(e=>e.isCorrect===true).length;
-  const wrong=answers.filter(e=>e.isCorrect!==true).length;
-  const accuracy=answers.length?Math.round(correct/answers.length*100):0;
-  const bySkill={};
-  answers.forEach(e=>{
-    if(!e.skill) return;
-    bySkill[e.skill] ||= {correct:0,total:0};
-    bySkill[e.skill].total++;
-    if(e.isCorrect===true) bySkill[e.skill].correct++;
-  });
-  const ranked=Object.entries(bySkill).map(([skill,v])=>({skill,accuracy:v.correct/v.total})).sort((a,b)=>b.accuracy-a.accuracy);
-  const strong=ranked[0]?.skill || "Belum cukup data";
-  const weak=ranked.length>1 ? ranked[ranked.length-1].skill : strong;
-
-  const panel=document.getElementById("finalLearningPanel");
-  if(panel){
-    panel.innerHTML=`
-      <div class="cupcake-ai-response">
-        <img class="cupcake-ai-image" src="sources/victory.png" alt="Chocolate Cupcake victory">
-        <div class="cupcake-ai-content">
-          <div class="cupcake-ai-message"><b>🍫 Analisis Chocolate Cupcake</b><br>${name}, ini yang aku pelajari dari permainanmu.</div>
-        </div>
-      </div>
-      <div class="learning-grid">
-        <span>✅ Benar</span><b>${correct}</b>
-        <span>❌ Salah</span><b>${wrong}</b>
-        <span>🎯 Akurasi</span><b>${accuracy}%</b>
-        <span>💪 Kekuatan</span><b>${strong}</b>
-        <span>🧠 Perlu latihan</span><b>${weak}</b>
-        <span>📊 Soal dijawab</span><b>${answers.length}</b>
-      </div>
-      <div class="learning-why"><b>🤖 Why</b><br>Chocolate Cupcake menggunakan pola jawabanmu untuk menyesuaikan dukungan dan tingkat tantangan pada permainan berikutnya.</div>`;
-  }
-
   let note=document.getElementById("finalAiNote");
   if(!note){
     note=document.createElement("div");
@@ -4531,9 +4461,16 @@ function showFinalVictory(){
     note.className="ai-note";
     document.getElementById("finalMessage").insertAdjacentElement("afterend",note);
   }
-  note.innerHTML=`<div class="cupcake-ai-decision"><b>🏆 Chocolate Cupcake</b><br>Luar biasa, ${name}! Aku mengingat performamu untuk sesi belajar berikutnya.</div>`;
+  if(typeof window.sendCupcakeFinalReport === "function") {
+    window.sendCupcakeFinalReport();
+    const aiNote=document.getElementById("aiNote");
+    if(aiNote && aiNote.innerHTML) {
+      note.innerHTML=aiNote.innerHTML;
+    }
+  } else {
+    note.innerHTML=`<div class="cupcake-ai-response"><img class="cupcake-ai-image" src="sources/victory.png" alt="Chocolate Cupcake victory"><div class="cupcake-ai-content"><div class="cupcake-ai-message">🍫 Aku sudah mengingat hasil belajarmu hari ini. Saat kita bertemu lagi, aku akan membantu kamu belajar dengan cara yang paling cocok.</div><div class="cupcake-ai-visual">🧠 📚 🍫</div></div></div>`;
+  }
   note.classList.remove("hidden");
-  if(typeof window.queueCupcakeTTS==="function") window.queueCupcakeTTS(`Luar biasa, ${name}! Aku sudah mengingat performamu.`);
 }
 
 /* =========================================================
@@ -4692,9 +4629,6 @@ function launchConfetti(){
 
 function exitGame(){
 
-  if("speechSynthesis" in window) window.speechSynthesis.cancel();
-  try{ playerEventTracker.clearPlayerData(); }catch(error){ console.warn("[Tracker] clearPlayerData error:",error); }
-
   locked=true;
   gameStarted=false;
   questionOpen=false;
@@ -4730,7 +4664,6 @@ function exitGame(){
 
   adaptiveDifficultyOverride=null;
   lastAIDecision=null;
-  window.currentAIDecision=null;
 
   levelKey="easy";
   unlocked=1;
@@ -4760,8 +4693,12 @@ function exitGame(){
 
 document.getElementById(
   "goPick"
-).onclick=
-  showProfile;
+).onclick=()=>{
+  showProfile();
+  if(typeof window.cupcakePlayWelcome === "function") {
+    window.cupcakePlayWelcome();
+  }
+};
 
 document.getElementById(
   "backIntroFromProfile"
