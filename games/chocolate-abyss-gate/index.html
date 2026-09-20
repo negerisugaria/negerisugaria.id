@@ -4694,10 +4694,13 @@ function exitGame(){
 document.getElementById(
   "goPick"
 ).onclick=()=>{
-  showProfile();
+  /* User gesture: browser mengizinkan TTS di sini. */
   if(typeof window.cupcakePlayWelcome === "function") {
     window.cupcakePlayWelcome();
+  }else if(typeof window.cupcakeSpeakWelcome === "function") {
+    window.cupcakeSpeakWelcome();
   }
+  showProfile();
 };
 
 document.getElementById(
@@ -5158,6 +5161,19 @@ window.addEventListener(
 updateHeaderCharacters();
 
 setupLevel();
+
+/* Tampilkan Chocolate Cupcake Welcome sejak halaman awal.
+   TTS otomatis dicoba oleh AI, tetapi suara browser tetap memerlukan
+   user gesture; tombol "Pilih Karakter" akan memicu suara tersebut. */
+try{
+  if(typeof window.startCupcakeWelcome === "function"){
+    window.startCupcakeWelcome(
+      window.playerEventTracker?.getPlayerInfo?.().playerId || "player"
+    );
+  }
+}catch(error){
+  console.warn("[Chocolate Cupcake] Welcome init error:", error);
+}
 
 updateDebugPanel();
 
