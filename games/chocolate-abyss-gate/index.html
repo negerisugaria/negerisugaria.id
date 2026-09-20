@@ -3722,20 +3722,16 @@ function buildMathVisual(question){
 
   const a=Number(question.a);
   const b=Number(question.b);
-  const ans=Number(question.ans);
 
   if(question.op==="−"){
     return `
       <div class="math-visual">
-        <div class="math-visual-title">Visualisasi pengurangan</div>
+        <div class="math-visual-title">Coba lihat soalnya</div>
         <div class="math-visual-equation">
-          ${mathItems(a)}<br>
-          − ${mathItems(b)}<br>
-          ─────────<br>
-          = ${mathItems(ans)}
+          ${mathItems(a)} − ${mathItems(b)} = ?
         </div>
         <div class="math-visual-help">
-          Ambil ${b} dari ${a}. Jadi tersisa ${ans}.
+          Perhatikan tanda <b>−</b>. Kita belum menampilkan jawabannya.
         </div>
       </div>`;
   }
@@ -3743,12 +3739,12 @@ function buildMathVisual(question){
   if(question.op==="+"){
     return `
       <div class="math-visual">
-        <div class="math-visual-title">Visualisasi penjumlahan</div>
+        <div class="math-visual-title">Coba lihat soalnya</div>
         <div class="math-visual-equation">
-          ${mathItems(a)} + ${mathItems(b)} = ${mathItems(ans)}
+          ${mathItems(a)} + ${mathItems(b)} = ?
         </div>
         <div class="math-visual-help">
-          Gabungkan ${a} dan ${b}, hasilnya ${ans}.
+          Gabungkan kelompok pertama dan kedua. Cari jawabannya sendiri.
         </div>
       </div>`;
   }
@@ -3756,10 +3752,12 @@ function buildMathVisual(question){
   if(question.op==="×"){
     return `
       <div class="math-visual">
-        <div class="math-visual-title">Visualisasi perkalian</div>
-        <div class="math-visual-equation">${a} × ${b} = ${ans}</div>
+        <div class="math-visual-title">Coba lihat soalnya</div>
+        <div class="math-visual-equation">
+          ${a} × ${b} = ?
+        </div>
         <div class="math-visual-help">
-          ${Array.from({length:Math.min(a,10)},()=>b).join(" + ")} = ${ans}
+          Pikirkan ${a} kelompok yang masing-masing berisi ${b}.
         </div>
       </div>`;
   }
@@ -3767,10 +3765,12 @@ function buildMathVisual(question){
   if(question.op==="÷"){
     return `
       <div class="math-visual">
-        <div class="math-visual-title">Visualisasi pembagian</div>
-        <div class="math-visual-equation">${a} ÷ ${b} = ${ans}</div>
+        <div class="math-visual-title">Coba lihat soalnya</div>
+        <div class="math-visual-equation">
+          ${a} ÷ ${b} = ?
+        </div>
         <div class="math-visual-help">
-          ${a} dibagi menjadi ${b} kelompok, masing-masing ${ans}.
+          Bayangkan ${a} benda dibagi rata menjadi ${b} kelompok.
         </div>
       </div>`;
   }
@@ -4073,10 +4073,23 @@ function answerQuestion(value){
        Pengurangan tidak pernah diubah menjadi penjumlahan. */
     const visual=buildMathVisual(currentQuestion);
     if(visual){
-      aiNote.innerHTML=
-        `<div class="cupcake-ai-message">🍫 Coba gunakan cara ini:</div>`+
-        visual;
+      aiNote.innerHTML=`
+        <div class="cupcake-ai-response wrong-answer-ai">
+          <img
+            class="cupcake-ai-image"
+            src="sources/chocolate-cupcake.png"
+            alt="Chocolate Cupcake membantu belajar"
+            onerror="this.onerror=null;this.src='sources/celebrating.png';"
+          >
+          <div class="cupcake-ai-content">
+            <div class="cupcake-ai-message">
+              🍫 Tidak apa-apa, kita lihat soalnya bersama.
+            </div>
+            ${visual}
+          </div>
+        </div>`;
       aiNote.classList.remove("hidden");
+      aiNote.scrollIntoView({behavior:"smooth", block:"nearest"});
     }
 
     if(
@@ -4323,7 +4336,15 @@ function closeHomePopup(){
 
 document.getElementById("continueHomeBtn").onclick=()=>{
   closeHomePopup();
-  completeLevel();
+
+  const currentKey=levelKey;
+  const idx=levelIndex(currentKey);
+
+  if(idx<2){
+    completeLevel(true);
+  }else{
+    completeLevel(false);
+  }
 };
 
 /* =========================================================
@@ -4703,7 +4724,7 @@ function showFinalVictory(){
    COMPLETE LEVEL
    ========================================================= */
 
-function completeLevel(){
+function completeLevel(autoContinue=false){
 
   locked=true;
   questionOpen=false;
@@ -4995,6 +5016,36 @@ function completeLevel(){
     };
 
     updateNewMazeButton();
+
+    /* Saat pemain menekan "Lanjut" dari Chocolate Abyss Gate,
+       langsung buka level berikutnya tanpa berhenti di popup level selesai. */
+    if(autoContinue){
+      levelKey=nextKey;
+
+      levelModal.classList.remove(
+        "show"
+      );
+
+      const levelAiNoteAuto=
+        document.getElementById(
+          "levelAiNote"
+        );
+
+      if(levelAiNoteAuto){
+        levelAiNoteAuto.innerHTML="";
+        levelAiNoteAuto.classList.add("hidden");
+      }
+
+      setupLevel();
+      startLevelWithoutIntro();
+      updateNewMazeButton();
+
+      showToast(
+        `🚀 Level berikutnya dimulai: ${levels[levelKey].name}`
+      );
+
+      return;
+    }
 
     const levelAiNote=
       document.getElementById(
