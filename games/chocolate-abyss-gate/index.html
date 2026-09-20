@@ -3894,6 +3894,9 @@ function answerQuestion(value){
         question:
           currentQuestion,
 
+        questionId:
+          currentQuestionId,
+
         playerAnswer:
           value,
 
@@ -4444,7 +4447,6 @@ function showLevelCelebration(levelName){
   if(!note) return;
   note.innerHTML=`<div class="cupcake-ai-response"><img class="cupcake-ai-image" src="sources/celebrating.png" alt="Chocolate Cupcake celebrating"><div class="cupcake-ai-content"><div class="cupcake-ai-message">🎉 Hebat! Kamu menyelesaikan level ${levelName}! 🍫</div><div class="cupcake-ai-visual">🎉🏆🍫</div></div></div>`;
   note.classList.remove("hidden");
-  if(typeof window.queueCupcakeTTS==="function") window.queueCupcakeTTS(`Hebat! Kamu menyelesaikan level ${levelName}!`);
 }
 
 /* =========================================================
@@ -4694,12 +4696,8 @@ function exitGame(){
 document.getElementById(
   "goPick"
 ).onclick=()=>{
-  /* User gesture: browser mengizinkan TTS di sini. */
-  if(typeof window.cupcakePlayWelcome === "function") {
-    window.cupcakePlayWelcome();
-  }else if(typeof window.cupcakeSpeakWelcome === "function") {
-    window.cupcakeSpeakWelcome();
-  }
+  /* User gesture membuka form. Welcome dengan nama dibacakan
+     oleh Chocolate Cupcake setelah profil disimpan. */
   showProfile();
 };
 
@@ -4767,6 +4765,16 @@ document.getElementById(
   updateDebugPanel();
 
   showPicker();
+
+  /*
+   * Ini masih berada di dalam klik "Lanjut", jadi browser memiliki
+   * user gesture. Chocolate Cupcake menampilkan Welcome DAN berbicara.
+   */
+  if(typeof window.cupcakePlayWelcome === "function") {
+    window.cupcakePlayWelcome("pickerAiNote");
+  }else if(typeof window.cupcakeSpeakWelcome === "function") {
+    window.cupcakeSpeakWelcome();
+  }
 
 };
 
@@ -5163,8 +5171,8 @@ updateHeaderCharacters();
 setupLevel();
 
 /* Tampilkan Chocolate Cupcake Welcome sejak halaman awal.
-   TTS otomatis dicoba oleh AI, tetapi suara browser tetap memerlukan
-   user gesture; tombol "Pilih Karakter" akan memicu suara tersebut. */
+   TTS dibunyikan oleh AI agent setelah nama pemain disimpan melalui
+   tombol "Lanjut", karena itu adalah user gesture browser. */
 try{
   if(typeof window.startCupcakeWelcome === "function"){
     window.startCupcakeWelcome(
