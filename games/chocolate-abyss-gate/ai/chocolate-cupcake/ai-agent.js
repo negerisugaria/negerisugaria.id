@@ -603,6 +603,14 @@
 
     if(isCorrect === true){
 
+      /*
+       * TTS "Hebat" hanya boleh muncul jika anak sebelumnya
+       * salah lalu berhasil menjawab benar.
+       * Jika benar pada percobaan pertama, tampilkan AI tanpa suara.
+       */
+      const hadMistakeBeforeCorrect =
+        Number(attemptNumber || 1) > 1;
+
       showLocalCupcakeState({
 
         state: "celebrating",
@@ -613,7 +621,7 @@
         visual:
           "🎉🍫",
 
-        speak: true
+        speak: hadMistakeBeforeCorrect
 
       });
 
@@ -853,6 +861,18 @@
    * Browser speech is reliable only after a user gesture, so
    * these functions are called directly from the game buttons.
    * ============================================================ */
+
+  window.cupcakeSpeakWelcome = function(){
+    const tracker = window.playerEventTracker;
+    const info = tracker && tracker.getPlayerInfo ? tracker.getPlayerInfo() : {};
+    const name = String(info.name || window.playerName || "").trim() || "teman";
+    const profile = window.getPlayerLearningProfile ? window.getPlayerLearningProfile() : null;
+    const hasHistory = Boolean(profile && Number(profile.attempts || 0) > 0);
+    const message = hasHistory
+      ? getReturningPlayerMessage()
+      : `Halo ${name}!\nAku Chocolate Cupcake.\nAku akan menemanimu bermain,\nmengingat kemajuanmu,\ndan membantumu saat kesulitan.\nAyo kita belajar sambil bermain!`;
+    speakCupcake(message);
+  };
 
   window.cupcakePlayWelcome = function(){
     const tracker = window.playerEventTracker;
