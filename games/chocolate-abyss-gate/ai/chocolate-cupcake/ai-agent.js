@@ -1584,11 +1584,13 @@
       state.wrongCount === 1
     ) {
 
-      showOops();
+      showEncouraging();
+      showFirstMistakeVisual(eventData);
 
     } else {
 
       showTeaching();
+      showSecondMistakeGuidance(eventData);
     }
 
 
@@ -2569,6 +2571,129 @@
 
 
   /* ============================================================
+     DISCUSSION VISUAL GUIDANCE
+     ============================================================ */
+
+  function getCupcakeVisualHost() {
+
+    return (
+      document.querySelector(
+        "[data-cupcake-response], #cupcakeResponse, .cupcake-response"
+      ) || null
+    );
+  }
+
+
+  function clearCupcakeGuidanceVisual() {
+
+    document
+      .querySelectorAll(".cupcake-guidance-visual")
+      .forEach(element => element.remove());
+  }
+
+
+  function createCountingTokens(question = {}, detailed = false) {
+
+    const a = Math.max(0, safeInteger(question.a ?? question.left, 0));
+    const b = Math.max(0, safeInteger(question.b ?? question.right, 0));
+    const operator = String(question.op || question.operator || "+");
+
+    let html = "";
+
+    if (operator === "-" || operator === "−") {
+      const total = Math.min(a, 30);
+      const removed = Math.min(b, total);
+      for (let i = 0; i < total; i++) {
+        const removedClass = i < removed ? " is-removed" : "";
+        html += `<span class="cupcake-count-token${removedClass}" style="--i:${i}">🍫</span>`;
+      }
+    } else if (operator === "*" || operator === "×") {
+      const groups = Math.min(b, 10);
+      const perGroup = Math.min(a, 10);
+      for (let g = 0; g < groups; g++) {
+        html += `<div class="cupcake-count-group" style="--i:${g}">`;
+        for (let i = 0; i < perGroup; i++) {
+          html += `<span class="cupcake-count-token">🍫</span>`;
+        }
+        html += `</div>`;
+      }
+    } else if (operator === "/" || operator === "÷") {
+      const boxes = Math.min(b, 6);
+      const total = Math.min(a, 30);
+      html += `<div class="cupcake-count-boxes">`;
+      for (let i = 0; i < boxes; i++) {
+        html += `<div class="cupcake-count-box" style="--i:${i}"><span>🍫</span><span>🍫</span><span>?</span></div>`;
+      }
+      html += `</div>`;
+      if (total > 0) {
+        html += `<div class="cupcake-count-note">Kita bagi cokelat satu per satu secara merata.</div>`;
+      }
+    } else {
+      const left = Math.min(a, 15);
+      const right = Math.min(b, 15);
+      html += `<div class="cupcake-count-add-group"><div>`;
+      for (let i = 0; i < left; i++) html += `<span class="cupcake-count-token" style="--i:${i}">🍫</span>`;
+      html += `</div><span class="cupcake-count-plus">＋</span><div>`;
+      for (let i = 0; i < right; i++) html += `<span class="cupcake-count-token" style="--i:${i}">🍫</span>`;
+      html += `</div></div>`;
+    }
+
+    return html;
+  }
+
+
+  function showCountingGuidance(question = {}, mode = "second") {
+
+    injectVisualMathCSS();
+    clearCupcakeGuidanceVisual();
+
+    const host = getCupcakeVisualHost();
+    if (!host) return;
+
+    const operator = operatorSymbol(question.op || question.operator || "+");
+    const prompt = mode === "first"
+      ? "Yuk kita lihat dan hitung bersama. Coba ceritakan apa yang kamu lihat."
+      : "Kita pelan-pelan ya. Hitung bersama Chocolate Cupcake, satu langkah demi satu langkah.";
+
+    const visual = document.createElement("div");
+    visual.className = "cupcake-guidance-visual";
+    visual.setAttribute("role", "status");
+    visual.innerHTML = `
+      <div class="cupcake-guidance-title">🧁 Yuk hitung bersama</div>
+      <div class="cupcake-guidance-equation">${question.a ?? question.left ?? "?"} ${operator} ${question.b ?? question.right ?? "?"} = ?</div>
+      <div class="cupcake-count-stage">${createCountingTokens(question, mode === "second")}</div>
+      <div class="cupcake-guidance-prompt">${prompt}</div>
+    `;
+
+    host.insertAdjacentElement("afterend", visual);
+
+    requestAnimationFrame(() => visual.classList.add("is-visible"));
+  }
+
+
+  function showFirstMistakeVisual(eventData = {}) {
+    showCountingGuidance(
+      state.currentQuestion || eventData,
+      "first"
+    );
+  }
+
+
+  function showSecondMistakeGuidance(eventData = {}) {
+    showCountingGuidance(
+      state.currentQuestion || eventData,
+      "second"
+    );
+
+    dispatch("cupcake-discussion-step", {
+      step: 2,
+      question: state.currentQuestion || eventData,
+      mode: "guided-counting"
+    });
+  }
+
+
+  /* ============================================================
      VISUAL MATH
      ============================================================ */
 
@@ -2698,6 +2823,121 @@
 
       .cupcake-math-equals {
         font-size:30px;
+      }
+
+      .cupcake-guidance-visual {
+        opacity:0;
+        transform:translateY(6px);
+        margin:12px 0;
+        padding:16px;
+        border-radius:18px;
+        background:rgba(255,255,255,.08);
+        border:1px solid rgba(255,210,90,.28);
+        text-align:center;
+        transition:opacity .25s ease, transform .25s ease;
+      }
+
+      .cupcake-guidance-visual.is-visible {
+        opacity:1;
+        transform:translateY(0);
+      }
+
+      .cupcake-guidance-title {
+        font-size:18px;
+        font-weight:800;
+        margin-bottom:6px;
+      }
+
+      .cupcake-guidance-equation {
+        font-size:24px;
+        font-weight:900;
+        margin-bottom:12px;
+      }
+
+      .cupcake-count-stage {
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        flex-wrap:wrap;
+        gap:7px;
+        min-height:56px;
+      }
+
+      .cupcake-count-token {
+        display:inline-block;
+        font-size:25px;
+        filter:drop-shadow(0 0 0 rgba(255,210,80,0));
+        animation:cupcakeCountGlow 1.8s ease-in-out infinite;
+        animation-delay:calc(var(--i, 0) * 80ms);
+      }
+
+      .cupcake-count-token.is-removed {
+        opacity:.28;
+        filter:grayscale(1);
+        text-decoration:line-through;
+      }
+
+      .cupcake-count-group {
+        display:flex;
+        gap:2px;
+        padding:7px 9px;
+        border-radius:12px;
+        border:1px solid rgba(255,210,90,.25);
+        animation:cupcakeGroupGlow 2s ease-in-out infinite;
+        animation-delay:calc(var(--i, 0) * 180ms);
+      }
+
+      .cupcake-count-boxes {
+        display:flex;
+        justify-content:center;
+        flex-wrap:wrap;
+        gap:10px;
+        width:100%;
+      }
+
+      .cupcake-count-box {
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        gap:1px;
+        min-width:58px;
+        min-height:70px;
+        padding:5px;
+        border-radius:12px;
+        border:1px solid rgba(255,210,90,.3);
+        animation:cupcakeGroupGlow 2s ease-in-out infinite;
+        animation-delay:calc(var(--i, 0) * 180ms);
+      }
+
+      .cupcake-count-add-group {
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        flex-wrap:wrap;
+        gap:10px;
+      }
+
+      .cupcake-count-plus {
+        font-size:26px;
+        font-weight:900;
+      }
+
+      .cupcake-count-note,
+      .cupcake-guidance-prompt {
+        margin-top:10px;
+        font-size:14px;
+        line-height:1.45;
+      }
+
+      @keyframes cupcakeCountGlow {
+        0%,100% { transform:scale(1); filter:drop-shadow(0 0 0 rgba(255,210,80,0)); }
+        45% { transform:scale(1.14); filter:drop-shadow(0 0 10px rgba(255,210,80,.9)); }
+      }
+
+      @keyframes cupcakeGroupGlow {
+        0%,100% { box-shadow:0 0 0 rgba(255,210,80,0); }
+        45% { box-shadow:0 0 16px rgba(255,210,80,.55); }
       }
 
       .cupcake-stt-active {
