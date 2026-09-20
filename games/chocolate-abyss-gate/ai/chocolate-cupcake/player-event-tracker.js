@@ -485,7 +485,7 @@
 
         lastMistake: null,
 
-        lastAI decision: null,
+        lastAIdecision: null,
 
         lastActivityAt: null
       };
