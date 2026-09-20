@@ -1,2488 +1,3331 @@
-(function(){
+/* ============================================================
+   CHOCOLATE ABYSS GATE
+   CHOCOLATE CUPCAKE AI AGENT
+   ============================================================
 
-  const CUPCAKE_API =
-    "https://api.negerisugaria.id/api/cupcake/respond";
+   Role:
+   Chocolate Cupcake = AI Learning Companion
 
-  const CUPCAKE_API_TIMEOUT = 8000;
+   Traits:
+   - Friendly
+   - Cheerful
+   - Educational
+   - Encouraging
 
-  /*
-   * ============================================================
-   * STATE IMAGES
-   * ============================================================
-   */
+   Mission:
+   Guide children through Chocolate Abyss Gate
+   while improving mathematics skills.
 
-  const stateImages = {
-    welcome: "sources/welcome.png",
-    encouraging: "sources/encouraging.png",
-    thinking: "sources/thinking.png",
-    oops: "sources/oops.png",
-    teaching: "sources/theaching.png",
-    celebrating: "sources/celebrating.png",
-    victory: "sources/victory.png"
+   FEATURES
+   ------------------------------------------------------------
+   1. Chocolate Cupcake AI companion
+   2. AI backend integration
+   3. Player Learning Profile
+   4. Adaptive Learning Decision
+   5. Event Tracking integration
+   6. OpenClaw Memory adapter
+   7. STT Indonesian
+   8. TTS Indonesian
+   9. Visual Math
+   10. AI state expressions
+   11. Answer feedback
+   12. Tutor request
+   13. Learning Resume
+   14. Offline fallback
+   15. Memory synchronization
+   ============================================================ */
+
+(function () {
+  "use strict";
+
+
+  /* ============================================================
+     CONFIGURATION
+     ============================================================ */
+
+  const CONFIG = {
+
+    CUPCAKE_API:
+      window.CHOCOLATE_CUPCAKE_API ||
+      "https://api.negerisugaria.id/api/cupcake/respond",
+
+    MEMORY_API:
+      window.CHOCOLATE_MEMORY_API ||
+      "https://api.negerisugaria.id/api/memory",
+
+    API_TIMEOUT:
+      8000,
+
+    MEMORY_TIMEOUT:
+      8000,
+
+    LANGUAGE:
+      "id-ID",
+
+    MAX_CHAT_HISTORY:
+      20,
+
+    MAX_RECENT_EVENTS:
+      20,
+
+    TTS_RATE:
+      0.95,
+
+    TTS_PITCH:
+      1.08,
+
+    TTS_VOLUME:
+      1.0,
+
+    STT_MAX_ALTERNATIVES:
+      3
   };
 
 
-  /*
-   * ============================================================
-   * LOCAL ADAPTIVE DECISION
-   * ============================================================
-   */
+  /* ============================================================
+     CUPCAKE PERSONA
+     ============================================================ */
 
-  window.requestAIDecision = function(playerProfile){
+  const CUPCAKE_PERSONA = {
 
-    playerProfile = playerProfile || {};
+    name:
+      "Chocolate Cupcake",
 
-    const skill =
-      playerProfile.currentSkill ||
-      Object.keys(playerProfile.skills || {})[0] ||
-      "addition";
+    role:
+      "AI Learning Companion",
 
-    const skillData =
-      (playerProfile.skills || {})[skill] || {};
+    traits: [
+      "Friendly",
+      "Cheerful",
+      "Educational",
+      "Encouraging"
+    ],
 
-    const recent =
-      (playerProfile.recentPerformance || [])
-        .filter(e => e.skill === skill)
-        .slice(-3);
+    mission:
+      "Guide children through Chocolate Abyss Gate while improving mathematics skills.",
 
-    const recentMistakes =
-      recent.filter(e => !e.isCorrect).length;
+    language:
+      "Bahasa Indonesia",
 
-    const accuracy =
-      Number.isFinite(skillData.accuracy)
-        ? skillData.accuracy
-        : Number(playerProfile.accuracy || 0);
+    style:
+      "short, friendly, encouraging, child-safe, educational",
 
-    const slow =
-      Number(playerProfile.averageResponseTime || 0) > 7000;
+    rules: [
 
-    const totalAttempts =
-      Number(playerProfile.attempts || 0);
+      "Gunakan bahasa Indonesia yang sederhana.",
 
-    let decision;
+      "Jangan mempermalukan pemain ketika salah.",
 
-    if(totalAttempts === 0){
+      "Jangan memberikan jawaban matematika secara langsung sebelum memberi kesempatan mencoba.",
 
-      decision = {
-        action: "BASELINE",
-        difficulty:
-          playerProfile.currentDifficulty || "easy",
-        skill,
-        useHint: false,
-        reason: "no_history"
-      };
+      "Jika pemain salah, berikan petunjuk bertahap.",
 
-    }else if(recentMistakes >= 2 || accuracy < 0.5){
+      "Gunakan ekspresi positif.",
 
-      decision = {
-        action: "REMEDIATE",
-        difficulty: "easy",
-        skill,
-        useHint: true,
-        reason: "repeated_mistakes"
-      };
+      "Sesuaikan bantuan dengan usia dan kemampuan pemain.",
 
-    }else if(recentMistakes >= 1 || accuracy < 0.7 || slow){
+      "Jika pemain mengalami beberapa kesalahan, sederhanakan penjelasan.",
 
-      decision = {
-        action: "SUPPORT",
-        difficulty: "easy",
-        skill,
-        useHint: true,
-        reason: "needs_support"
-      };
+      "Jika pemain berhasil, berikan apresiasi.",
 
-    }else{
+      "Jangan memberikan informasi yang tidak berhubungan dengan permainan."
 
-      decision = {
-        action: "PRACTICE",
-        difficulty:
-          playerProfile.currentDifficulty || "medium",
-        skill,
-        useHint: false,
-        reason: "continue_practice"
-      };
+    ]
+  };
 
+
+  /* ============================================================
+     CUPCAKE EXPRESSIONS
+     ============================================================ */
+
+  const CUPCAKE_STATES = {
+
+    welcome: {
+      image:
+        "sources/welcome.png",
+      label:
+        "😊 Welcome"
+    },
+
+    thinking: {
+      image:
+        "sources/thinking.png",
+      label:
+        "🤔 Thinking"
+    },
+
+    oops: {
+      image:
+        "sources/oops.png",
+      label:
+        "😯 Oops"
+    },
+
+    teaching: {
+      image:
+        "sources/theaching.png",
+      label:
+        "💡 Teaching"
+    },
+
+    celebrating: {
+      image:
+        "sources/celebrating.png",
+      label:
+        "🎉 Celebrating"
+    },
+
+    victory: {
+      image:
+        "sources/victory.png",
+      label:
+        "🏆 Victory"
+    },
+
+    encouraging: {
+      image:
+        "sources/encouraging.png",
+      label:
+        "💪 Encouraging"
     }
-
-    return decision;
   };
 
 
-  /*
-   * ============================================================
-   * API REQUEST
-   * ============================================================
-   */
+  /* ============================================================
+     INTERNAL STATE
+     ============================================================ */
 
-  window.requestCupcakeResponse = async function(eventData){
+  const state = {
 
-    const controller =
-      new AbortController();
+    playerId:
+      null,
 
-    const timeoutId =
-      setTimeout(
-        () => controller.abort(),
-        CUPCAKE_API_TIMEOUT
+    playerName:
+      "",
+
+    playerAge:
+      null,
+
+    currentState:
+      "welcome",
+
+    currentQuestion:
+      null,
+
+    currentDecision:
+      null,
+
+    currentProfile:
+      null,
+
+    chatHistory:
+      [],
+
+    requestSequence:
+      0,
+
+    thinking:
+      false,
+
+    speaking:
+      false,
+
+    listening:
+      false,
+
+    ttsUnlocked:
+      false,
+
+    sttSupported:
+      false,
+
+    ttsSupported:
+      false,
+
+    recognition:
+      null,
+
+    speechBuffer:
+      "",
+
+    lastResponse:
+      "",
+
+    wrongCount:
+      0,
+
+    currentQuestionAttempts:
+      0,
+
+    questionStartedAt:
+      null,
+
+    initialized:
+      false
+  };
+
+
+  /* ============================================================
+     GENERIC HELPERS
+     ============================================================ */
+
+  function nowISO() {
+    return new Date().toISOString();
+  }
+
+
+  function safeNumber(value, fallback = 0) {
+
+    const number =
+      Number(value);
+
+    return Number.isFinite(number)
+      ? number
+      : fallback;
+  }
+
+
+  function safeInteger(value, fallback = 0) {
+
+    const number =
+      parseInt(value, 10);
+
+    return Number.isFinite(number)
+      ? number
+      : fallback;
+  }
+
+
+  function clamp(value, min, max) {
+
+    return Math.min(
+      Math.max(value, min),
+      max
+    );
+  }
+
+
+  function createId(prefix) {
+
+    return (
+      prefix +
+      "_" +
+      Date.now().toString(36) +
+      "_" +
+      Math.random()
+        .toString(36)
+        .slice(2, 10)
+    );
+  }
+
+
+  function dispatch(name, detail = {}) {
+
+    try {
+
+      window.dispatchEvent(
+        new CustomEvent(
+          name,
+          {
+            detail
+          }
+        )
       );
 
-    try{
-
-      const response =
-        await fetch(CUPCAKE_API, {
-
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json"
-          },
-
-          body:
-            JSON.stringify(eventData),
-
-          signal:
-            controller.signal
-
-        });
-
-      if(!response.ok){
-
-        throw new Error(
-          "Cupcake API HTTP " +
-          response.status
-        );
-
-      }
-
-      const data =
-        await response.json();
-
-      if(!data || !data.success){
-
-        throw new Error(
-          "Invalid Cupcake API response"
-        );
-
-      }
-
-      return data;
-
-    }catch(error){
-
-      const message =
-        error &&
-        error.name === "AbortError"
-
-          ? "Cupcake API timeout"
-
-          : (
-              error &&
-              error.message
-            ) ||
-            "Unknown API error";
+    } catch (error) {
 
       console.warn(
-        "[Chocolate Cupcake] API unavailable:",
-        message
+        "[Chocolate Cupcake] Event error:",
+        error
       );
-
-      return {
-
-        success: false,
-
-        fallback: true,
-
-        response: null,
-
-        error: message
-
-      };
-
-    }finally{
-
-      clearTimeout(timeoutId);
-
     }
-
-  };
-
-
-  /*
-   * ============================================================
-   * TTS
-   * ============================================================
-   */
-
-  window.cupcakeTTS = {
-
-    enabled: true,
-
-    unlocked: false,
-
-    speaking: false,
-
-    lastText: "",
-
-    lastSpokenAt: 0,
-
-    voice: null
-
-  };
+  }
 
 
-  function findIndonesianVoice(){
+  /* ============================================================
+     PLAYER EVENT TRACKER ACCESS
+     ============================================================ */
 
-    if(!("speechSynthesis" in window)){
-      return null;
-    }
+  function getTracker() {
 
-    const voices =
-      window.speechSynthesis.getVoices();
+    return (
+      window.playerEventTracker ||
+      null
+    );
+  }
 
-    if(!voices || !voices.length){
-      return null;
-    }
 
-    const exact =
-      voices.find(v =>
-        String(v.lang || "")
-          .toLowerCase() === "id-id"
+  function getProfile() {
+
+    try {
+
+      if (
+        typeof window.getPlayerLearningProfile ===
+        "function"
+      ) {
+
+        return (
+          window.getPlayerLearningProfile() ||
+          null
+        );
+      }
+
+    } catch (error) {
+
+      console.warn(
+        "[Chocolate Cupcake] Profile error:",
+        error
       );
-
-    if(exact){
-      return exact;
-    }
-
-    const indonesia =
-      voices.find(v =>
-        String(v.lang || "")
-          .toLowerCase()
-          .startsWith("id-")
-      );
-
-    if(indonesia){
-      return indonesia;
     }
 
     return null;
   }
 
 
-  function refreshCupcakeVoice(){
+  function getPlayerInfo() {
 
-    const voice =
-      findIndonesianVoice();
+    try {
 
-    if(voice){
+      if (
+        typeof window.playerEventTracker
+          ?.getPlayerInfo ===
+        "function"
+      ) {
 
-      window.cupcakeTTS.voice =
-        voice;
+        return (
+          window.playerEventTracker
+            .getPlayerInfo() ||
+          {}
+        );
+      }
 
-      console.log(
-        "[Chocolate Cupcake] TTS voice:",
-        voice.name,
-        voice.lang
+    } catch (_) {}
+
+    return {
+
+      playerId:
+        state.playerId,
+
+      name:
+        state.playerName,
+
+      age:
+        state.playerAge
+    };
+  }
+
+
+  /* ============================================================
+     PLAYER ID
+     ============================================================ */
+
+  function resolvePlayerId() {
+
+    const info =
+      getPlayerInfo();
+
+    return (
+      info.playerId ||
+      state.playerId ||
+      localStorage.getItem(
+        "chocolateAbyssPlayerId"
+      ) ||
+      createId("player")
+    );
+  }
+
+
+  /* ============================================================
+     CURRENT LEVEL
+     ============================================================ */
+
+  function getCurrentLevel() {
+
+    try {
+
+      if (
+        typeof window.getCurrentGameLevel ===
+        "function"
+      ) {
+
+        return window.getCurrentGameLevel();
+      }
+
+    } catch (_) {}
+
+    return (
+      window.levelKey ||
+      window.currentLevel ||
+      null
+    );
+  }
+
+
+  /* ============================================================
+     EVENT TRACKING
+     ============================================================ */
+
+  function trackEvent(
+    type,
+    payload = {}
+  ) {
+
+    try {
+
+      if (
+        typeof window.trackPlayerEvent ===
+        "function"
+      ) {
+
+        return window.trackPlayerEvent(
+          type,
+          {
+            playerId:
+              state.playerId,
+
+            level:
+              payload.level ||
+              getCurrentLevel(),
+
+            ...payload
+          }
+        );
+      }
+
+
+      const tracker =
+        getTracker();
+
+      if (
+        tracker &&
+        typeof tracker.track ===
+        "function"
+      ) {
+
+        return tracker.track(
+          type,
+          payload
+        );
+      }
+
+    } catch (error) {
+
+      console.warn(
+        "[Chocolate Cupcake] Tracking error:",
+        error
       );
-
     }
 
-    return voice;
+    return null;
   }
 
 
-  window.unlockChocolateCupcakeTTS =
-    function(){
-
-      if(!("speechSynthesis" in window)){
-        return false;
-      }
-
-      try{
-
-        const utterance =
-          new SpeechSynthesisUtterance("");
-
-        utterance.lang =
-          "id-ID";
-
-        utterance.volume =
-          0;
-
-        window.speechSynthesis.speak(
-          utterance
-        );
-
-        window.cupcakeTTS.unlocked =
-          true;
-
-        refreshCupcakeVoice();
-
-        console.log(
-          "[Chocolate Cupcake] TTS unlocked."
-        );
-
-        return true;
-
-      }catch(error){
-
-        console.warn(
-          "[Chocolate Cupcake] TTS unlock error:",
-          error
-        );
-
-        return false;
-      }
-
-    };
-
-
-  function cleanCupcakeSpeech(text){
-
-    return String(text || "")
-
-      .replace(
-        /[\u{1F300}-\u{1FAFF}]/gu,
-        ""
-      )
-
-      .replace(
-        /[*_#`]/g,
-        ""
-      )
-
-      .replace(
-        /\s+/g,
-        " "
-      )
-
-      .trim();
-
-  }
-
-
-  window.speakChocolateCupcake =
-    function(text){
-
-      if(
-        !window.cupcakeTTS.enabled ||
-        !("speechSynthesis" in window)
-      ){
-
-        return;
-
-      }
-
-      const speech =
-        cleanCupcakeSpeech(text);
-
-      if(!speech){
-        return;
-      }
-
-      const now =
-        Date.now();
-
-      /*
-       * Jangan mengulang kalimat identik
-       * dalam waktu sangat singkat.
-       */
-
-      if(
-        speech ===
-        window.cupcakeTTS.lastText &&
-
-        now -
-        window.cupcakeTTS.lastSpokenAt <
-        3000
-      ){
-
-        return;
-
-      }
-
-      window.cupcakeTTS.lastText =
-        speech;
-
-      window.cupcakeTTS.lastSpokenAt =
-        now;
-
-      try{
-
-        /*
-         * Jangan cancel speech setiap kali.
-         * Ini mencegah error "interrupted".
-         */
-
-        const synth =
-          window.speechSynthesis;
-
-        if(synth.speaking){
-          synth.cancel();
-        }
-
-        const utterance =
-          new SpeechSynthesisUtterance(
-            speech
-          );
-
-        const voice =
-          window.cupcakeTTS.voice ||
-          refreshCupcakeVoice();
-
-        utterance.lang =
-          voice
-            ? voice.lang
-            : "id-ID";
-
-        if(voice){
-          utterance.voice =
-            voice;
-        }
-
-        utterance.rate =
-          0.90;
-
-        utterance.pitch =
-          1.08;
-
-        utterance.volume =
-          1;
-
-        utterance.onstart =
-          function(){
-
-            window.cupcakeTTS.speaking =
-              true;
-
-          };
-
-        utterance.onend =
-          function(){
-
-            window.cupcakeTTS.speaking =
-              false;
-
-          };
-
-        utterance.onerror =
-          function(event){
-
-            window.cupcakeTTS.speaking =
-              false;
-
-            /*
-             * "interrupted" biasanya terjadi
-             * ketika browser menghentikan speech
-             * untuk speech baru.
-             */
-
-            if(
-              event &&
-              event.error !==
-              "interrupted"
-            ){
-
-              console.warn(
-                "[Chocolate Cupcake] TTS error:",
-                event.error
-              );
-
-            }
-
-          };
-
-        synth.speak(
-          utterance
-        );
-
-        console.log(
-          "[Chocolate Cupcake] 🔊 Speaking:",
-          speech
-        );
-
-      }catch(error){
-
-        console.warn(
-          "[Chocolate Cupcake] TTS error:",
-          error
-        );
-
-      }
-
-    };
-
-
-  if("speechSynthesis" in window){
-
-    refreshCupcakeVoice();
-
-    window.speechSynthesis
-      .addEventListener(
-        "voiceschanged",
-        function(){
-
-          refreshCupcakeVoice();
-
+  /* ============================================================
+     API FETCH WITH TIMEOUT
+     ============================================================ */
+
+  async function fetchWithTimeout(
+    url,
+    options = {},
+    timeout = CONFIG.API_TIMEOUT
+  ) {
+
+    const controller =
+      new AbortController();
+
+    const timer =
+      setTimeout(
+        () =>
+          controller.abort(),
+        timeout
+      );
+
+    try {
+
+      return await fetch(
+        url,
+        {
+          ...options,
+          signal:
+            controller.signal
         }
       );
 
+    } finally {
+
+      clearTimeout(timer);
+    }
   }
 
 
-  /*
-   * ============================================================
-   * VISUAL MATH ENGINE
-   *
-   * Visual dibuat langsung dari soal game.
-   * Tidak menunggu OpenClaw.
-   * ============================================================
-   */
+  /* ============================================================
+     CUPCAKE API REQUEST
+     ============================================================ */
+
+  async function requestCupcakeAPI(
+    eventData = {}
+  ) {
+
+    const requestId =
+      createId("cupcake");
+
+    state.requestSequence++;
+
+    const payload = {
+
+      requestId,
+
+      requestSequence:
+        state.requestSequence,
+
+      timestamp:
+        nowISO(),
+
+      persona:
+        CUPCAKE_PERSONA,
+
+      player: {
+
+        playerId:
+          state.playerId,
+
+        name:
+          state.playerName,
+
+        age:
+          state.playerAge
+      },
+
+      profile:
+        getProfile(),
+
+      event:
+        eventData,
+
+      currentLevel:
+        getCurrentLevel(),
+
+      question:
+        state.currentQuestion
+    };
 
 
-  function normalizeOperation(operation){
+    try {
 
-    const op =
+      const response =
+        await fetchWithTimeout(
+          CONFIG.CUPCAKE_API,
+          {
+
+            method:
+              "POST",
+
+            headers: {
+
+              "Content-Type":
+                "application/json",
+
+              "Accept":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify(
+                payload
+              )
+          },
+
+          CONFIG.API_TIMEOUT
+        );
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          "Cupcake API HTTP " +
+          response.status
+        );
+      }
+
+
+      const data =
+        await response.json();
+
+
+      return {
+
+        success:
+          true,
+
+        requestId,
+
+        data
+      };
+
+    } catch (error) {
+
+      console.warn(
+        "[Chocolate Cupcake] API unavailable:",
+        error
+      );
+
+
+      return {
+
+        success:
+          false,
+
+        requestId,
+
+        error:
+          error.message
+      };
+    }
+  }
+
+
+  /* ============================================================
+     NORMALIZE API RESPONSE
+     ============================================================ */
+
+  function normalizeCupcakeResponse(
+    result
+  ) {
+
+    if (!result) {
+      return "";
+    }
+
+
+    if (
+      typeof result ===
+      "string"
+    ) {
+
+      return result.trim();
+    }
+
+
+    const data =
+      result.data ||
+      result;
+
+
+    return String(
+
+      data.response ||
+
+      data.message ||
+
+      data.reply ||
+
+      data.text ||
+
+      data.answer ||
+
+      data.content ||
+
+      ""
+
+    ).trim();
+  }
+
+
+  /* ============================================================
+     LOCAL CUPCAKE RESPONSE
+     ============================================================ */
+
+  function localResponse(
+    eventData = {}
+  ) {
+
+    const profile =
+      getProfile() ||
+      {};
+
+    const accuracy =
+      safeNumber(
+        profile.accuracy,
+        0
+      );
+
+    const mistakes =
+      safeInteger(
+        profile.mistakes,
+        0
+      );
+
+    const skill =
+      profile.recommendedSkill ||
+      eventData.skill ||
+      "matematika";
+
+
+    if (
+      eventData.type ===
+      "game_started"
+    ) {
+
+      return (
+        "Hai! Aku Chocolate Cupcake 🍫🧁 " +
+        "Ayo kita pecahkan labirin bersama. " +
+        "Kamu pasti bisa!"
+      );
+    }
+
+
+    if (
+      eventData.type ===
+      "answer_submitted"
+    ) {
+
+      if (
+        eventData.correct ===
+        true
+      ) {
+
+        return (
+          "Hebat! 🎉 Jawabanmu benar! " +
+          "Ayo lanjut ke misi berikutnya."
+        );
+      }
+
+
+      if (
+        eventData.attempts >=
+        2
+      ) {
+
+        return (
+          "Tidak apa-apa 😊 " +
+          "Coba kita pecah soalnya menjadi langkah yang lebih kecil. " +
+          "Perhatikan angkanya satu per satu ya."
+        );
+      }
+
+
+      return (
+        "Hmm, hampir benar! 😯 " +
+        "Coba periksa lagi angka dan tandanya. " +
+        "Kamu masih punya kesempatan!"
+      );
+    }
+
+
+    if (
+      eventData.type ===
+      "tutor_request"
+    ) {
+
+      return (
+        "Aku akan membantu sedikit dulu 💡 " +
+        "Coba perhatikan bagian soal yang paling mudah. " +
+        "Setelah itu kita lanjutkan langkah berikutnya."
+      );
+    }
+
+
+    if (
+      eventData.type ===
+      "level_completed"
+    ) {
+
+      return (
+        "Yeay! 🎉 Kamu berhasil menyelesaikan level ini! " +
+        "Aku melihat kamu semakin jago. " +
+        "Ayo lanjut ke tantangan berikutnya!"
+      );
+    }
+
+
+    if (
+      accuracy < 0.5 ||
+      mistakes >= 3
+    ) {
+
+      return (
+        "Kita pelan-pelan ya 😊 " +
+        "Aku akan memberikan petunjuk lebih sederhana. " +
+        "Kita fokus latihan " +
+        skill +
+        " bersama."
+      );
+    }
+
+
+    return (
+      "Semangat! 💪 " +
+      "Perhatikan soal dengan teliti dan coba lagi."
+    );
+  }
+
+
+  /* ============================================================
+     SHOW CUPCAKE STATE
+     ============================================================ */
+
+  function showCupcakeState(
+    stateName,
+    options = {}
+  ) {
+
+    const cupcakeState =
+      CUPCAKE_STATES[
+        stateName
+      ] ||
+      CUPCAKE_STATES.welcome;
+
+
+    state.currentState =
+      stateName;
+
+
+    const image =
+      cupcakeState.image;
+
+
+    /*
+     * Existing game function.
+     */
+
+    try {
+
+      if (
+        typeof window.showCupcakeAgentState ===
+        "function"
+      ) {
+
+        window.showCupcakeAgentState(
+          stateName,
+          options.text ||
+          ""
+        );
+
+        return;
+
+      }
+
+    } catch (_) {}
+
+
+    /*
+     * Generic DOM fallback.
+     */
+
+    const imageElements =
+      document.querySelectorAll(
+        "[data-cupcake-image], .cupcake-image, #cupcakeImage"
+      );
+
+
+    imageElements.forEach(
+      element => {
+
+        if (element.tagName === "IMG") {
+
+          element.src =
+            image;
+        }
+
+        element.dataset.state =
+          stateName;
+      }
+    );
+
+
+    const stateLabels =
+      document.querySelectorAll(
+        "[data-cupcake-state]"
+      );
+
+
+    stateLabels.forEach(
+      element => {
+
+        element.textContent =
+          cupcakeState.label;
+      }
+    );
+
+
+    dispatch(
+      "cupcake-state-changed",
+      {
+        state:
+          stateName,
+
+        image:
+          image,
+
+        label:
+          cupcakeState.label
+      }
+    );
+  }
+
+
+  /* ============================================================
+     SHOW CUPCAKE RESPONSE
+     ============================================================ */
+
+  function showCupcakeResponse(
+    response,
+    options = {}
+  ) {
+
+    if (!response) {
+      return;
+    }
+
+
+    state.lastResponse =
+      response;
+
+
+    const text =
+      String(response);
+
+
+    /*
+     * Existing game UI
+     */
+
+    try {
+
+      if (
+        typeof window.showCupcakeResponse ===
+        "function" &&
+        window.showCupcakeResponse !==
+          showCupcakeResponse
+      ) {
+
+        window.showCupcakeResponse(
+          response,
+          options
+        );
+      }
+
+    } catch (_) {}
+
+
+    /*
+     * Generic DOM fallback
+     */
+
+    const responseElements =
+      document.querySelectorAll(
+        "[data-cupcake-response], #cupcakeResponse, .cupcake-response"
+      );
+
+
+    responseElements.forEach(
+      element => {
+
+        element.textContent =
+          text;
+      }
+    );
+
+
+    dispatch(
+      "cupcake-response",
+      {
+        text:
+          text,
+
+        state:
+          state.currentState
+      }
+    );
+
+
+    if (
+      options.speak !== false
+    ) {
+
+      speakChocolateCupcake(
+        text
+      );
+    }
+  }
+
+
+  /* ============================================================
+     THINKING
+     ============================================================ */
+
+  function showThinking() {
+
+    showCupcakeState(
+      "thinking"
+    );
+  }
+
+
+  /* ============================================================
+     OOPS
+     ============================================================ */
+
+  function showOops() {
+
+    showCupcakeState(
+      "oops"
+    );
+  }
+
+
+  /* ============================================================
+     TEACHING
+     ============================================================ */
+
+  function showTeaching() {
+
+    showCupcakeState(
+      "teaching"
+    );
+  }
+
+
+  /* ============================================================
+     ENCOURAGING
+     ============================================================ */
+
+  function showEncouraging() {
+
+    showCupcakeState(
+      "encouraging"
+    );
+  }
+
+
+  /* ============================================================
+     CELEBRATING
+     ============================================================ */
+
+  function showCelebrating() {
+
+    showCupcakeState(
+      "celebrating"
+    );
+  }
+
+
+  /* ============================================================
+     VICTORY
+     ============================================================ */
+
+  function showVictory() {
+
+    showCupcakeState(
+      "victory"
+    );
+  }
+
+
+  /* ============================================================
+     ADAPTIVE LEARNING
+     ============================================================ */
+
+  function calculateAdaptiveDecision(
+    profile
+  ) {
+
+    profile =
+      profile ||
+      getProfile() ||
+      {};
+
+
+    const accuracy =
+      safeNumber(
+        profile.accuracy,
+        0
+      );
+
+    const mistakes =
+      safeInteger(
+        profile.mistakes,
+        0
+      );
+
+    const attempts =
+      safeInteger(
+        profile.attempts,
+        0
+      );
+
+    const averageResponseTime =
+      safeNumber(
+        profile.averageResponseTimeMs,
+        0
+      );
+
+
+    const recentMistakes =
+      Array.isArray(
+        profile.recentMistakes
+      )
+        ? profile.recentMistakes
+        : [];
+
+
+    const recentMistakeCount =
+      recentMistakes.length >= 3
+        ? 3
+        : recentMistakes.length;
+
+
+    let decision =
+      "PRACTICE";
+
+    let reason =
+      "Pemain dapat melanjutkan latihan normal.";
+
+    let difficultyAdjustment =
+      0;
+
+
+    /*
+     * REMEDIATION
+     */
+
+    if (
+      recentMistakeCount >= 2 ||
+      accuracy < 0.5
+    ) {
+
+      decision =
+        "REMEDIATE";
+
+      reason =
+        "Pemain membutuhkan bantuan dan soal yang lebih sederhana.";
+
+      difficultyAdjustment =
+        -1;
+    }
+
+
+    /*
+     * SUPPORT
+     */
+
+    else if (
+      mistakes >= 2 ||
+      accuracy < 0.7 ||
+      averageResponseTime > 7000
+    ) {
+
+      decision =
+        "SUPPORT";
+
+      reason =
+        "Pemain menunjukkan tanda membutuhkan petunjuk tambahan.";
+
+      difficultyAdjustment =
+        -1;
+    }
+
+
+    /*
+     * STABLE PRACTICE
+     */
+
+    else if (
+      accuracy >= 0.8 &&
+      attempts > 0
+    ) {
+
+      decision =
+        "CHALLENGE";
+
+      reason =
+        "Pemain menunjukkan performa yang cukup baik.";
+
+      difficultyAdjustment =
+        1;
+    }
+
+
+    const skill =
+      profile.recommendedSkill ||
+      null;
+
+
+    return {
+
+      decision,
+
+      reason,
+
+      difficultyAdjustment,
+
+      recommendedSkill:
+        skill,
+
+      accuracy,
+
+      mistakes,
+
+      attempts,
+
+      averageResponseTimeMs:
+        averageResponseTime
+    };
+  }
+
+
+  /* ============================================================
+     REQUEST AI DECISION
+     ============================================================ */
+
+  async function requestAIDecision(
+    profile
+  ) {
+
+    const localDecision =
+      calculateAdaptiveDecision(
+        profile
+      );
+
+
+    state.currentDecision =
+      localDecision;
+
+
+    trackEvent(
+      "AI_DECISION",
+      {
+        decision:
+          localDecision.decision,
+
+        reason:
+          localDecision.reason,
+
+        recommendedSkill:
+          localDecision.recommendedSkill,
+
+        difficultyAdjustment:
+          localDecision.difficultyAdjustment,
+
+        source:
+          "local-adaptive-engine"
+      }
+    );
+
+
+    dispatch(
+      "cupcake-ai-decision",
+      localDecision
+    );
+
+
+    /*
+     * Let game use the decision.
+     */
+
+    window.adaptiveDifficultyOverride =
+      localDecision
+        .difficultyAdjustment;
+
+
+    window.currentAIDecision =
+      localDecision;
+
+
+    return localDecision;
+  }
+
+
+  /* ============================================================
+     QUESTION START
+     ============================================================ */
+
+  function startQuestion(
+    question = {}
+  ) {
+
+    state.currentQuestion =
+      {
+        ...question
+      };
+
+    state.currentQuestionAttempts =
+      0;
+
+    state.questionStartedAt =
+      Date.now();
+
+    state.wrongCount =
+      0;
+
+
+    const skill =
+      question.skill ||
+      operatorToSkill(
+        question.op ||
+        question.operator
+      );
+
+
+    state.currentQuestion.skill =
+      skill;
+
+
+    trackEvent(
+      "QUESTION_SHOWN",
+      {
+        questionId:
+          question.questionId,
+
+        skill,
+
+        operator:
+          question.op ||
+          question.operator,
+
+        a:
+          question.a ??
+          question.left,
+
+        b:
+          question.b ??
+          question.right,
+
+        level:
+          question.level ||
+          getCurrentLevel(),
+
+        difficulty:
+          question.difficulty ||
+          getCurrentLevel()
+      }
+    );
+
+
+    requestAIDecision(
+      getProfile()
+    );
+
+
+    return state.currentQuestion;
+  }
+
+
+  /* ============================================================
+     OPERATOR TO SKILL
+     ============================================================ */
+
+  function operatorToSkill(
+    operator
+  ) {
+
+    switch (operator) {
+
+      case "+":
+        return "addition";
+
+      case "-":
+        return "subtraction";
+
+      case "*":
+      case "×":
+        return "multiplication";
+
+      case "/":
+      case "÷":
+        return "division";
+
+      default:
+        return "general_math";
+    }
+  }
+
+
+  /* ============================================================
+     ANSWER FEEDBACK
+     ============================================================ */
+
+  async function askCupcakeAfterAnswer(
+    answerData = {}
+  ) {
+
+    const correct =
+      Boolean(
+        answerData.correct === true ||
+        answerData.isCorrect === true
+      );
+
+
+    state.currentQuestionAttempts =
+      Math.max(
+        1,
+        safeInteger(
+          answerData.attempts,
+          state.currentQuestionAttempts + 1
+        )
+      );
+
+
+    const responseTimeMs =
+      answerData.responseTimeMs ??
+      (
+        state.questionStartedAt
+          ? Date.now() -
+            state.questionStartedAt
+          : 0
+      );
+
+
+    const eventData = {
+
+      type:
+        "answer_submitted",
+
+      questionId:
+        answerData.questionId ||
+        state.currentQuestion
+          ?.questionId,
+
+      correct,
+
+      isCorrect:
+        correct,
+
+      attempts:
+        state.currentQuestionAttempts,
+
+      responseTimeMs:
+
+        safeNumber(
+          responseTimeMs,
+          0
+        ),
+
+      userAnswer:
+        answerData.userAnswer ??
+        answerData.answer ??
+        null,
+
+      correctAnswer:
+        answerData.correctAnswer ??
+        null,
+
+      skill:
+        answerData.skill ||
+        state.currentQuestion?.skill ||
+        operatorToSkill(
+          state.currentQuestion?.op
+        ),
+
+      level:
+        answerData.level ||
+        getCurrentLevel()
+    };
+
+
+    trackEvent(
+      "ANSWER_SUBMITTED",
+      eventData
+    );
+
+
+    /*
+     * CORRECT
+     */
+
+    if (correct) {
+
+      state.wrongCount =
+        0;
+
+      showCelebrating();
+
+
+      const local =
+        localResponse(
+          eventData
+        );
+
+
+      showCupcakeResponse(
+        local,
+        {
+          speak:
+            answerData.speak !== false
+        }
+      );
+
+
+      sendCupcakeEvent(
+        eventData,
+        false
+      );
+
+
+      return {
+
+        correct:
+          true,
+
+        response:
+          local
+      };
+    }
+
+
+    /*
+     * WRONG
+     */
+
+    state.wrongCount++;
+
+
+    if (
+      state.wrongCount === 1
+    ) {
+
+      showOops();
+
+    } else {
+
+      showTeaching();
+    }
+
+
+    const local =
+      localResponse(
+        eventData
+      );
+
+
+    showCupcakeResponse(
+      local,
+      {
+        speak:
+          answerData.speak !== false
+      }
+    );
+
+
+    sendCupcakeEvent(
+      eventData,
+      false
+    );
+
+
+    return {
+
+      correct:
+        false,
+
+      response:
+        local
+    };
+  }
+
+
+  /* ============================================================
+     SEND CUPCAKE EVENT
+     ============================================================ */
+
+  async function sendCupcakeEvent(
+    eventData = {},
+    displayResponse = true
+  ) {
+
+    const result =
+      await requestCupcakeAPI(
+        eventData
+      );
+
+
+    if (
+      !result.success
+    ) {
+
+      return result;
+    }
+
+
+    const response =
+      normalizeCupcakeResponse(
+        result
+      );
+
+
+    if (
+      response &&
+      displayResponse
+    ) {
+
+      showCupcakeResponse(
+        response
+      );
+    }
+
+
+    if (
+      response
+    ) {
+
+      state.chatHistory.push({
+
+        role:
+          "assistant",
+
+        content:
+          response,
+
+        timestamp:
+          nowISO()
+      });
+
+
+      if (
+        state.chatHistory.length >
+        CONFIG.MAX_CHAT_HISTORY
+      ) {
+
+        state.chatHistory =
+          state.chatHistory.slice(
+            -CONFIG.MAX_CHAT_HISTORY
+          );
+      }
+    }
+
+
+    dispatch(
+      "cupcake-api-response",
+      {
+        response,
+
+        result
+      }
+    );
+
+
+    return {
+
+      success:
+        true,
+
+      response,
+
+      result
+    };
+  }
+
+
+  /* ============================================================
+     TUTOR REQUEST
+     ============================================================ */
+
+  async function askCupcake(
+    message,
+    options = {}
+  ) {
+
+    const text =
       String(
-        operation || "+"
+        message ||
+        ""
       ).trim();
 
-    if(
-      op === "x" ||
-      op === "X" ||
-      op === "*"
-    ){
-      return "×";
+
+    if (!text) {
+
+      return null;
     }
 
-    if(
-      op === "/" ||
-      op === ":"
-    ){
-      return "÷";
-    }
 
-    if(
-      op === "-"
-    ){
-      return "−";
-    }
-
-    return "+";
-  }
+    const profile =
+      getProfile();
 
 
-  function safeNumber(value){
+    trackEvent(
+      "TUTOR_REQUEST",
+      {
+        message:
+          text,
 
-    const number =
-      Number(value);
+        source:
+          options.source ||
+          "chat",
 
-    return Number.isFinite(number)
-      ? Math.max(
-          0,
-          Math.floor(number)
-        )
-      : null;
-
-  }
-
-
-  function createMathObject(
-    emoji,
-    className = "math-object"
-  ){
-
-    const object =
-      document.createElement("span");
-
-    object.className =
-      className;
-
-    object.textContent =
-      emoji;
-
-    return object;
-
-  }
+        skill:
+          options.skill ||
+          state.currentQuestion?.skill ||
+          profile?.recommendedSkill ||
+          null
+      }
+    );
 
 
-  function createObjectsRow(
-    count,
-    emoji
-  ){
+    state.chatHistory.push({
 
-    const row =
-      document.createElement("div");
+      role:
+        "user",
 
-    row.className =
-      "cupcake-math-items";
+      content:
+        text,
 
-    const maxVisible =
-      Math.min(
-        Math.max(
-          0,
-          Number(count || 0)
-        ),
-        30
+      timestamp:
+        nowISO()
+    });
+
+
+    showThinking();
+
+
+    const result =
+      await requestCupcakeAPI(
+        {
+          type:
+            "tutor_request",
+
+          message:
+            text,
+
+          source:
+            options.source ||
+            "chat",
+
+          profile,
+
+          question:
+            state.currentQuestion,
+
+          history:
+            state.chatHistory.slice(
+              -CONFIG.MAX_CHAT_HISTORY
+            )
+        }
       );
 
-    for(
-      let i = 0;
-      i < maxVisible;
-      i++
-    ){
 
-      row.appendChild(
-        createMathObject(
-          emoji
-        )
+    let response =
+      normalizeCupcakeResponse(
+        result
       );
 
+
+    if (!response) {
+
+      response =
+        localResponse(
+          {
+            type:
+              "tutor_request"
+          }
+        );
     }
 
-    return row;
 
+    showTeaching();
+
+
+    showCupcakeResponse(
+      response,
+      {
+        speak:
+          options.speak !== false
+      }
+    );
+
+
+    return response;
   }
 
 
-  function createNumberLabel(
-    number
-  ){
+  /* ============================================================
+     WELCOME
+     ============================================================ */
 
-    const label =
-      document.createElement("div");
+  async function startCupcakeWelcome(
+    playerId,
+    options = {}
+  ) {
 
-    label.className =
-      "cupcake-math-number";
+    state.playerId =
+      playerId ||
+      resolvePlayerId();
 
-    label.textContent =
-      String(number);
 
-    return label;
+    const info =
+      getPlayerInfo();
 
+
+    state.playerName =
+      info.name ||
+      options.playerName ||
+      "";
+
+    state.playerAge =
+      info.age ||
+      options.age ||
+      null;
+
+
+    unlockChocolateCupcakeTTS();
+
+
+    showCupcakeState(
+      "welcome"
+    );
+
+
+    const local =
+      localResponse(
+        {
+          type:
+            "game_started"
+        }
+      );
+
+
+    showCupcakeResponse(
+      local,
+      {
+        speak:
+          options.speak !== false
+      }
+    );
+
+
+    trackEvent(
+      "GAME_STARTED",
+      {
+        source:
+          options.source ||
+          "chocolate-abyss-gate",
+
+        playerName:
+          state.playerName,
+
+        age:
+          state.playerAge
+      }
+    );
+
+
+    sendCupcakeEvent(
+      {
+        type:
+          "game_started",
+
+        playerName:
+          state.playerName,
+
+        age:
+          state.playerAge
+      },
+      false
+    );
+
+
+    return local;
   }
 
 
-  function createOperator(
-    operator
-  ){
+  /* ============================================================
+     LEVEL COMPLETED
+     ============================================================ */
 
-    const element =
-      document.createElement("div");
+  async function sendCupcakeVictory(
+    level,
+    data = {}
+  ) {
 
-    element.className =
-      "cupcake-math-operator";
-
-    element.textContent =
-      operator;
-
-    return element;
-
-  }
+    showVictory();
 
 
-  function buildAdditionVisual(
-    a,
-    b,
-    teaching
-  ){
+    const profile =
+      getProfile();
 
-    const visual =
-      document.createElement("div");
 
-    visual.className =
-      "cupcake-math-visual";
+    trackEvent(
+      "LEVEL_COMPLETED",
+      {
+        level:
+          level,
 
-    const title =
-      document.createElement("div");
+        score:
+          data.score,
 
-    title.className =
-      "cupcake-math-title";
+        steps:
+          data.steps,
 
-    title.textContent =
-      teaching
-        ? "Ayo kita hitung bersama!"
-        : "Yuk hitung pelan-pelan!";
+        accuracy:
+          profile?.accuracy,
 
-    visual.appendChild(title);
+        totalQuestions:
+          profile?.totalQuestions,
 
-    const equation =
-      document.createElement("div");
+        correctAnswers:
+          profile?.correctAnswers,
 
-    equation.className =
-      "cupcake-math-equation";
-
-    const groupA =
-      document.createElement("div");
-
-    groupA.className =
-      "cupcake-math-group";
-
-    groupA.appendChild(
-      createNumberLabel(a)
+        mistakes:
+          profile?.mistakes
+      }
     );
 
-    groupA.appendChild(
-      createObjectsRow(
-        a,
-        "🍫"
-      )
+
+    const local =
+      localResponse(
+        {
+          type:
+            "level_completed"
+        }
+      );
+
+
+    showCupcakeResponse(
+      local,
+      {
+        speak:
+          data.speak !== false
+      }
     );
 
-    equation.appendChild(
-      groupA
+
+    sendCupcakeEvent(
+      {
+        type:
+          "level_completed",
+
+        level,
+
+        score:
+          data.score,
+
+        steps:
+          data.steps,
+
+        profile
+      },
+      false
     );
 
-    equation.appendChild(
-      createOperator("+")
-    );
 
-    const groupB =
-      document.createElement("div");
+    /*
+     * Sync player memory after level completion.
+     */
 
-    groupB.className =
-      "cupcake-math-group";
+    try {
 
-    groupB.appendChild(
-      createNumberLabel(b)
-    );
+      if (
+        typeof window.syncPlayerMemory ===
+        "function"
+      ) {
 
-    groupB.appendChild(
-      createObjectsRow(
-        b,
-        "🍫"
-      )
-    );
-
-    equation.appendChild(
-      groupB
-    );
-
-    visual.appendChild(
-      equation
-    );
-
-    const instruction =
-      document.createElement("div");
-
-    instruction.className =
-      "cupcake-math-instruction";
-
-    if(teaching){
-
-      instruction.textContent =
-        "Hitung cokelat pertama, lalu tambahkan cokelat kedua.";
-
-    }else{
-
-      instruction.textContent =
-        "Hitung semua cokelat. Ada berapa semuanya?";
-
-    }
-
-    visual.appendChild(
-      instruction
-    );
-
-    return visual;
-
-  }
-
-
-  function buildSubtractionVisual(
-    a,
-    b,
-    teaching
-  ){
-
-    const visual =
-      document.createElement("div");
-
-    visual.className =
-      "cupcake-math-visual";
-
-    const title =
-      document.createElement("div");
-
-    title.className =
-      "cupcake-math-title";
-
-    title.textContent =
-      teaching
-        ? "Mari kita kurangi bersama!"
-        : "Coba hitung yang tersisa!";
-
-    visual.appendChild(title);
-
-    const original =
-      document.createElement("div");
-
-    original.className =
-      "cupcake-math-group cupcake-math-subtraction";
-
-    original.appendChild(
-      createNumberLabel(a)
-    );
-
-    const row =
-      document.createElement("div");
-
-    row.className =
-      "cupcake-math-items";
-
-    for(
-      let i = 0;
-      i < Math.min(a, 30);
-      i++
-    ){
-
-      const object =
-        createMathObject(
-          "🍫"
-        );
-
-      if(
-        i >= a - b
-      ){
-
-        object.classList.add(
-          "cupcake-math-removed"
-        );
-
+        await window.syncPlayerMemory();
       }
 
-      row.appendChild(
-        object
-      );
+    } catch (_) {}
 
-    }
 
-    original.appendChild(
-      row
-    );
-
-    visual.appendChild(
-      original
-    );
-
-    const legend =
-      document.createElement("div");
-
-    legend.className =
-      "cupcake-math-instruction";
-
-    if(teaching){
-
-      legend.textContent =
-        "Coret " +
-        b +
-        " cokelat. Sekarang hitung cokelat yang masih ada.";
-
-    }else{
-
-      legend.textContent =
-        "Ada " +
-        a +
-        " cokelat. Ambil " +
-        b +
-        ". Berapa yang tersisa?";
-
-    }
-
-    visual.appendChild(
-      legend
-    );
-
-    return visual;
-
+    return local;
   }
 
 
-  function buildMultiplicationVisual(
-    a,
-    b,
-    teaching
-  ){
+  /* ============================================================
+     STT SUPPORT
+     ============================================================ */
 
-    const visual =
-      document.createElement("div");
+  function initializeSTT() {
 
-    visual.className =
-      "cupcake-math-visual";
+    const SpeechRecognition =
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
 
-    const title =
-      document.createElement("div");
 
-    title.className =
-      "cupcake-math-title";
+    if (!SpeechRecognition) {
 
-    title.textContent =
-      teaching
-        ? "Kita buat beberapa kelompok!"
-        : "Hitung setiap kelompok!";
+      state.sttSupported =
+        false;
 
-    visual.appendChild(
-      title
-    );
-
-    const groups =
-      document.createElement("div");
-
-    groups.className =
-      "cupcake-math-multiplication";
-
-    const totalGroups =
-      Math.min(a, 10);
-
-    const objectsPerGroup =
-      Math.min(b, 15);
-
-    for(
-      let i = 0;
-      i < totalGroups;
-      i++
-    ){
-
-      const group =
-        document.createElement("div");
-
-      group.className =
-        "cupcake-math-multigroup";
-
-      const groupLabel =
-        document.createElement("span");
-
-      groupLabel.className =
-        "cupcake-math-group-label";
-
-      groupLabel.textContent =
-        "Kelompok " +
-        (i + 1);
-
-      group.appendChild(
-        groupLabel
+      console.warn(
+        "[Chocolate Cupcake] Speech Recognition not supported."
       );
 
-      group.appendChild(
-        createObjectsRow(
-          objectsPerGroup,
-          "🍫"
-        )
-      );
-
-      groups.appendChild(
-        group
-      );
-
+      return false;
     }
 
-    visual.appendChild(
-      groups
-    );
 
-    const instruction =
-      document.createElement("div");
+    state.sttSupported =
+      true;
 
-    instruction.className =
-      "cupcake-math-instruction";
 
-    instruction.textContent =
-      teaching
-        ? `${a} kelompok, masing-masing ${b} cokelat. Hitung semuanya.`
-        : `Ada ${a} kelompok. Setiap kelompok berisi ${b} cokelat. Berapa semuanya?`;
+    state.recognition =
+      new SpeechRecognition();
 
-    visual.appendChild(
-      instruction
-    );
 
-    return visual;
+    state.recognition.lang =
+      CONFIG.LANGUAGE;
 
+    state.recognition.continuous =
+      false;
+
+    state.recognition.interimResults =
+      true;
+
+    state.recognition.maxAlternatives =
+      CONFIG.STT_MAX_ALTERNATIVES;
+
+
+    state.recognition.onstart =
+      function () {
+
+        state.listening =
+          true;
+
+        dispatch(
+          "cupcake-stt-start",
+          {
+            language:
+              CONFIG.LANGUAGE
+          }
+        );
+      };
+
+
+    state.recognition.onresult =
+      function (event) {
+
+        let transcript =
+          "";
+
+        for (
+          let i =
+            event.resultIndex;
+          i <
+          event.results.length;
+          i++
+        ) {
+
+          transcript +=
+            event.results[i][0]
+              .transcript;
+        }
+
+
+        state.speechBuffer =
+          transcript.trim();
+
+
+        dispatch(
+          "cupcake-stt-result",
+          {
+            transcript:
+              state.speechBuffer,
+
+            final:
+              Boolean(
+                event.results[
+                  event.results.length - 1
+                ].isFinal
+              )
+          }
+        );
+      };
+
+
+    state.recognition.onerror =
+      function (event) {
+
+        state.listening =
+          false;
+
+
+        dispatch(
+          "cupcake-stt-error",
+          {
+            error:
+              event.error
+          }
+        );
+
+
+        console.warn(
+          "[Chocolate Cupcake] STT error:",
+          event.error
+        );
+      };
+
+
+    state.recognition.onend =
+      function () {
+
+        state.listening =
+          false;
+
+
+        dispatch(
+          "cupcake-stt-end",
+          {
+            transcript:
+              state.speechBuffer
+          }
+        );
+
+
+        if (
+          state.speechBuffer
+        ) {
+
+          const transcript =
+            state.speechBuffer;
+
+          state.speechBuffer =
+            "";
+
+
+          trackEvent(
+            "STT_REQUEST",
+            {
+              language:
+                CONFIG.LANGUAGE,
+
+              transcript:
+                transcript
+            }
+          );
+
+
+          /*
+           * Automatically send spoken message
+           * to Chocolate Cupcake.
+           */
+
+          askCupcake(
+            transcript,
+            {
+              source:
+                "stt"
+            }
+          );
+        }
+      };
+
+
+    return true;
   }
 
 
-  function buildDivisionVisual(
-    a,
-    b,
-    teaching
-  ){
+  /* ============================================================
+     START STT
+     ============================================================ */
 
-    const visual =
-      document.createElement("div");
+  function startSTT() {
 
-    visual.className =
-      "cupcake-math-visual";
+    if (
+      !state.sttSupported
+    ) {
 
-    const title =
-      document.createElement("div");
-
-    title.className =
-      "cupcake-math-title";
-
-    title.textContent =
-      teaching
-        ? "Mari kita bagi bersama!"
-        : "Coba bagikan dengan rata!";
-
-    visual.appendChild(
-      title
-    );
-
-    const sourceTitle =
-      document.createElement("div");
-
-    sourceTitle.className =
-      "cupcake-math-source-title";
-
-    sourceTitle.textContent =
-      "Semua cokelat:";
-
-    visual.appendChild(
-      sourceTitle
-    );
-
-    visual.appendChild(
-      createObjectsRow(
-        a,
-        "🍫"
-      )
-    );
-
-    const groups =
-      document.createElement("div");
-
-    groups.className =
-      "cupcake-math-division";
-
-    const groupCount =
-      Math.min(
-        Math.max(1, b),
-        10
-      );
-
-    const each =
-      Math.floor(
-        a / b
-      );
-
-    for(
-      let i = 0;
-      i < groupCount;
-      i++
-    ){
-
-      const group =
-        document.createElement("div");
-
-      group.className =
-        "cupcake-math-divgroup";
-
-      const label =
-        document.createElement("div");
-
-      label.className =
-        "cupcake-math-group-label";
-
-      label.textContent =
-        "🧁 " +
-        (i + 1);
-
-      group.appendChild(
-        label
-      );
-
-      group.appendChild(
-        createObjectsRow(
-          each,
-          "🍫"
-        )
-      );
-
-      groups.appendChild(
-        group
-      );
-
+      initializeSTT();
     }
 
-    visual.appendChild(
-      groups
-    );
 
-    const instruction =
-      document.createElement("div");
+    if (
+      !state.recognition
+    ) {
 
-    instruction.className =
-      "cupcake-math-instruction";
+      return {
+        success:
+          false,
 
-    instruction.textContent =
-      teaching
-        ? `${a} cokelat dibagikan kepada ${b} kelompok. Hitung cokelat di setiap kelompok.`
-        : `Bagikan ${a} cokelat kepada ${b} kelompok secara rata.`;
+        reason:
+          "Speech Recognition tidak tersedia."
+      };
+    }
 
-    visual.appendChild(
-      instruction
-    );
 
-    return visual;
+    if (
+      state.listening
+    ) {
 
+      return {
+        success:
+          false,
+
+        reason:
+          "STT sedang aktif."
+      };
+    }
+
+
+    state.speechBuffer =
+      "";
+
+
+    showThinking();
+
+
+    try {
+
+      state.recognition.start();
+
+
+      return {
+        success:
+          true
+      };
+
+    } catch (error) {
+
+      console.warn(
+        "[Chocolate Cupcake] Failed to start STT:",
+        error
+      );
+
+
+      return {
+        success:
+          false,
+
+        reason:
+          error.message
+      };
+    }
   }
 
 
-  function buildVisualMath(
-    question,
-    state
-  ){
+  /* ============================================================
+     STOP STT
+     ============================================================ */
 
-    if(!question){
+  function stopSTT() {
+
+    if (
+      !state.recognition
+    ) {
+
+      return false;
+    }
+
+
+    try {
+
+      state.recognition.stop();
+
+      return true;
+
+    } catch (_) {
+
+      return false;
+    }
+  }
+
+
+  /* ============================================================
+     TTS
+     ============================================================ */
+
+  function initializeTTS() {
+
+    state.ttsSupported =
+      "speechSynthesis" in window &&
+      "SpeechSynthesisUtterance" in window;
+
+
+    return state.ttsSupported;
+  }
+
+
+  function getIndonesianVoice() {
+
+    if (
+      !state.ttsSupported
+    ) {
+
       return null;
     }
 
-    const a =
-      safeNumber(question.a);
 
-    const b =
-      safeNumber(question.b);
+    const voices =
+      window.speechSynthesis.getVoices();
 
-    if(
-      a === null ||
-      b === null
-    ){
+
+    if (!voices.length) {
 
       return null;
-
     }
 
-    const operation =
-      normalizeOperation(
-        question.op ||
-        question.operation
+
+    const preferred =
+      voices.find(
+        voice =>
+          voice.lang ===
+          "id-ID"
       );
 
-    const teaching =
-      state === "teaching";
 
-    /*
-     * Batasi visual agar tidak memenuhi
-     * layar untuk angka yang sangat besar.
-     */
+    if (preferred) {
 
-    if(
-      operation === "+" &&
-      a <= 30 &&
-      b <= 30
-    ){
-
-      return buildAdditionVisual(
-        a,
-        b,
-        teaching
-      );
-
+      return preferred;
     }
 
-    if(
-      operation === "−" &&
-      a <= 30 &&
-      b <= a
-    ){
 
-      return buildSubtractionVisual(
-        a,
-        b,
-        teaching
-      );
-
-    }
-
-    if(
-      operation === "×" &&
-      a <= 10 &&
-      b <= 15
-    ){
-
-      return buildMultiplicationVisual(
-        a,
-        b,
-        teaching
-      );
-
-    }
-
-    if(
-      operation === "÷" &&
-      b > 0 &&
-      a <= 30 &&
-      a % b === 0
-    ){
-
-      return buildDivisionVisual(
-        a,
-        b,
-        teaching
-      );
-
-    }
-
-    /*
-     * Fallback untuk angka yang terlalu besar.
-     */
-
-    const visual =
-      document.createElement("div");
-
-    visual.className =
-      "cupcake-math-visual";
-
-    const title =
-      document.createElement("div");
-
-    title.className =
-      "cupcake-math-title";
-
-    title.textContent =
-      teaching
-        ? "Mari kita pecah soalnya menjadi bagian kecil."
-        : "Yuk kita hitung bersama.";
-
-    visual.appendChild(
-      title
+    return (
+      voices.find(
+        voice =>
+          voice.lang &&
+          voice.lang
+            .toLowerCase()
+            .startsWith("id")
+      ) ||
+      voices[0]
     );
-
-    const equation =
-      document.createElement("div");
-
-    equation.className =
-      "cupcake-math-big-equation";
-
-    equation.textContent =
-      `${a} ${operation} ${b} = ?`;
-
-    visual.appendChild(
-      equation
-    );
-
-    const instruction =
-      document.createElement("div");
-
-    instruction.className =
-      "cupcake-math-instruction";
-
-    instruction.textContent =
-      "Gunakan cara hitung yang paling mudah. Kerjakan satu bagian dulu.";
-
-    visual.appendChild(
-      instruction
-    );
-
-    return visual;
-
   }
 
 
-  /*
-   * ============================================================
-   * VISUAL MATH CSS
-   *
-   * CSS dimasukkan dari JS supaya index.html tidak perlu
-   * diubah.
-   * ============================================================
-   */
+  function unlockChocolateCupcakeTTS() {
 
-  function installVisualMathCSS(){
+    if (
+      !state.ttsSupported
+    ) {
 
-    if(
-      document.getElementById(
-        "chocolate-cupcake-math-css"
-      )
-    ){
+      initializeTTS();
+    }
+
+
+    state.ttsUnlocked =
+      true;
+
+
+    try {
+
+      const utterance =
+        new SpeechSynthesisUtterance(
+          ""
+        );
+
+      utterance.lang =
+        CONFIG.LANGUAGE;
+
+      utterance.volume =
+        0;
+
+
+      window.speechSynthesis.speak(
+        utterance
+      );
+
+    } catch (_) {}
+
+
+    dispatch(
+      "cupcake-tts-unlocked"
+    );
+
+
+    return true;
+  }
+
+
+  function speakChocolateCupcake(
+    text,
+    options = {}
+  ) {
+
+    if (
+      !text ||
+      !state.ttsSupported ||
+      state.ttsUnlocked === false
+    ) {
+
+      return false;
+    }
+
+
+    try {
+
+      window.speechSynthesis.cancel();
+
+
+      const utterance =
+        new SpeechSynthesisUtterance(
+          String(text)
+        );
+
+
+      utterance.lang =
+        options.lang ||
+        CONFIG.LANGUAGE;
+
+      utterance.rate =
+        safeNumber(
+          options.rate,
+          CONFIG.TTS_RATE
+        );
+
+      utterance.pitch =
+        safeNumber(
+          options.pitch,
+          CONFIG.TTS_PITCH
+        );
+
+      utterance.volume =
+        safeNumber(
+          options.volume,
+          CONFIG.TTS_VOLUME
+        );
+
+
+      const voice =
+        getIndonesianVoice();
+
+
+      if (voice) {
+
+        utterance.voice =
+          voice;
+      }
+
+
+      utterance.onstart =
+        function () {
+
+          state.speaking =
+            true;
+
+          dispatch(
+            "cupcake-tts-start",
+            {
+              text:
+                text
+            }
+          );
+        };
+
+
+      utterance.onend =
+        function () {
+
+          state.speaking =
+            false;
+
+          dispatch(
+            "cupcake-tts-end"
+          );
+        };
+
+
+      utterance.onerror =
+        function (event) {
+
+          state.speaking =
+            false;
+
+          dispatch(
+            "cupcake-tts-error",
+            {
+              error:
+                event.error
+            }
+          );
+        };
+
+
+      window.speechSynthesis.speak(
+        utterance
+      );
+
+
+      return true;
+
+    } catch (error) {
+
+      console.warn(
+        "[Chocolate Cupcake] TTS error:",
+        error
+      );
+
+      return false;
+    }
+  }
+
+
+  function stopChocolateCupcakeTTS() {
+
+    if (
+      !state.ttsSupported
+    ) {
 
       return;
-
     }
 
+
+    try {
+
+      window.speechSynthesis.cancel();
+
+    } catch (_) {}
+
+
+    state.speaking =
+      false;
+  }
+
+
+  /* ============================================================
+     VISUAL MATH
+     ============================================================ */
+
+  function operatorSymbol(
+    operator
+  ) {
+
+    switch (operator) {
+
+      case "*":
+        return "×";
+
+      case "/":
+        return "÷";
+
+      default:
+        return operator;
+    }
+  }
+
+
+  function createVisualMath(
+    question = {}
+  ) {
+
+    const a =
+      question.a ??
+      question.left;
+
+    const b =
+      question.b ??
+      question.right;
+
+    const operator =
+      operatorSymbol(
+        question.op ||
+        question.operator ||
+        "+"
+      );
+
+
+    if (
+      a === undefined ||
+      b === undefined
+    ) {
+
+      return "";
+    }
+
+
+    return `
+      <div class="cupcake-visual-math"
+           aria-label="Visual Math">
+
+        <div class="cupcake-math-number">
+          🍫 ${a}
+        </div>
+
+        <div class="cupcake-math-operator">
+          ${operator}
+        </div>
+
+        <div class="cupcake-math-number">
+          🍫 ${b}
+        </div>
+
+        <div class="cupcake-math-equals">
+          = ?
+        </div>
+
+      </div>
+    `;
+  }
+
+
+  /* ============================================================
+     INJECT VISUAL MATH CSS
+     ============================================================ */
+
+  function injectVisualMathCSS() {
+
+    if (
+      document.getElementById(
+        "cupcake-visual-math-css"
+      )
+    ) {
+
+      return;
+    }
+
+
     const style =
-      document.createElement("style");
+      document.createElement(
+        "style"
+      );
+
 
     style.id =
-      "chocolate-cupcake-math-css";
+      "cupcake-visual-math-css";
+
 
     style.textContent = `
 
-      .cupcake-math-visual{
-        margin-top:12px;
-        padding:14px;
-        border-radius:18px;
-        background:linear-gradient(
-          135deg,
-          #fff8e8,
-          #fffdf7
-        );
-        border:2px solid rgba(
-          91,
-          45,
-          22,
-          .14
-        );
-        text-align:center;
-        color:#3b1d10;
-        box-shadow:
-          0 5px 15px rgba(
-            0,
-            0,
-            0,
-            .08
-          );
-      }
-
-      .cupcake-math-title{
-        font-size:18px;
-        font-weight:800;
-        margin-bottom:10px;
-      }
-
-      .cupcake-math-equation{
+      .cupcake-visual-math {
         display:flex;
         align-items:center;
         justify-content:center;
-        gap:10px;
-        flex-wrap:wrap;
+        gap:12px;
+        padding:16px;
+        margin:12px 0;
+        border-radius:18px;
+        background:rgba(255,255,255,.08);
+        font-size:28px;
+        font-weight:800;
+        text-align:center;
       }
 
-      .cupcake-math-group{
+      .cupcake-math-number {
         display:flex;
-        flex-direction:column;
         align-items:center;
         gap:5px;
-        min-width:80px;
       }
 
-      .cupcake-math-number{
-        font-size:20px;
-        font-weight:900;
-      }
-
-      .cupcake-math-items{
-        display:flex;
-        flex-wrap:wrap;
-        justify-content:center;
-        gap:4px;
-        max-width:330px;
-        margin:0 auto;
-      }
-
-      .math-object{
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        width:30px;
-        height:30px;
-        font-size:23px;
-        animation:cupcakeMathPop .25s ease;
-      }
-
-      .cupcake-math-operator{
+      .cupcake-math-operator {
         font-size:30px;
-        font-weight:900;
       }
 
-      .cupcake-math-instruction{
-        margin-top:12px;
-        font-size:14px;
-        font-weight:700;
-        line-height:1.45;
+      .cupcake-math-equals {
+        font-size:30px;
       }
 
-      .cupcake-math-subtraction
-      .cupcake-math-items{
-        max-width:420px;
+      .cupcake-stt-active {
+        animation: cupcakeSTTPulse 1s infinite;
       }
 
-      .cupcake-math-removed{
-        opacity:.28;
-        filter:grayscale(1);
-        text-decoration:line-through;
-        transform:scale(.9);
-      }
-
-      .cupcake-math-multiplication{
-        display:flex;
-        flex-direction:column;
-        gap:7px;
-        align-items:center;
-      }
-
-      .cupcake-math-multigroup{
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        gap:8px;
-        flex-wrap:wrap;
-        width:100%;
-      }
-
-      .cupcake-math-group-label{
-        min-width:85px;
-        font-size:13px;
-        font-weight:800;
-      }
-
-      .cupcake-math-source-title{
-        font-weight:800;
-        margin-bottom:5px;
-      }
-
-      .cupcake-math-division{
-        display:grid;
-        grid-template-columns:
-          repeat(
-            auto-fit,
-            minmax(100px,1fr)
-          );
-        gap:8px;
-        margin-top:12px;
-      }
-
-      .cupcake-math-divgroup{
-        padding:8px;
-        border-radius:12px;
-        background:#fff;
-        border:1px solid rgba(
-          91,
-          45,
-          22,
-          .12
-        );
-      }
-
-      .cupcake-math-big-equation{
-        font-size:26px;
-        font-weight:900;
-        margin:10px 0;
-      }
-
-      @keyframes cupcakeMathPop{
-        from{
-          transform:scale(.7);
-          opacity:0;
-        }
-        to{
+      @keyframes cupcakeSTTPulse {
+        0% {
           transform:scale(1);
-          opacity:1;
-        }
-      }
-
-      @media(max-width:600px){
-
-        .cupcake-math-visual{
-          padding:10px;
         }
 
-        .math-object{
-          width:26px;
-          height:26px;
-          font-size:20px;
+        50% {
+          transform:scale(1.05);
         }
 
-        .cupcake-math-title{
-          font-size:16px;
+        100% {
+          transform:scale(1);
         }
-
-        .cupcake-math-instruction{
-          font-size:13px;
-        }
-
       }
 
     `;
 
+
     document.head.appendChild(
       style
     );
-
   }
 
 
-  installVisualMathCSS();
+  /* ============================================================
+     LEARNING RESUME
+     ============================================================ */
 
+  function getLearningResume() {
 
-  /*
-   * ============================================================
-   * DISPLAY CUPCAKE RESPONSE
-   * ============================================================
-   */
+    try {
 
-  function normalizeCupcakeState(
-    state
-  ){
+      if (
+        typeof window.generatePlayerLearningResume ===
+        "function"
+      ) {
 
-    const value =
-      String(
-        state || "encouraging"
-      )
-      .toLowerCase()
-      .trim();
+        return (
+          window.generatePlayerLearningResume()
+        );
+      }
 
-    return stateImages[value]
-      ? value
-      : "encouraging";
-
-  }
-
-
-  function showCupcakeResponse(
-    data,
-    options = {}
-  ){
-
-    if(
-      !data ||
-      !data.success ||
-      !data.response
-    ){
-
-      return;
-
-    }
-
-    const ai =
-      data.response;
-
-    const note =
-      document.getElementById(
-        "aiNote"
-      );
-
-    if(!note){
+    } catch (error) {
 
       console.warn(
-        "[Chocolate Cupcake] #aiNote tidak ditemukan."
+        "[Chocolate Cupcake] Resume error:",
+        error
       );
-
-      return;
-
-    }
-
-    const state =
-      normalizeCupcakeState(
-        ai.state ||
-        ai.emotion
-      );
-
-    const imageSrc =
-      stateImages[state];
-
-    let message =
-      String(
-        ai.message || ""
-      ).trim();
-
-    if(ai.hint){
-
-      const hint =
-        String(
-          ai.hint
-        ).trim();
-
-      if(
-        hint &&
-        !message.includes(hint)
-      ){
-
-        message +=
-          (message ? " " : "") +
-          hint;
-
-      }
-
-    }
-
-    note.innerHTML = "";
-
-    const wrapper =
-      document.createElement(
-        "div"
-      );
-
-    wrapper.className =
-      "cupcake-ai-response";
-
-    const image =
-      document.createElement(
-        "img"
-      );
-
-    image.className =
-      "cupcake-ai-image";
-
-    image.src =
-      imageSrc;
-
-    image.alt =
-      "Chocolate Cupcake";
-
-    image.loading =
-      "eager";
-
-    const content =
-      document.createElement(
-        "div"
-      );
-
-    content.className =
-      "cupcake-ai-content";
-
-    const title =
-      document.createElement(
-        "strong"
-      );
-
-    title.textContent =
-      "🍫 Chocolate Cupcake";
-
-    const textElement =
-      document.createElement(
-        "div"
-      );
-
-    textElement.className =
-      "cupcake-ai-message";
-
-    textElement.textContent =
-      message;
-
-    content.appendChild(
-      title
-    );
-
-    content.appendChild(
-      textElement
-    );
-
-
-    /*
-     * ==========================================================
-     * LOCAL VISUAL MATH
-     *
-     * Prioritas:
-     * 1. Soal asli dari event game
-     * 2. Visual dari AI jika tersedia
-     * ==========================================================
-     */
-
-    if(
-      options.question &&
-      (
-        state === "encouraging" ||
-        state === "teaching"
-      )
-    ){
-
-      const mathVisual =
-        buildVisualMath(
-          options.question,
-          state
-        );
-
-      if(mathVisual){
-
-        content.appendChild(
-          mathVisual
-        );
-
-      }
-
-    }else if(
-      ai.visual &&
-      ai.visual.enabled &&
-      ai.visual.content
-    ){
-
-      const visual =
-        document.createElement(
-          "div"
-        );
-
-      visual.className =
-        "cupcake-ai-visual";
-
-      visual.textContent =
-        String(
-          ai.visual.content
-        );
-
-      content.appendChild(
-        visual
-      );
-
     }
 
 
-    wrapper.appendChild(
-      image
-    );
-
-    wrapper.appendChild(
-      content
-    );
-
-    note.appendChild(
-      wrapper
-    );
-
-    note.classList.remove(
-      "hidden"
-    );
+    const profile =
+      getProfile() ||
+      {};
 
 
-    /*
-     * TTS
-     */
+    return {
 
-    if(
-      options.speak === true &&
-      ai.speak !== false &&
-      message
-    ){
+      player:
+        getPlayerInfo(),
 
-      window.speakChocolateCupcake(
-        message
-      );
+      performance: {
 
-    }
+        totalQuestions:
+          profile.totalQuestions || 0,
 
+        correctAnswers:
+          profile.correctAnswers || 0,
 
-    /*
-     * Celebration timer
-     */
+        mistakes:
+          profile.mistakes || 0,
 
-    if(
-      state === "celebrating" ||
-      state === "victory"
-    ){
+        accuracy:
+          profile.accuracy || 0,
 
-      if(
-        window.cupcakeCelebrationTimer
-      ){
+        score:
+          profile.score || 0,
 
-        clearTimeout(
-          window.cupcakeCelebrationTimer
-        );
+        steps:
+          profile.steps || 0
+      },
 
-      }
+      skills:
+        profile.skills || {},
 
-      const duration =
-        state === "victory"
-          ? 10000
-          : 5000;
+      recommendedSkill:
+        profile.recommendedSkill ||
+        null,
 
-      window.cupcakeCelebrationTimer =
-        setTimeout(
-          function(){
-
-            if(note){
-
-              note.classList.remove(
-                "hidden"
-              );
-
-            }
-
-          },
-          duration
-        );
-
-    }
-
+      learningStatus:
+        profile.learningStatus ||
+        "new"
+    };
   }
+
+
+  /* ============================================================
+     SHOW LEARNING RESUME
+     ============================================================ */
+
+  function showLearningResume() {
+
+    const resume =
+      getLearningResume();
+
+
+    dispatch(
+      "cupcake-learning-resume",
+      resume
+    );
+
+
+    /*
+     * Existing UI hook.
+     */
+
+    try {
+
+      if (
+        typeof window.showPlayerLearningResume ===
+        "function"
+      ) {
+
+        window.showPlayerLearningResume(
+          resume
+        );
+      }
+
+    } catch (_) {}
+
+
+    return resume;
+  }
+
+
+  /* ============================================================
+     MEMORY SYNC
+     ============================================================ */
+
+  async function syncPlayerMemory() {
+
+    try {
+
+      if (
+        typeof window.syncPlayerMemory ===
+        "function"
+      ) {
+
+        return await window.syncPlayerMemory();
+      }
+
+    } catch (error) {
+
+      console.warn(
+        "[Chocolate Cupcake] Memory sync error:",
+        error
+      );
+    }
+
+
+    /*
+     * Fallback adapter directly from AI Agent.
+     */
+
+    const profile =
+      getProfile();
+
+
+    if (!profile) {
+
+      return {
+        success:
+          false,
+
+        reason:
+          "No learning profile"
+      };
+    }
+
+
+    const payload = {
+
+      source:
+        "chocolate-abyss-gate",
+
+      type:
+        "player_learning_profile",
+
+      playerId:
+        state.playerId,
+
+      player:
+        getPlayerInfo(),
+
+      profile,
+
+      timestamp:
+        nowISO()
+    };
+
+
+    try {
+
+      const response =
+        await fetchWithTimeout(
+          CONFIG.MEMORY_API,
+          {
+
+            method:
+              "POST",
+
+            headers: {
+
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify(
+                payload
+              )
+          },
+
+          CONFIG.MEMORY_TIMEOUT
+        );
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          "Memory API HTTP " +
+          response.status
+        );
+      }
+
+
+      return {
+        success:
+          true
+      };
+
+    } catch (error) {
+
+      console.warn(
+        "[Chocolate Cupcake] Memory API unavailable:",
+        error
+      );
+
+
+      return {
+        success:
+          false,
+
+        reason:
+          error.message
+      };
+    }
+  }
+
+
+  /* ============================================================
+     CHAT MESSAGE
+     ============================================================ */
+
+  async function sendChatMessage(
+    message,
+    options = {}
+  ) {
+
+    return askCupcake(
+      message,
+      options
+    );
+  }
+
+
+  /* ============================================================
+     GAME EVENT LISTENER
+     ============================================================ */
+
+  function setupGameEventListeners() {
+
+    window.addEventListener(
+      "player-event",
+      function (event) {
+
+        const data =
+          event.detail || {};
+
+
+        if (
+          data.type ===
+          "QUESTION_SHOWN"
+        ) {
+
+          state.currentQuestion = {
+
+            questionId:
+              data.questionId,
+
+            skill:
+              data.skill,
+
+            level:
+              data.level,
+
+            difficulty:
+              data.difficulty,
+
+            a:
+              data.a,
+
+            b:
+              data.b,
+
+            op:
+              data.op ||
+              data.operator
+          };
+
+
+          state.currentQuestionAttempts =
+            0;
+
+          state.questionStartedAt =
+            Date.now();
+        }
+
+
+        if (
+          data.type ===
+          "LEVEL_COMPLETED"
+        ) {
+
+          showCelebrating();
+        }
+
+
+        if (
+          data.type ===
+          "SESSION_COMPLETED"
+        ) {
+
+          showVictory();
+        }
+      }
+    );
+
+
+    window.addEventListener(
+      "learning-resume-generated",
+      function () {
+
+        showLearningResume();
+      }
+    );
+  }
+
+
+  /* ============================================================
+     PUBLIC API
+     ============================================================ */
+
+  window.ChocolateCupcakeAI = {
+
+    config:
+      CONFIG,
+
+    persona:
+      CUPCAKE_PERSONA,
+
+    states:
+      CUPCAKE_STATES,
+
+    state,
+
+    getProfile,
+
+    getPlayerInfo,
+
+    getCurrentLevel,
+
+    trackEvent,
+
+    startQuestion,
+
+    askCupcakeAfterAnswer,
+
+    askCupcake,
+
+    sendChatMessage,
+
+    sendCupcakeEvent,
+
+    startCupcakeWelcome,
+
+    sendCupcakeVictory,
+
+    requestAIDecision,
+
+    calculateAdaptiveDecision,
+
+    showCupcakeState,
+
+    showCupcakeResponse,
+
+    showThinking,
+
+    showOops,
+
+    showTeaching,
+
+    showEncouraging,
+
+    showCelebrating,
+
+    showVictory,
+
+    startSTT,
+
+    stopSTT,
+
+    initializeSTT,
+
+    speakChocolateCupcake,
+
+    stopChocolateCupcakeTTS,
+
+    unlockChocolateCupcakeTTS,
+
+    initializeTTS,
+
+    createVisualMath,
+
+    getLearningResume,
+
+    showLearningResume,
+
+    syncPlayerMemory,
+
+    getChatHistory:
+      function () {
+        return [
+          ...state.chatHistory
+        ];
+      },
+
+    clearChatHistory:
+      function () {
+        state.chatHistory = [];
+      }
+  };
+
+
+  /* ============================================================
+     BACKWARD COMPATIBILITY API
+     ============================================================ */
+
+  window.requestAIDecision =
+    requestAIDecision;
+
+
+  window.requestCupcakeResponse =
+    requestCupcakeAPI;
+
+
+  window.showCupcakeAgentState =
+    showCupcakeState;
 
 
   window.showCupcakeResponse =
     showCupcakeResponse;
 
 
-  /*
-   * ============================================================
-   * SEND EVENT
-   * ============================================================
-   */
-
-  let cupcakeRequestSequence = 0;
-
-  function nextCupcakeRequestId(){
-
-    cupcakeRequestSequence += 1;
-
-    return cupcakeRequestSequence;
-
-  }
-
-
   window.sendCupcakeEvent =
-    function(eventData){
+    sendCupcakeEvent;
 
-      const requestId =
-        nextCupcakeRequestId();
-
-      requestCupcakeResponse(
-        eventData
-      )
-      .then(
-        function(data){
-
-          /*
-           * Event lama tidak boleh
-           * menimpa event terbaru.
-           */
-
-          if(
-            requestId !==
-            cupcakeRequestSequence
-          ){
-
-            return;
-
-          }
-
-          /*
-           * API hanya memperkaya tutor_request.
-           *
-           * Feedback answer sudah ditampilkan
-           * secara lokal sehingga tidak menunggu AI.
-           */
-
-          if(
-            data &&
-            data.success &&
-            eventData &&
-            eventData.event ===
-            "tutor_request"
-          ){
-
-            showCupcakeResponse(
-              data,
-              {
-                speak: false,
-                question:
-                  eventData.question
-              }
-            );
-
-          }
-
-        }
-      )
-      .catch(
-        function(error){
-
-          console.warn(
-            "[Chocolate Cupcake] Event error:",
-            error
-          );
-
-        }
-      );
-
-      return requestId;
-
-    };
-
-
-  /*
-   * ============================================================
-   * LOCAL CUPCAKE STATE
-   * ============================================================
-   */
-
-  function showLocalCupcakeState({
-    state,
-    message,
-    hint = "",
-    question = null,
-    speak = true
-  }){
-
-    showCupcakeResponse(
-
-      {
-        success: true,
-
-        response: {
-
-          state,
-
-          message,
-
-          hint,
-
-          visual: {
-            enabled: false,
-            content: ""
-          },
-
-          speak,
-
-          emotion: state
-
-        }
-
-      },
-
-      {
-        speak,
-
-        question
-
-      }
-
-    );
-
-  }
-
-
-  /*
-   * ============================================================
-   * LOCAL ANSWER FEEDBACK
-   * ============================================================
-   */
-
-  function localAnswerFeedback({
-
-    isCorrect,
-
-    attemptNumber,
-
-    question
-
-  }){
-
-    /*
-     * ==========================================================
-     * CORRECT
-     * ==========================================================
-     */
-
-    if(isCorrect === true){
-
-      showLocalCupcakeState({
-
-        state:
-          "celebrating",
-
-        message:
-          "Benar! Hebat sekali! 🎉",
-
-        hint:
-          "",
-
-        question:
-          null,
-
-        speak:
-          true
-
-      });
-
-      return;
-
-    }
-
-
-    /*
-     * ==========================================================
-     * WRONG
-     * ==========================================================
-     */
-
-    const attempt =
-      Number(
-        attemptNumber || 1
-      );
-
-
-    /*
-     * ==========================================================
-     * FIRST WRONG
-     *
-     * ENCOURAGING + VISUAL
-     * ==========================================================
-     */
-
-    if(attempt <= 1){
-
-      showLocalCupcakeState({
-
-        state:
-          "encouraging",
-
-        message:
-          "Tidak apa-apa. Yuk coba lagi! Kamu pasti bisa!",
-
-        hint:
-          "Lihat cokelatnya dan hitung satu per satu.",
-
-        question:
-          question,
-
-        speak:
-          true
-
-      });
-
-      return;
-
-    }
-
-
-    /*
-     * ==========================================================
-     * SECOND WRONG
-     *
-     * TEACHING + VISUAL
-     * ==========================================================
-     */
-
-    if(attempt === 2){
-
-      showLocalCupcakeState({
-
-        state:
-          "teaching",
-
-        message:
-          "Ayo kita hitung bersama.",
-
-        hint:
-          "Perhatikan kelompok cokelatnya, lalu hitung pelan-pelan.",
-
-        question:
-          question,
-
-        speak:
-          true
-
-      });
-
-      return;
-
-    }
-
-
-    /*
-     * ==========================================================
-     * THIRD+ WRONG
-     *
-     * TEACHING + MORE DIRECT VISUAL
-     * ==========================================================
-     */
-
-    showLocalCupcakeState({
-
-      state:
-        "teaching",
-
-      message:
-        "Tidak apa-apa. Kita kerjakan langkah demi langkah.",
-
-      hint:
-        "Hitung benda yang terlihat. Tidak perlu terburu-buru.",
-
-      question:
-        question,
-
-      speak:
-        true
-
-    });
-
-  }
-
-
-  /*
-   * ============================================================
-   * ANSWER EVENT
-   * ============================================================
-   */
-
-  window.askCupcakeAfterAnswer =
-    function({
-
-      question,
-
-      playerAnswer,
-
-      correctAnswer,
-
-      isCorrect,
-
-      attemptNumber,
-
-      responseTime,
-
-      skill,
-
-      difficulty,
-
-      playerId
-
-    }){
-
-      /*
-       * ========================================================
-       * 1. FEEDBACK LANGSUNG
-       *
-       * Anak langsung mendapat feedback tanpa menunggu API.
-       * ========================================================
-       */
-
-      localAnswerFeedback({
-
-        isCorrect,
-
-        attemptNumber,
-
-        question
-
-      });
-
-
-      /*
-       * ========================================================
-       * 2. KIRIM DATA KE AI
-       *
-       * Berjalan asynchronous di background.
-       * ========================================================
-       */
-
-      window.sendCupcakeEvent({
-
-        event:
-          "answer_submitted",
-
-        player: {
-
-          id:
-            playerId ||
-            "player"
-
-        },
-
-        game: {
-
-          gameId:
-            "chocolate-abyss-gate",
-
-          level:
-            difficulty ||
-            "easy"
-
-        },
-
-        question: {
-
-          type:
-            skill ||
-            "addition",
-
-          a:
-            question?.a,
-
-          b:
-            question?.b,
-
-          operation:
-            question?.op ||
-            question?.operation,
-
-          correctAnswer
-
-        },
-
-        answer: {
-
-          value:
-            playerAnswer,
-
-          correct:
-            isCorrect
-
-        },
-
-        attempt:
-          Number(
-            attemptNumber || 1
-          ),
-
-        context: {
-
-          responseTime:
-            Number(
-              responseTime || 0
-            ),
-
-          skill:
-            skill ||
-            "addition"
-
-        }
-
-      });
-
-    };
-
-
-  /*
-   * ============================================================
-   * WELCOME
-   * ============================================================
-   */
 
   window.startCupcakeWelcome =
-    function(playerId){
+    startCupcakeWelcome;
 
-      window.unlockChocolateCupcakeTTS();
-
-      showLocalCupcakeState({
-
-        state:
-          "welcome",
-
-        message:
-          "Halo! Aku Chocolate Cupcake. Yuk kita mulai petualangan! ✨",
-
-        hint:
-          "",
-
-        question:
-          null,
-
-        speak:
-          true
-
-      });
-
-      window.sendCupcakeEvent({
-
-        event:
-          "game_started",
-
-        player: {
-
-          id:
-            playerId ||
-            "player"
-
-        },
-
-        game: {
-
-          gameId:
-            "chocolate-abyss-gate",
-
-          level:
-            window.getCurrentGameLevel
-              ? window.getCurrentGameLevel()
-              : "easy"
-
-        }
-
-      });
-
-    };
-
-
-  /*
-   * ============================================================
-   * VICTORY
-   * ============================================================
-   */
 
   window.sendCupcakeVictory =
-    function({
-
-      playerId,
-
-      level,
-
-      correct,
-
-      wrong
-
-    }){
-
-      const levelKey =
-        String(
-          level || "easy"
-        )
-        .toLowerCase();
+    sendCupcakeVictory;
 
 
-      const isFinalVictory =
-        levelKey === "hard";
+  window.askCupcakeAfterAnswer =
+    askCupcakeAfterAnswer;
 
 
-      if(isFinalVictory){
-
-        showLocalCupcakeState({
-
-          state:
-            "victory",
-
-          message:
-            "Luar biasa! Kamu berhasil menyelesaikan Chocolate Abyss Gate! 🏆🎉",
-
-          hint:
-            "",
-
-          question:
-            null,
-
-          speak:
-            true
-
-        });
-
-      }else{
-
-        showLocalCupcakeState({
-
-          state:
-            "celebrating",
-
-          message:
-            "Hebat! Level ini selesai! 🎉",
-
-          hint:
-            "",
-
-          question:
-            null,
-
-          speak:
-            true
-
-        });
-
-      }
+  window.startChocolateCupcakeSTT =
+    startSTT;
 
 
-      window.sendCupcakeEvent({
-
-        event:
-          "level_completed",
-
-        player: {
-
-          id:
-            playerId ||
-            "player"
-
-        },
-
-        game: {
-
-          gameId:
-            "chocolate-abyss-gate",
-
-          level:
-            level ||
-            "easy"
-
-        },
-
-        progress: {
-
-          correct:
-            Number(
-              correct || 0
-            ),
-
-          wrong:
-            Number(
-              wrong || 0
-            ),
-
-          completed:
-            true,
-
-          finalVictory:
-            isFinalVictory
-
-        }
-
-      });
-
-    };
+  window.stopChocolateCupcakeSTT =
+    stopSTT;
 
 
-  /*
-   * ============================================================
-   * TTS CONTROLS
-   * ============================================================
-   */
-
-  window.setChocolateCupcakeTTS =
-    function(enabled){
-
-      window.cupcakeTTS.enabled =
-        Boolean(enabled);
-
-      if(
-        !window.cupcakeTTS.enabled &&
-        "speechSynthesis" in window
-      ){
-
-        window.speechSynthesis.cancel();
-
-        window.cupcakeTTS.speaking =
-          false;
-
-      }
-
-    };
+  window.speakChocolateCupcake =
+    speakChocolateCupcake;
 
 
   window.stopChocolateCupcakeTTS =
-    function(){
+    stopChocolateCupcakeTTS;
 
-      if(
-        "speechSynthesis" in window
-      ){
 
-        window.speechSynthesis.cancel();
+  window.unlockChocolateCupcakeTTS =
+    unlockChocolateCupcakeTTS;
 
+
+  window.getChocolateCupcakeProfile =
+    getProfile;
+
+
+  window.getChocolateCupcakeLearningResume =
+    getLearningResume;
+
+
+  window.syncChocolateCupcakeMemory =
+    syncPlayerMemory;
+
+
+  /* ============================================================
+     INITIALIZATION
+     ============================================================ */
+
+  function initialize() {
+
+    if (
+      state.initialized
+    ) {
+
+      return;
+    }
+
+
+    state.playerId =
+      resolvePlayerId();
+
+
+    const info =
+      getPlayerInfo();
+
+
+    state.playerName =
+      info.name ||
+      "";
+
+    state.playerAge =
+      info.age ||
+      null;
+
+
+    initializeTTS();
+
+    initializeSTT();
+
+    injectVisualMathCSS();
+
+    setupGameEventListeners();
+
+
+    state.initialized =
+      true;
+
+
+    dispatch(
+      "chocolate-cupcake-ready",
+      {
+
+        playerId:
+          state.playerId,
+
+        playerName:
+          state.playerName,
+
+        sttSupported:
+          state.sttSupported,
+
+        ttsSupported:
+          state.ttsSupported
       }
-
-      window.cupcakeTTS.speaking =
-        false;
-
-    };
-
-
-  /*
-   * ============================================================
-   * DEBUG / STATUS
-   * ============================================================
-   */
-
-  console.log(
-    "[Chocolate Cupcake] AI Agent loaded."
-  );
-
-  console.log(
-    "[Chocolate Cupcake] TTS available:",
-    "speechSynthesis" in window
-  );
-
-  if(
-    "speechSynthesis" in window
-  ){
-
-    console.log(
-      "[Chocolate Cupcake] TTS voices loaded:",
-      window.speechSynthesis
-        .getVoices()
-        .length
     );
 
+
+    console.log(
+      "%c🍫 Chocolate Cupcake AI Agent Ready",
+      "font-weight:bold;"
+    );
+
+
+    console.log(
+      "[Chocolate Cupcake] Persona:",
+      CUPCAKE_PERSONA
+    );
+
+
+    console.log(
+      "[Chocolate Cupcake] STT supported:",
+      state.sttSupported
+    );
+
+
+    console.log(
+      "[Chocolate Cupcake] TTS supported:",
+      state.ttsSupported
+    );
   }
 
+
+  if (
+    document.readyState ===
+    "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initialize
+    );
+
+  } else {
+
+    initialize();
+  }
 
 })();
