@@ -102,6 +102,34 @@
 
   const CUPCAKE_API_TIMEOUT = 8000;
 
+  /*
+   * Kunci TTS celebrating berdasarkan SOAL, bukan sekadar
+   * nomor percobaan. Ini mencegah suara "Hebat!" muncul pada
+   * jawaban benar pertama atau terbawa dari soal sebelumnya.
+   */
+  const cupcakeWrongQuestions = new Set();
+
+  function cupcakeQuestionKey(question, explicitId){
+    if(explicitId !== undefined && explicitId !== null && String(explicitId).trim()){
+      return String(explicitId);
+    }
+    if(!question) return "unknown-question";
+    return [
+      question.id,
+      question.questionId,
+      question.a,
+      question.op,
+      question.b,
+      question.ans
+    ].map(v => String(v ?? "")).join("|");
+  }
+
+  function cancelCupcakeSpeech(){
+    if("speechSynthesis" in window){
+      try{ window.speechSynthesis.cancel(); }catch(e){}
+    }
+  }
+
   window.requestCupcakeResponse = async function(eventData){
 
     const controller = new AbortController();
@@ -222,80 +250,49 @@
   }
 
   function buildChildVisual(a, op, b, suffix){
-    const n1 = Math.max(0, Math.min(20, Number(a)));
-    const n2 = Math.max(0, Math.min(20, Number(b)));
-    if(!Number.isFinite(n1) || !Number.isFinite(n2)) return escapeHtml(String(a) + " " + op + " " + String(b) + suffix);
-    const icon = op === "-" ? "🍫" : op === "×" || op === "*" ? "🧁" : "🍫";
-    const second = icon;
-    const left = Array.from({length:Math.min(n1,12)},()=>icon).join(" ");
-    const right = Array.from({length:Math.min(n2,12)},()=>second).join(" ");
-    return '<div class="math-visual-row"><span>' + left + '</span><strong> ' + escapeHtml(op) + ' </strong><span>' + right + '</span><strong>' + escapeHtml(suffix || " = ?") + '</strong></div>';
+    const n1 = Number(a);
+    const n2 = Number(b);
+    if(!Number.isFinite(n1) || !Number.isFinite(n2)){
+      return '<div class="math-visual-question">🍫 ' + escapeHtml(op) + ' 🍫 = ?</div>';
+    }
+    const icon = (op === "×" || op === "*") ? "🧁" : "🍫";
+    const left = Array.from({length:Math.min(Math.max(0,Math.round(n1)),12)},()=>icon).join(" ");
+    const right = Array.from({length:Math.min(Math.max(0,Math.round(n2)),12)},()=>icon).join(" ");
+    return '<div class="math-visual-row"><span class="math-object-group">' + (left || "🍫") + '</span><strong>' + escapeHtml(op) + '</strong><span class="math-object-group">' + (right || "🍫") + '</span></div><div class="math-visual-question">' + escapeHtml(String(a)) + ' ' + escapeHtml(op) + ' ' + escapeHtml(String(b)) + escapeHtml(suffix || " = ?") + '</div>';
   }
 
-  function speakCupcake(message){
+  let cupcakeSpeechToken = 0;
 
-    if(
-      !message ||
-      !("speechSynthesis" in window)
-    ){
-      return;
-    }
+  function speakCupcake(message){
+    if(!message || !("speechSynthesis" in window)) return;
+
+    const token = ++cupcakeSpeechToken;
 
     try{
-
+      /* Selalu hentikan suara sebelumnya agar tidak overlap. */
       window.speechSynthesis.cancel();
 
-      const utterance =
-        new SpeechSynthesisUtterance(message);
-
+      const utterance = new SpeechSynthesisUtterance(String(message));
       utterance.lang = "id-ID";
       utterance.rate = 0.95;
       utterance.pitch = 1.05;
-
+      utterance.onstart = () => {
+        if(token !== cupcakeSpeechToken){
+          try{ window.speechSynthesis.cancel(); }catch(e){}
+        }
+      };
       window.speechSynthesis.speak(utterance);
-
     }catch(error){
-
-      console.warn(
-        "[Chocolate Cupcake] TTS error:",
-        error
-      );
-
+      console.warn("[Chocolate Cupcake] TTS error:", error);
     }
-
   }
 
-  function escapeHtml(value){
-    return String(value).replace(/[&<>\"']/g, c => ({
-      "&":"&amp;", "<":"&lt;", ">":"&gt;",
-      "\"":"&quot;", "'":"&#39;"
-    }[c]));
-  }
-
-  /* Visual matematika sederhana untuk anak.
-     Object dari API tidak boleh berubah menjadi [object Object]. */
-  function formatVisualMath(value){
-    if(value === null || value === undefined) return "";
-    if(typeof value === "string" || typeof value === "number") {
-      return escapeHtml(String(value));
+  window.stopCupcakeTTS = function(){
+    cupcakeSpeechToken++;
+    if("speechSynthesis" in window){
+      try{ window.speechSynthesis.cancel(); }catch(e){}
     }
-    if(Array.isArray(value)){
-      return value.map(formatVisualMath).join(" ");
-    }
-    if(typeof value === "object"){
-      if(value.display !== undefined) return formatVisualMath(value.display);
-      if(value.text !== undefined) return formatVisualMath(value.text);
-      if(value.equation !== undefined) return formatVisualMath(value.equation);
-      if(value.expression !== undefined) return formatVisualMath(value.expression);
-      if(value.a !== undefined && value.b !== undefined){
-        const op=value.operation || value.op || "+";
-        const ans=value.answer !== undefined ? ` = ${value.answer}` : " = ?";
-        return escapeHtml(`${value.a} ${op} ${value.b}${ans}`);
-      }
-      return Object.entries(value).map(([k,v]) => `<div>${escapeHtml(k)}: ${formatVisualMath(v)}</div>`).join("");
-    }
-    return escapeHtml(String(value));
-  }
+  };
 
   function getPlayerName(){
     try{
@@ -598,36 +595,41 @@
   function localAnswerFeedback({
     isCorrect,
     attemptNumber,
-    question
+    question,
+    questionId
   }){
+
+    const questionKey = cupcakeQuestionKey(question, questionId);
 
     if(isCorrect === true){
 
       /*
-       * TTS "Hebat" hanya boleh muncul jika anak sebelumnya
-       * salah lalu berhasil menjawab benar.
-       * Jika benar pada percobaan pertama, tampilkan AI tanpa suara.
+       * Celebrating SELALU tampil.
+       * TTS HANYA aktif jika SOAL INI sebelumnya pernah dijawab salah.
+       * Jadi jawaban benar pertama = tanpa suara, meskipun soal sebelumnya
+       * atau sesi sebelumnya pernah salah.
        */
-      const hadMistakeBeforeCorrect =
-        Number(attemptNumber || 1) > 1;
+      const hadMistakeBeforeCorrect = cupcakeWrongQuestions.has(questionKey);
 
       showLocalCupcakeState({
-
         state: "celebrating",
-
         message:
           "🍫 Hebat!\nKamu sudah semakin pintar.\nSekarang kita coba tantangan baru yuk!",
-
-        visual:
-          "🎉🍫",
-
+        visual: "🎉🍫",
         speak: hadMistakeBeforeCorrect
-
       });
 
-      return;
+      if(!hadMistakeBeforeCorrect){
+        /* Benar pada percobaan pertama: celebrating tetap tampil, TANPA suara. */
+        cancelCupcakeSpeech();
+      }
 
+      cupcakeWrongQuestions.delete(questionKey);
+      return;
     }
+
+    /* Jawaban salah dicatat untuk SOAL yang sedang aktif. */
+    cupcakeWrongQuestions.add(questionKey);
 
     const attempt =
       Number(attemptNumber || 1);
@@ -660,7 +662,7 @@
           "Coba hitung pelan-pelan.",
 
         visual:
-          validNumbers ? {a:a,b:b,operation:operation} : "🍫 + 🍫 = ?",
+          validNumbers ? buildChildVisual(a, operation, b, " = ?") : "🍫 + 🍫 = ?",
 
         speak: true
 
@@ -684,7 +686,7 @@
 
         visual:
           validNumbers
-            ? {a:a,b:b,operation:operation}
+            ? buildChildVisual(a, operation, b, " = ?")
             : "🍫 + 🍫 = ?",
 
         speak: true
@@ -709,7 +711,7 @@
 
       visual:
         validNumbers
-          ? `🍫 ${operation} 🍫\n${a} ${operation} ${b} = ?`
+          ? buildChildVisual(a, operation, b, " = ?")
           : "🍫🍫 + 🍫🍫🍫 = ?",
 
       speak: true
@@ -728,6 +730,7 @@
   window.askCupcakeAfterAnswer = function({
 
     question,
+    questionId,
     playerAnswer,
     correctAnswer,
     isCorrect,
@@ -745,7 +748,8 @@
     localAnswerFeedback({
       isCorrect,
       attemptNumber,
-      question
+      question,
+      questionId
     });
 
     /*
@@ -874,7 +878,7 @@
     speakCupcake(message);
   };
 
-  window.cupcakePlayWelcome = function(){
+  window.cupcakePlayWelcome = function(noteId = "startAiNote"){
     const tracker = window.playerEventTracker;
     const info = tracker && tracker.getPlayerInfo ? tracker.getPlayerInfo() : {};
     const name = String(info.name || window.playerName || "").trim() || "teman";
@@ -889,7 +893,7 @@
       message,
       visual: "🍫🧁",
       speak: true,
-      noteId: "startAiNote"
+      noteId
     });
   };
 
