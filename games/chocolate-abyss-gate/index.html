@@ -433,6 +433,8 @@ header:after{
 
 .card{
   width:min(760px,100%);
+  max-height:calc(100vh - 32px);
+  overflow-y:auto;
   background:#fff9ec;
   border:3px solid #e5bc5e;
   border-radius:28px;
@@ -1072,12 +1074,6 @@ header:after{
 
   <div class="card" id="introCard">
 
-    <img
-      class="intro-cupcake"
-      src="sources/welcome.png"
-      alt="Chocolate Cupcake Welcome"
-    >
-
     <h2>
       Welcome to Chocolate Abyss Gate
     </h2>
@@ -1090,8 +1086,6 @@ header:after{
       <br>
       <b>Good luck!</b>
     </p>
-
-    <div class="ai-note" id="startAiNote"></div>
 
     <button class="actions" id="goPick" type="button">
       🍫 Pilih Karakter
@@ -3894,9 +3888,6 @@ function answerQuestion(value){
         question:
           currentQuestion,
 
-        questionId:
-          currentQuestionId,
-
         playerAnswer:
           value,
 
@@ -4447,6 +4438,7 @@ function showLevelCelebration(levelName){
   if(!note) return;
   note.innerHTML=`<div class="cupcake-ai-response"><img class="cupcake-ai-image" src="sources/celebrating.png" alt="Chocolate Cupcake celebrating"><div class="cupcake-ai-content"><div class="cupcake-ai-message">🎉 Hebat! Kamu menyelesaikan level ${levelName}! 🍫</div><div class="cupcake-ai-visual">🎉🏆🍫</div></div></div>`;
   note.classList.remove("hidden");
+  if(typeof window.queueCupcakeTTS==="function") window.queueCupcakeTTS(`Hebat! Kamu menyelesaikan level ${levelName}!`);
 }
 
 /* =========================================================
@@ -4696,8 +4688,12 @@ function exitGame(){
 document.getElementById(
   "goPick"
 ).onclick=()=>{
-  /* User gesture membuka form. Welcome dengan nama dibacakan
-     oleh Chocolate Cupcake setelah profil disimpan. */
+  /* User gesture: browser mengizinkan TTS di sini. */
+  if(typeof window.cupcakePlayWelcome === "function") {
+    window.cupcakePlayWelcome();
+  }else if(typeof window.cupcakeSpeakWelcome === "function") {
+    window.cupcakeSpeakWelcome();
+  }
   showProfile();
 };
 
@@ -4765,16 +4761,6 @@ document.getElementById(
   updateDebugPanel();
 
   showPicker();
-
-  /*
-   * Ini masih berada di dalam klik "Lanjut", jadi browser memiliki
-   * user gesture. Chocolate Cupcake menampilkan Welcome DAN berbicara.
-   */
-  if(typeof window.cupcakePlayWelcome === "function") {
-    window.cupcakePlayWelcome("pickerAiNote");
-  }else if(typeof window.cupcakeSpeakWelcome === "function") {
-    window.cupcakeSpeakWelcome();
-  }
 
 };
 
@@ -5170,9 +5156,8 @@ updateHeaderCharacters();
 
 setupLevel();
 
-/* Tampilkan Chocolate Cupcake Welcome sejak halaman awal.
-   TTS dibunyikan oleh AI agent setelah nama pemain disimpan melalui
-   tombol "Lanjut", karena itu adalah user gesture browser. */
+/* Inisialisasi event welcome tanpa menampilkan popup/gambar AI.
+   Suara welcome diputar saat tombol "Pilih Karakter" diklik. */
 try{
   if(typeof window.startCupcakeWelcome === "function"){
     window.startCupcakeWelcome(
