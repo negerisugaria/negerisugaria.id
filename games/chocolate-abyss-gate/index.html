@@ -1199,8 +1199,8 @@ header:after{
 
     <img
       class="intro-cupcake"
-      src="sources/chocolate-cupcake.png"
-      alt="Chocolate Cupcake"
+      src="sources/welcome.png"
+      alt="Chocolate Cupcake — Welcome"
     >
 
     <h2>
@@ -1278,6 +1278,7 @@ header:after{
         Lanjut →
       </button>
 
+
     </div>
 
   </div>
@@ -1311,6 +1312,7 @@ header:after{
       >
         🚀 Mulai Labirin
       </button>
+
 
     </div>
 
@@ -2616,6 +2618,122 @@ function renderPicker(){
 
     });
 
+}
+
+
+/* =========================================================
+   CHOCOLATE CUPCAKE — VOICE DISCUSSION HELPERS
+   ========================================================= */
+let cupcakeNudgeTimer=null;
+let cupcakeAutoVoice=false;
+let cupcakeVoicePermission=false;
+
+function cupcakeSpeak(text){
+  showCupcakeAgentState("welcome", text);
+  speakCupcake(text);
+}
+
+function clearCupcakeNudge(){
+  if(cupcakeNudgeTimer){
+    clearTimeout(cupcakeNudgeTimer);
+    cupcakeNudgeTimer=null;
+  }
+}
+
+function scheduleCupcakeNudge(text, delay=7000){
+  clearCupcakeNudge();
+  cupcakeNudgeTimer=setTimeout(()=>{
+    cupcakeNudgeTimer=null;
+    cupcakeSpeak(text);
+  }, delay);
+}
+
+async function ensureCupcakeVoicePermission(){
+  if(cupcakeVoicePermission) return true;
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return true;
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    stream.getTracks().forEach(track=>track.stop());
+    cupcakeVoicePermission=true;
+    return true;
+  }catch(error){
+    console.warn("[Chocolate Cupcake] Voice permission unavailable:",error);
+    return false;
+  }
+}
+
+function startCupcakeListening(){
+  if(!cupcakeAutoVoice || !window.startChocolateCupcakeSTT) return;
+  const result=window.startChocolateCupcakeSTT();
+  if(!result || result.success===false){
+    scheduleCupcakeNudge("Aku masih di sini. Kalau kamu siap, ceritakan jawabanmu dengan suara.",5000);
+  }
+}
+
+function speakCupcakeAndListen(text){
+  cupcakeSpeak(text);
+  if(!cupcakeAutoVoice) return;
+  const begin=()=>setTimeout(startCupcakeListening,350);
+  if("speechSynthesis" in window){
+    try{
+      const utterances=window.speechSynthesis.getVoices();
+      void utterances;
+      window.speechSynthesis.cancel();
+      const utterance=new SpeechSynthesisUtterance(text);
+      utterance.lang="id-ID";
+      utterance.rate=.95;
+      utterance.pitch=1.05;
+      utterance.onend=begin;
+      utterance.onerror=begin;
+      window.speechSynthesis.speak(utterance);
+      return;
+    }catch(error){
+      console.warn("[Chocolate Cupcake] Auto voice TTS error:",error);
+    }
+  }
+  begin();
+}
+
+async function startCupcakeDiscussion(){
+  clearCupcakeNudge();
+  cupcakeAutoVoice=true;
+  const permitted=await ensureCupcakeVoicePermission();
+  if(permitted) startCupcakeListening();
+}
+
+window.addEventListener("cupcake-stt-end",()=>{
+  if(!cupcakeAutoVoice) return;
+  const transcript=(window.__chocolateCupcakeLastTranscript||"").trim();
+  if(transcript) return;
+  scheduleCupcakeNudge("Aku belum mendengar suaramu. Yuk, ceritakan apa yang kamu pikirkan.",3500);
+});
+
+window.addEventListener("cupcake-stt-result",event=>{
+  if(event.detail && event.detail.final){
+    window.__chocolateCupcakeLastTranscript=event.detail.transcript||"";
+  }
+});
+
+function buildGuidedMathStep(question, attempt){
+  if(!question) return "Coba kita pecah soalnya menjadi langkah yang lebih kecil. Apa yang bisa kamu hitung lebih dulu?";
+  const a=Number(question.a), b=Number(question.b);
+  if(question.op==="−"){
+    if(attempt===2) return `Kita pelan-pelan. Ada ${a} cokelat. Sekarang, kalau ${b} cokelat diambil, coba kurangi sedikit demi sedikit. Berapa yang tersisa setelah beberapa cokelat diambil?`;
+    return `Kita ambil satu langkah saja. Mulai dari ${a}, lalu kurangi satu cokelat. Sekarang menjadi berapa?`;
+  }
+  if(question.op==="+"){
+    if(attempt===2) return `Kita pecah menjadi dua bagian. Mulai dari ${a}, lalu tambahkan ${b} satu per satu. Coba hitung bersama Chocolate Cupcake.`;
+    return `Mulai dari ${a}. Tambahkan satu lagi. Sekarang berapa?`;
+  }
+  if(question.op==="×"){
+    if(attempt===2) return `Jangan hitung semuanya sekaligus. Ada ${b} kelompok, masing-masing ${a}. Coba hitung satu kelompok dulu. Berapa cokelatnya?`;
+    return `Sekarang fokus satu kelompok saja. Ada ${a} cokelat di kelompok itu. Bisa kamu hitung?`;
+  }
+  if(question.op==="÷"){
+    if(attempt===2) return `Kita bagi sedikit demi sedikit. Ada ${a} cokelat dan ${b} kotak. Coba masukkan satu cokelat ke setiap kotak. Sudah berapa yang kita bagikan?`;
+    return `Sekarang fokus pada satu kotak. Menurutmu, berapa cokelat yang ada di kotak itu?`;
+  }
+  return "Kita lakukan satu langkah kecil dulu. Apa yang kamu lihat dari soal ini?";
 }
 
 function showIntro(){
@@ -4256,28 +4374,35 @@ function answerQuestion(value){
 
     const cupcakeMessage=
       cupcakeWrongCount===1
-        ? "Tidak apa-apa! Kamu sudah mencoba. Ayo lihat soalnya sekali lagi."
-        : "Yuk belajar bersama. Perhatikan operasi matematikanya, lalu coba lagi.";
+        ? "Hampir! Tidak apa-apa kalau salah. Yuk kita hitung bersama."
+        : buildGuidedMathStep(currentQuestion, currentAttemptNumber);
 
     showCupcakeAgentState(
       cupcakeState,
       cupcakeMessage
     );
 
-    const visual=buildMathVisual(currentQuestion);
-    if(visual){
-      aiNote.innerHTML+=visual;
+    /* Tahap 1: tampilkan visualisasi lengkap.
+       Tahap 2+: kecilkan masalah menjadi satu langkah sederhana. */
+    if(cupcakeWrongCount===1){
+      const visual=buildMathVisual(currentQuestion);
+      if(visual){
+        aiNote.innerHTML+=visual;
+        aiNote.classList.remove("hidden");
+        aiNote.scrollIntoView({behavior:"smooth",block:"nearest"});
+      }
+    }else{
+      aiNote.innerHTML+=`<div class="math-visual math-guided-step"><div class="math-visual-title">🧁 Kita lakukan satu langkah kecil</div><div class="math-visual-help">${cupcakeMessage}</div></div>`;
       aiNote.classList.remove("hidden");
-      aiNote.scrollIntoView({
-        behavior:"smooth",
-        block:"nearest"
-      });
+      aiNote.scrollIntoView({behavior:"smooth",block:"nearest"});
     }
 
-    speakCupcake(
-      cupcakeState==="encouraging"
-        ? "Tidak apa-apa! Kamu sudah mencoba. Ayo lihat soalnya sekali lagi."
-        : "Yuk belajar bersama. Perhatikan operasi matematikanya, lalu coba lagi."
+    speakCupcake(cupcakeMessage);
+    scheduleCupcakeNudge(
+      cupcakeWrongCount===1
+        ? "Coba ceritakan kepada Chocolate Cupcake: apa yang kamu lihat dari gambar cokelat tadi?"
+        : "Tidak perlu terburu-buru. Ceritakan langkah kecil yang menurutmu harus dilakukan berikutnya.",
+      8000
     );
 
     if(
@@ -4297,6 +4422,8 @@ function answerQuestion(value){
     return;
 
   }
+
+  clearCupcakeNudge();
 
   /* =====================================================
      CORRECT ANSWER
@@ -5616,10 +5743,13 @@ function exitGame(){
    BUTTONS
    ========================================================= */
 
-document.getElementById(
-  "goPick"
-).onclick=
-  showProfile;
+document.getElementById("goPick").onclick=()=>{
+  showProfile();
+  cupcakeAutoVoice=true;
+  ensureCupcakeVoicePermission().then(()=>{
+    speakCupcakeAndListen("Halo! Sekarang kita kenalan dulu. Tuliskan nama dan usia kamu. Setelah itu Chocolate Cupcake akan menyebut namamu dan mengajakmu memilih karakter.");
+  });
+};
 
 document.getElementById(
   "backIntroFromProfile"
@@ -5686,6 +5816,11 @@ document.getElementById(
 
   showPicker();
 
+  cupcakeAutoVoice=true;
+  ensureCupcakeVoicePermission().then(()=>{
+    speakCupcakeAndListen(`Senang bertemu denganmu, ${name}! Usiamu ${age} tahun. Sekarang pilih karakter yang paling kamu suka. Ceritakan kepada Chocolate Cupcake karakter mana yang kamu pilih.`);
+  });
+
 };
 
 document.getElementById(
@@ -5697,9 +5832,10 @@ document.getElementById(
    START GAME
    ========================================================= */
 
-document.getElementById(
-  "startGame"
-).onclick=()=>{
+document.getElementById("startGame").onclick=()=>{
+  clearCupcakeNudge();
+  cupcakeAutoVoice=false;
+  if(window.stopChocolateCupcakeSTT) window.stopChocolateCupcakeSTT();
 
   const seed=
     Date.now()+
