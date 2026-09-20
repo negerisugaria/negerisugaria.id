@@ -1594,6 +1594,7 @@ let questionShownAt=null;
 let currentQuestionId=null;
 let currentAttemptNumber=0;
 let currentHintUsed=false;
+let cupcakeWrongCount=0;
 let lastAIDecision=null;
 let adaptiveDifficultyOverride=null;
 
@@ -2762,6 +2763,16 @@ function startLevelWithoutIntro(){
   gameStarted=true;
   locked=false;
   questionOpen=false;
+  cupcakeWrongCount=0;
+
+  showCupcakeAgentState(
+    "welcome",
+    `Hai! Aku Chocolate Cupcake. Selamat bermain di ${levels[levelKey].name}!`
+  );
+
+  speakCupcake(
+    `Hai! Aku Chocolate Cupcake. Selamat bermain di ${levels[levelKey].name}!`
+  );
 
   hideStart();
 
@@ -4069,28 +4080,41 @@ function answerQuestion(value){
 
     }
 
-    /* Visual selalu mengikuti operasi soal asli.
-       Pengurangan tidak pernah diubah menjadi penjumlahan. */
+    /* Agent state:
+       salah pertama = Encouraging
+       salah kedua+ = Teaching */
+    cupcakeWrongCount++;
+
+    const cupcakeState=
+      cupcakeWrongCount===1
+        ? "encouraging"
+        : "teaching";
+
+    const cupcakeMessage=
+      cupcakeWrongCount===1
+        ? "Tidak apa-apa! Kamu sudah mencoba. Ayo lihat soalnya sekali lagi."
+        : "Yuk belajar bersama. Perhatikan operasi matematikanya, lalu coba lagi.";
+
+    showCupcakeAgentState(
+      cupcakeState,
+      cupcakeMessage
+    );
+
     const visual=buildMathVisual(currentQuestion);
     if(visual){
-      aiNote.innerHTML=`
-        <div class="cupcake-ai-response wrong-answer-ai">
-          <img
-            class="cupcake-ai-image"
-            src="sources/chocolate-cupcake.png"
-            alt="Chocolate Cupcake membantu belajar"
-            onerror="this.onerror=null;this.src='sources/celebrating.png';"
-          >
-          <div class="cupcake-ai-content">
-            <div class="cupcake-ai-message">
-              🍫 Tidak apa-apa, kita lihat soalnya bersama.
-            </div>
-            ${visual}
-          </div>
-        </div>`;
+      aiNote.innerHTML+=visual;
       aiNote.classList.remove("hidden");
-      aiNote.scrollIntoView({behavior:"smooth", block:"nearest"});
+      aiNote.scrollIntoView({
+        behavior:"smooth",
+        block:"nearest"
+      });
     }
+
+    speakCupcake(
+      cupcakeState==="encouraging"
+        ? "Tidak apa-apa! Kamu sudah mencoba. Ayo lihat soalnya sekali lagi."
+        : "Yuk belajar bersama. Perhatikan operasi matematikanya, lalu coba lagi."
+    );
 
     if(
       lastAIDecision &&
@@ -4149,6 +4173,15 @@ function answerQuestion(value){
   f.innerHTML=
     `🎉 Benar! <b>+${earned} poin</b><br>`+
     `<small>Rute ${actual} langkah • rute tercepat ${optimal}</small>`;
+
+  showCupcakeAgentState(
+    "celebrating",
+    `Hebat! Jawabanmu benar. Kamu mendapat +${earned} poin!`
+  );
+
+  speakCupcake(
+    `Hebat! Jawabanmu benar. Kamu mendapat ${earned} poin!`
+  );
 
   try{
 
@@ -4267,6 +4300,94 @@ function answerQuestion(value){
 }
 
 /* =========================================================
+   CHOCOLATE CUPCAKE AGENT — STATE CONTROLLER
+   State:
+   welcome -> game starts
+   encouraging -> first wrong answer
+   teaching -> second+ wrong answer
+   celebrating -> correct answer / level complete
+   victory -> all levels complete
+   ========================================================= */
+
+function showCupcakeAgentState(state, message=""){
+  const targets=[
+    document.getElementById("aiNote"),
+    document.getElementById("levelAiNote"),
+    document.getElementById("homeAiNote")
+  ].filter(Boolean);
+
+  if(!targets.length) return;
+
+  const config={
+    welcome:{
+      image:"sources/welcome.png",
+      fallback:"sources/chocolate-cupcake.png",
+      label:"🧁 Welcome",
+      text:message||"Hai! Aku Chocolate Cupcake. Yuk mulai petualangan!"
+    },
+    encouraging:{
+      image:"sources/encouraging.png",
+      fallback:"sources/chocolate-cupcake.png",
+      label:"💪 Encouraging",
+      text:message||"Tidak apa-apa! Kamu pasti bisa. Coba perhatikan soalnya lagi."
+    },
+    teaching:{
+      image:"sources/teaching.png",
+      fallback:"sources/chocolate-cupcake.png",
+      label:"🧠 Teaching",
+      text:message||"Ayo kita pelajari langkahnya bersama."
+    },
+    celebrating:{
+      image:"sources/celebrating.png",
+      fallback:"sources/chocolate-cupcake.png",
+      label:"🎉 Celebrating",
+      text:message||"Hebat! Jawabanmu benar!"
+    },
+    victory:{
+      image:"sources/victory.png",
+      fallback:"sources/chocolate-cupcake.png",
+      label:"🏆 Victory",
+      text:message||"Luar biasa! Semua level berhasil kamu selesaikan!"
+    }
+  };
+
+  const cfg=config[state]||config.welcome;
+
+  targets.forEach(note=>{
+    note.innerHTML=`
+      <div class="cupcake-ai-response cupcake-state-${state}">
+        <img
+          class="cupcake-ai-image"
+          src="${cfg.image}"
+          alt="Chocolate Cupcake — ${cfg.label}"
+          onerror="this.onerror=null;this.src='${cfg.fallback}';"
+        >
+        <div class="cupcake-ai-content">
+          <div class="cupcake-ai-message">
+            <b>${cfg.label}</b><br>
+            ${cfg.text}
+          </div>
+        </div>
+      </div>`;
+    note.classList.remove("hidden");
+  });
+}
+
+function speakCupcake(text){
+  if(!("speechSynthesis" in window)) return;
+  try{
+    window.speechSynthesis.cancel();
+    const utterance=new SpeechSynthesisUtterance(text);
+    utterance.lang="id-ID";
+    utterance.rate=.95;
+    utterance.pitch=1.05;
+    window.speechSynthesis.speak(utterance);
+  }catch(error){
+    console.warn("[Chocolate Cupcake] TTS error:",error);
+  }
+}
+
+/* =========================================================
    HOME / CHOCOLATE ABYSS GATE POPUP
    ========================================================= */
 
@@ -4293,21 +4414,10 @@ function openHomePopup(){
     Tekan <b>Lanjut</b> untuk menyelesaikan level.
   `;
 
-  const note=document.getElementById("homeAiNote");
-  if(note){
-    note.innerHTML=`
-      <div class="cupcake-ai-response">
-        <img class="cupcake-ai-image"
-             src="sources/celebrating.png"
-             alt="Chocolate Cupcake">
-        <div class="cupcake-ai-content">
-          <div class="cupcake-ai-message">
-            🎉 Hebat! Kamu menemukan Chocolate Abyss Gate.
-          </div>
-          <div class="cupcake-ai-visual">🏠🍫🚪✨</div>
-        </div>
-      </div>`;
-  }
+  showCupcakeAgentState(
+    "celebrating",
+    "🎉 Hebat! Kamu menemukan Chocolate Abyss Gate. Tekan Lanjut untuk menyelesaikan level."
+  );
 
   homeModal.classList.add("show");
   homeModal.setAttribute("aria-hidden","false");
@@ -4615,6 +4725,15 @@ function showLevelCelebration(
    ========================================================= */
 
 function showFinalVictory(){
+
+  showCupcakeAgentState(
+    "victory",
+    "🏆 Luar biasa! Semua level Chocolate Abyss Gate berhasil kamu selesaikan!"
+  );
+
+  speakCupcake(
+    "Luar biasa! Semua level Chocolate Abyss Gate berhasil kamu selesaikan!"
+  );
 
   const card=
     document.querySelector(
