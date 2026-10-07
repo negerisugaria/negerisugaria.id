@@ -1317,7 +1317,6 @@ header:after{
       <button
         id="continueAfterWallet"
         type="button"
-        disabled
       >
         Lanjut → Pilih Karakter
       </button>
@@ -2817,17 +2816,28 @@ function updateWalletUI(){
     if(connectWalletBtn) connectWalletBtn.textContent="🟢 Wallet Connected";
   }else{
     walletStatus.classList.remove("connected");
-    walletStatus.textContent="🔗 Wallet belum terhubung.";
-    continueAfterWalletBtn.disabled=true;
+    walletStatus.innerHTML="🔗 Wallet belum terhubung.<br><small>Web3 bersifat opsional untuk melanjutkan permainan.</small>";
+    continueAfterWalletBtn.disabled=false;
     if(connectWalletBtn) connectWalletBtn.textContent="🔗 Connect Wallet";
   }
 }
 
+function getWeb3Provider(){
+  if(window.ethereum) return window.ethereum;
+  return null;
+}
+
 async function connectBNBWallet(){
-  if(!window.ethereum){
+  const provider=getWeb3Provider();
+
+  if(!provider){
     walletStatus.classList.remove("connected");
     walletStatus.innerHTML =
-      `⚠️ Wallet Web3 belum tersedia.<br><small>Gunakan MetaMask atau wallet browser yang mendukung BNB Smart Chain.</small>`;
+      `⚠️ Wallet belum tersedia di browser ini.<br><small>Kamu tetap bisa bermain. Untuk fitur Web3, buka game dengan MetaMask atau wallet yang mendukung BNB Smart Chain.</small>`;
+    if(connectWalletBtn){
+      connectWalletBtn.disabled=false;
+      connectWalletBtn.textContent="🔗 Connect Wallet";
+    }
     return false;
   }
 
@@ -2837,7 +2847,7 @@ async function connectBNBWallet(){
       connectWalletBtn.textContent="⏳ Menghubungkan...";
     }
 
-    const accounts=await window.ethereum.request({
+    const accounts=await provider.request({
       method:"eth_requestAccounts"
     });
 
@@ -2848,7 +2858,7 @@ async function connectBNBWallet(){
     connectedWalletAddress=accounts[0];
 
     try{
-      walletChainId=await window.ethereum.request({
+      walletChainId=await provider.request({
         method:"eth_chainId"
       });
     }catch(_){
@@ -2873,6 +2883,9 @@ async function connectBNBWallet(){
     }
 
     showToast("🟢 Wallet berhasil terhubung.");
+    setTimeout(()=>{
+      showPicker();
+    },700);
     return true;
 
   }catch(error){
@@ -2911,9 +2924,10 @@ async function showWallet(){
    * Cek koneksi yang sudah pernah diberikan tanpa
    * membuka popup wallet lagi.
    */
-  if(!connectedWalletAddress && window.ethereum){
+  const provider=getWeb3Provider();
+  if(!connectedWalletAddress && provider){
     try{
-      const accounts=await window.ethereum.request({
+      const accounts=await provider.request({
         method:"eth_accounts"
       });
 
@@ -2934,8 +2948,7 @@ async function showWallet(){
 
 function continueToPicker(){
   if(!connectedWalletAddress){
-    showToast("🔗 Hubungkan wallet terlebih dahulu.");
-    return;
+    showToast("🎮 Web3 dilewati. Selamat bermain di Chocolate Abyss Gate!");
   }
   showPicker();
 }
