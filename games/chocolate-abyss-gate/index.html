@@ -2823,8 +2823,28 @@ function updateWalletUI(){
 }
 
 function getWeb3Provider(){
+  // Trust Wallet / MetaMask / injected EIP-1193 provider
   if(window.ethereum) return window.ethereum;
+  if(window.trustwallet && window.trustwallet.ethereum) return window.trustwallet.ethereum;
   return null;
+}
+
+function openTrustWallet(){
+  const currentUrl = window.location.href;
+  const trustUrl =
+    "https://link.trustwallet.com/open_url?url=" +
+    encodeURIComponent(currentUrl);
+
+  walletStatus.innerHTML =
+    `📱 <b>Buka game di Trust Wallet</b><br><small>Jika Trust Wallet terpasang di HP, tekan tombol di bawah. Setelah game terbuka di Trust Wallet, tekan Connect Wallet.</small>`;
+
+  if(connectWalletBtn){
+    connectWalletBtn.disabled=false;
+    connectWalletBtn.textContent="📱 Buka di Trust Wallet";
+    connectWalletBtn.onclick=()=>{
+      window.location.href=trustUrl;
+    };
+  }
 }
 
 async function connectBNBWallet(){
@@ -2832,12 +2852,7 @@ async function connectBNBWallet(){
 
   if(!provider){
     walletStatus.classList.remove("connected");
-    walletStatus.innerHTML =
-      `⚠️ Wallet belum tersedia di browser ini.<br><small>Kamu tetap bisa bermain. Untuk fitur Web3, buka game dengan MetaMask atau wallet yang mendukung BNB Smart Chain.</small>`;
-    if(connectWalletBtn){
-      connectWalletBtn.disabled=false;
-      connectWalletBtn.textContent="🔗 Connect Wallet";
-    }
+    openTrustWallet();
     return false;
   }
 
