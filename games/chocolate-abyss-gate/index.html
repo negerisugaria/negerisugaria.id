@@ -557,6 +557,123 @@ header:after{
   gap:8px;
 }
 
+.wallet-card{
+  width:min(520px,100%);
+  margin:14px auto 0;
+  padding:16px;
+  border:2px solid #e5bc5e;
+  border-radius:18px;
+  background:linear-gradient(135deg,#fffdf7,#fff0cc);
+  text-align:left;
+}
+
+.wallet-brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:1000;
+  color:var(--brown);
+}
+
+.bnb-logo{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  background:#f3ba2f;
+  color:#fff;
+  font-size:22px;
+  box-shadow:0 5px 12px #6b371d22;
+}
+
+.wallet-subtitle{
+  margin:6px 0 12px;
+  color:#76503a;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.45;
+}
+
+.wallet-status{
+  padding:9px 10px;
+  border-radius:11px;
+  background:#f5e3bd;
+  color:#5f3a25;
+  font-size:12px;
+  font-weight:900;
+  overflow-wrap:anywhere;
+}
+
+.wallet-status.connected{
+  background:#e8f0d8;
+  color:#315b25;
+}
+
+.wallet-actions{
+  display:flex;
+  gap:8px;
+  justify-content:center;
+  margin-top:10px;
+}
+
+.wallet-actions button{
+  padding:10px 14px;
+  border-radius:11px;
+  background:var(--brown);
+  color:#fff;
+  font-weight:1000;
+}
+
+.wallet-actions button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+.wallet-address{
+  display:block;
+  margin-top:5px;
+  font-size:11px;
+  word-break:break-all;
+}
+
+.ai-achievement{
+  margin:12px 0 10px;
+  padding:12px;
+  border:2px solid #f3c15b;
+  border-radius:16px;
+  background:linear-gradient(135deg,#fff8df,#fff0c2);
+  text-align:left;
+}
+
+.ai-achievement-title{
+  color:var(--brown);
+  font-size:15px;
+  font-weight:1000;
+}
+
+.ai-achievement-body{
+  margin-top:6px;
+  color:#76503a;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.45;
+}
+
+.ai-achievement-badge{
+  margin-top:8px;
+  padding:9px;
+  border-radius:11px;
+  background:#fff;
+  font-weight:1000;
+  color:#5f3a25;
+}
+
+.ai-achievement-badge.success{
+  background:#e8f0d8;
+  color:#315b25;
+}
+
 .ai-note{
   margin-top:10px;
   padding:9px 11px;
@@ -1151,6 +1268,63 @@ header:after{
 
   </div>
 
+  <div class="card hidden" id="walletCard">
+
+    <h2>
+      🍫 Selamat datang di Negeri Sugaria!
+    </h2>
+
+    <p>
+      Hubungkan wallet untuk masuk ke <b>Web3 Adventure</b>.
+      <br>
+      Data nama dan usia tetap berada di game, bukan di blockchain.
+    </p>
+
+    <div class="wallet-card">
+      <div class="wallet-brand">
+        <div class="bnb-logo">◆</div>
+        <div>
+          <div>Web3 Adventure</div>
+          <small>BNB Smart Chain</small>
+        </div>
+      </div>
+
+      <div class="wallet-subtitle">
+        Wallet digunakan sebagai identitas Web3 untuk achievement.
+        Tidak ada nama atau usia yang dikirim ke blockchain.
+      </div>
+
+      <div class="wallet-status" id="walletStatus">
+        🔗 Wallet belum terhubung.
+      </div>
+
+      <div class="wallet-actions">
+        <button id="connectWallet" type="button">
+          🔗 Connect Wallet
+        </button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button
+        class="secondary"
+        id="backToProfileFromWallet"
+        type="button"
+      >
+        ← Kembali
+      </button>
+
+      <button
+        id="continueAfterWallet"
+        type="button"
+        disabled
+      >
+        Lanjut → Pilih Karakter
+      </button>
+    </div>
+
+  </div>
+
   <div class="card hidden" id="pickerCard">
 
     <h2>
@@ -1282,6 +1456,11 @@ header:after{
     </h2>
 
     <p id="finalMessage"></p>
+
+    <div
+      class="ai-achievement"
+      id="finalAiAchievement"
+    ></div>
 
     <button
       id="playAgain"
@@ -1524,6 +1703,11 @@ let missionStartSteps=0;
 let currentQuestion=null;
 let questionOpen=false;
 let currentLevelStartedAt=0;
+
+let connectedWalletAddress=
+  localStorage.getItem("sugaria_bnb_wallet") || null;
+
+let walletChainId=null;
 let levelCompletionGuard=false;
 let nextLevelTimer=null;
 
@@ -1865,6 +2049,18 @@ const introCard=
 
 const pickerCard=
   document.getElementById("pickerCard");
+
+const walletCard=
+  document.getElementById("walletCard");
+
+const walletStatus=
+  document.getElementById("walletStatus");
+
+const connectWalletBtn=
+  document.getElementById("connectWallet");
+
+const continueAfterWalletBtn=
+  document.getElementById("continueAfterWallet");
 
 const profileCard=
   document.getElementById("profileCard");
@@ -2595,10 +2791,153 @@ function showIntro(){
     "hidden"
   );
 
+  walletCard.classList.add(
+    "hidden"
+  );
+
   pickerCard.classList.add(
     "hidden"
   );
 
+}
+
+function shortWalletAddress(address){
+  if(!address) return "";
+  return address.slice(0,6)+"…"+address.slice(-4);
+}
+
+function updateWalletUI(){
+  if(!walletStatus || !continueAfterWalletBtn) return;
+
+  if(connectedWalletAddress){
+    walletStatus.classList.add("connected");
+    walletStatus.innerHTML =
+      `🟢 <b>Wallet Connected</b><span class="wallet-address">${connectedWalletAddress}</span>`;
+    continueAfterWalletBtn.disabled=false;
+    if(connectWalletBtn) connectWalletBtn.textContent="🟢 Wallet Connected";
+  }else{
+    walletStatus.classList.remove("connected");
+    walletStatus.textContent="🔗 Wallet belum terhubung.";
+    continueAfterWalletBtn.disabled=true;
+    if(connectWalletBtn) connectWalletBtn.textContent="🔗 Connect Wallet";
+  }
+}
+
+async function connectBNBWallet(){
+  if(!window.ethereum){
+    walletStatus.classList.remove("connected");
+    walletStatus.innerHTML =
+      `⚠️ Wallet Web3 belum tersedia.<br><small>Gunakan MetaMask atau wallet browser yang mendukung BNB Smart Chain.</small>`;
+    return false;
+  }
+
+  try{
+    if(connectWalletBtn){
+      connectWalletBtn.disabled=true;
+      connectWalletBtn.textContent="⏳ Menghubungkan...";
+    }
+
+    const accounts=await window.ethereum.request({
+      method:"eth_requestAccounts"
+    });
+
+    if(!accounts || !accounts.length){
+      throw new Error("Wallet tidak mengembalikan account.");
+    }
+
+    connectedWalletAddress=accounts[0];
+
+    try{
+      walletChainId=await window.ethereum.request({
+        method:"eth_chainId"
+      });
+    }catch(_){
+      walletChainId=null;
+    }
+
+    localStorage.setItem(
+      "sugaria_bnb_wallet",
+      connectedWalletAddress
+    );
+
+    updateWalletUI();
+
+    try{
+      playerEventTracker.track("WEB3_WALLET_CONNECTED",{
+        walletAddress:connectedWalletAddress,
+        chainId:walletChainId,
+        network:"BNB Smart Chain"
+      });
+    }catch(error){
+      console.warn("[Tracker] Wallet event error:",error);
+    }
+
+    showToast("🟢 Wallet berhasil terhubung.");
+    return true;
+
+  }catch(error){
+    console.warn("[Web3] Wallet connection failed:",error);
+    if(walletStatus){
+      walletStatus.classList.remove("connected");
+      walletStatus.textContent =
+        "❌ Koneksi wallet dibatalkan atau gagal. Coba lagi.";
+    }
+    if(connectWalletBtn) connectWalletBtn.textContent="🔗 Connect Wallet";
+    return false;
+
+  }finally{
+    if(connectWalletBtn) connectWalletBtn.disabled=false;
+  }
+}
+
+async function ensureBNBWallet(){
+  if(connectedWalletAddress){
+    updateWalletUI();
+    return true;
+  }
+  return connectBNBWallet();
+}
+
+async function showWallet(){
+
+  introCard.classList.add("hidden");
+  profileCard.classList.add("hidden");
+  walletCard.classList.remove("hidden");
+  pickerCard.classList.add("hidden");
+
+  updateWalletUI();
+
+  /*
+   * Cek koneksi yang sudah pernah diberikan tanpa
+   * membuka popup wallet lagi.
+   */
+  if(!connectedWalletAddress && window.ethereum){
+    try{
+      const accounts=await window.ethereum.request({
+        method:"eth_accounts"
+      });
+
+      if(accounts && accounts.length){
+        connectedWalletAddress=accounts[0];
+        localStorage.setItem(
+          "sugaria_bnb_wallet",
+          connectedWalletAddress
+        );
+        updateWalletUI();
+      }
+    }catch(error){
+      console.warn("[Web3] Silent wallet check failed:",error);
+    }
+  }
+
+}
+
+function continueToPicker(){
+  if(!connectedWalletAddress){
+    showToast("🔗 Hubungkan wallet terlebih dahulu.");
+    return;
+  }
+  showPicker();
 }
 
 function showProfile(){
@@ -2646,6 +2985,10 @@ function showPicker(){
   );
 
   profileCard.classList.add(
+    "hidden"
+  );
+
+  walletCard.classList.add(
     "hidden"
   );
 
@@ -4442,6 +4785,95 @@ function showLevelCelebration(levelName){
    FINAL VICTORY
    ========================================================= */
 
+async function runAIAchievementAgent(){
+  const note=document.getElementById("finalAiAchievement");
+  if(!note) return;
+
+  const profile=
+    window.getPlayerLearningProfile
+      ? window.getPlayerLearningProfile()
+      : {};
+
+  const info=
+    playerEventTracker && playerEventTracker.getPlayerInfo
+      ? playerEventTracker.getPlayerInfo()
+      : {};
+
+  note.innerHTML=`
+    <div class="ai-achievement-title">
+      🏆 AI Achievement Agent
+    </div>
+    <div class="ai-achievement-body">
+      Chocolate Cupcake sedang menganalisis perjalanan belajar
+      ${info.name ? `<b>${info.name}</b>` : "pemain"}...
+    </div>
+    <div class="ai-achievement-badge">
+      ⏳ Memverifikasi penyelesaian Easy → Medium → Hard...
+    </div>
+  `;
+
+  try{
+    const accuracy=Number(profile.accuracy||0);
+    const walletText=
+      connectedWalletAddress
+        ? `<br>Web3 Wallet: <b>${shortWalletAddress(connectedWalletAddress)}</b>`
+        : "";
+
+    note.innerHTML=`
+      <div class="ai-achievement-title">
+        🏆 AI Achievement Agent — Achievement Unlocked!
+      </div>
+      <div class="ai-achievement-body">
+        Chocolate Cupcake memverifikasi bahwa semua level
+        Chocolate Abyss Gate telah diselesaikan.
+      </div>
+      <div class="ai-achievement-badge success">
+        🍫 <b>Chocolate Abyss Guardian</b><br>
+        AI Verified • ${Math.round(accuracy*100)}% learning accuracy
+        ${walletText}
+      </div>
+    `;
+
+    try{
+      playerEventTracker.track("AI_ACHIEVEMENT_UNLOCKED",{
+        achievementId:"chocolate-abyss-guardian",
+        achievementName:"Chocolate Abyss Guardian",
+        verifiedBy:"Chocolate Cupcake AI",
+        walletAddress:connectedWalletAddress || null,
+        chain:"BNB Smart Chain",
+        totalScore,
+        accuracy
+      });
+    }catch(error){
+      console.warn("[Tracker] Achievement event error:",error);
+    }
+
+    void sendGameEventToMemoryAPI({
+      playerId:playerEventTracker.playerId || null,
+      sessionId:playerEventTracker.sessionId || null,
+      type:"AI_ACHIEVEMENT_UNLOCKED",
+      achievementId:"chocolate-abyss-guardian",
+      achievementName:"Chocolate Abyss Guardian",
+      verifiedBy:"Chocolate Cupcake AI",
+      walletAddress:connectedWalletAddress || null,
+      chain:"BNB Smart Chain"
+    });
+
+  }catch(error){
+    console.warn("[AI Achievement] error:",error);
+    note.innerHTML=`
+      <div class="ai-achievement-title">🏆 AI Achievement Agent</div>
+      <div class="ai-achievement-body">
+        Semua level selesai. Achievement berhasil dicatat,
+        tetapi verifikasi AI membutuhkan koneksi ulang.
+      </div>
+      <div class="ai-achievement-badge success">
+        🍫 <b>Chocolate Abyss Guardian</b>
+      </div>
+    `;
+  }
+}
+
 function showFinalVictory(){
   const card=document.querySelector("#finalOverlay .final-card");
   if(!card) return;
@@ -4462,6 +4894,7 @@ function showFinalVictory(){
     note.innerHTML=`<div class="cupcake-ai-response"><img class="cupcake-ai-image" src="sources/victory.png" alt="Chocolate Cupcake victory"><div class="cupcake-ai-content"><div class="cupcake-ai-message">🍫 Aku sudah mengingat hasil belajarmu hari ini. Saat kita bertemu lagi, aku akan membantu kamu belajar dengan cara yang paling cocok.</div><div class="cupcake-ai-visual">🧠 📚 🍫</div></div></div>`;
   }
   note.classList.remove("hidden");
+  void runAIAchievementAgent();
 }
 
 /* =========================================================
@@ -4757,9 +5190,24 @@ document.getElementById(
 
   updateDebugPanel();
 
-  showPicker();
+  showWallet();
 
 };
+
+document.getElementById(
+  "backIntroFromWallet"
+).onclick=
+  showProfile;
+
+document.getElementById(
+  "connectWallet"
+).onclick=
+  connectBNBWallet;
+
+document.getElementById(
+  "continueAfterWallet"
+).onclick=
+  continueToPicker;
 
 document.getElementById(
   "backIntro"
@@ -5144,6 +5592,36 @@ window.addEventListener(
   "player-event",
   updateDebugPanel
 );
+
+/* =========================================================
+   WEB3 WALLET EVENTS
+   ========================================================= */
+
+if(window.ethereum){
+  window.ethereum.on?.("accountsChanged",accounts=>{
+    connectedWalletAddress =
+      accounts && accounts.length
+        ? accounts[0]
+        : null;
+
+    if(connectedWalletAddress){
+      localStorage.setItem(
+        "sugaria_bnb_wallet",
+        connectedWalletAddress
+      );
+    }else{
+      localStorage.removeItem(
+        "sugaria_bnb_wallet"
+      );
+    }
+
+    updateWalletUI();
+  });
+
+  window.ethereum.on?.("chainChanged",chainId=>{
+    walletChainId=chainId;
+  });
+}
 
 /* =========================================================
    INITIALIZE
